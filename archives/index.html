@@ -3,9 +3,9 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8" />
-    <title>Archives | Gumuluo&#39;s Blog</title>
+    <title>Archives | 孤木落の博客</title>
     <meta name="author" content="Gumuluo" />
-    <meta name="description" content="孤木落の博客" />
+    <meta name="description" content="Gumuluo's Blog" />
     <meta name="keywords" content="" />
     <meta
         name="viewport"
@@ -35,10 +35,17 @@
 <script src="/js/lib/highlight.js"></script>
 
 
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.css" />
+<script src="/js/lib/math.js"></script>
+
 
 <script src="/js/lib/preview.js"></script>
 
 
+
+<script src="/js/lib/search.js"></script>
 
 
 
@@ -59,7 +66,7 @@
         <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
     <nav id="desktop-menu">
         <a class="title" href="/">
-            <span>GUMULUO&#39;S BLOG</span>
+            <span>孤木落の博客</span>
         </a>
         
         <a href="/">
@@ -91,7 +98,7 @@
     <nav id="mobile-menu">
         <div class="title" @click="showMenuItems = !showMenuItems">
             <i class="fa-solid fa-bars fa-fw"></i>
-            <span>&emsp;GUMULUO&#39;S BLOG</span>
+            <span>&emsp;孤木落の博客</span>
         </div>
         <transition name="slide">
             <div class="items" v-show="showMenuItems">
@@ -153,14 +160,16 @@
             
 <div id="archives">
     
+    <input id="search-bar" class="input" placeholder="搜索" v-model="rawSearch" />
+    
     <div id="timeline-wrap" ref="timeline">
         
-        <div class="timeline" data-title="helloworld">
+        <div class="timeline" data-title="git教程(1)">
             <div class="timeline-tail"></div>
             <div class="timeline-content">
                 <div class="item-time">2025/12/13</div>
-                <a href="/2025/12/13/hello-world/">
-                    <h3>Hello World</h3>
+                <a href="/2025/12/13/Git%E6%95%99%E7%A8%8B-1/">
+                    <h3>Git教程(1)</h3>
                 </a>
                 <div class="info">
                     
@@ -176,7 +185,7 @@
     <div id="footer-wrap">
         <div>
             &copy;
-            2022 - 2025 Gumuluo&#39;s Blog
+            2025 - 2025 孤木落の博客
             <span id="footer-icon">
                 <i class="fa-solid fa-font-awesome fa-fw"></i>
             </span>
