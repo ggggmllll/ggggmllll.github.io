@@ -3,7 +3,7 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8" />
-    <title>孤木落の博客</title>
+    <title>关于我 | 孤木落の博客</title>
     <meta name="author" content="Gumuluo" />
     <meta name="description" content="Gumuluo's Blog" />
     <meta name="keywords" content="" />
@@ -47,7 +47,13 @@
 
 
 
-<script src="/js/lib/home.js"></script>
+
+<script src="https://s4.zstatic.net/ajax/libs/waline/2.15.8/waline.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/waline/2.15.8/waline.min.css" />
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/waline/2.15.8/waline-meta.min.css" />
+
+
+
 
 <link rel="stylesheet" href="/css/main.css" />
 
@@ -157,49 +163,11 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            <div id="home-head">
-    <div
-        id="home-background"
-        ref="homeBackground"
-        data-images="/images/background.jpg,/images/background%20(1).jpg,/images/background%20(2).jpg,/images/background%20(3).jpg,/images/background%20(4).jpg,/images/background%20(5).jpg,/images/background%20(6).jpg,/images/background%20(7).jpg,/images/background%20(8).jpg,/images/background%20(9).jpg,/images/background%20(10).jpg,/images/background%20(11).jpg,/images/background%20(12).jpg,/images/background%20(13).jpg,/images/background%20(14).jpg,/images/background%20(15).jpg,/images/background%20(16).jpg"
-    ></div>
-    <div id="home-info" @click="homeClick">
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="info">
-            <div class="wrap">
-                <h1>孤木落の博客</h1>
-                <h3>落叶人何在，寒云路几层</h3>
-                <h5>Gumuluo&#39;s Blog</h5>
-            </div>
-        </span>
+            <div class="article">
+    <div>
+        <h1>关于我</h1>
     </div>
-</div>
-<div
-    id="home-posts-wrap"
-    ref="homePostsWrap"
-    true
->
-    <div id="home-posts">
-        
-
-<div class="post">
-    <a href="/2025/12/13/Git%E6%95%99%E7%A8%8B-1/">
-        <h2 class="post-title">Git教程(1)</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="category">
-            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                计算机
-            </a>
-        </span>
-        
+    <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
@@ -209,77 +177,40 @@
         
         
     </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <i class="fa-solid fa-tags fa-fw"></i>
-        </span>
-        
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/Git/" style="color: #00bcd4">Git</a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/%E6%95%99%E7%A8%8B/" style="color: #00a596">教程</a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/" style="color: #00bcd4">版本控制</a>
-        </span>
-        
-    </div>
-    <a href="/2025/12/13/Git%E6%95%99%E7%A8%8B-1/" class="go-post">阅读全文</a>
-</div>
-
-
-        <div class="page-current">
     
-    <span class="current">1</span>
-    
-    
-    
-    
-</div>
+    <div class="content" v-pre>
+        <p>欢迎来到孤木落の博客!</p>
+<h2 id="博客分享"><a href="#博客分享" class="headerlink" title="博客分享:"></a>博客分享:</h2><ul>
+<li><p><strong>电气工程及其自动化专业内容</strong></p>
+</li>
+<li><p><strong>数学</strong></p>
+</li>
+<li><p><strong>物理</strong></p>
+</li>
+<li><p><strong>移动安全（业余爱好者）</strong></p>
+</li>
+<li><p><strong>东方project！！！</strong></p>
+</li>
+</ul>
+<h2 id="Links"><a href="#Links" class="headerlink" title="Links"></a>Links</h2><ul>
+<li><p><strong>BiliBili:</strong> <a target="_blank" rel="noopener" href="https://space.bilibili.com/3546927079623134">bilibili@孤木落_z</a></p>
+</li>
+<li><p><strong>Github:</strong> <a target="_blank" rel="noopener" href="https://github.com/ggggmllll">Github@ggggmllll</a></p>
+</li>
+</ul>
+<p>more···</p>
 
     </div>
     
-    <div id="home-card">
-        <div id="card-style">
-    <div id="card-div">
-        <div class="avatar">
-            <img src="/images/avatar.jpg" alt="avatar" />
-        </div>
-        <div class="name">Gumuluo</div>
-        <div class="description">
-            <p><strong>兴趣使然的程序员</strong><br>努力学习中~</p>
-
-        </div>
-        
-        
-        <div class="friend-links">
-            
-            <div class="friend-link">
-                <a target="_blank" rel="noopener" href="https://argvchs.github.io">Argvchs</a>
-            </div>
-            
-        </div>
-        
+    
+    
+    
+    
+    <div id="comment">
+        <div id="waline-container"></div>
     </div>
-</div>
-
-    </div>
+    
+    
     
 </div>
 
@@ -311,6 +242,29 @@
         
     </div>
     <script src="/js/main.js"></script>
+    
+    
+
+
+<script>
+    Waline.init({
+        el: "#waline-container",
+        serverURL: "",
+        commentCount: true,
+        pageview: false,
+        emoji: "https://unpkg.com/@waline/emojis@1.2.0/weibo,https://unpkg.com/@waline/emojis@1.2.0/alus,https://unpkg.com/@waline/emojis@1.2.0/bilibili,https://unpkg.com/@waline/emojis@1.2.0/qq,https://unpkg.com/@waline/emojis@1.2.0/tieba,https://unpkg.com/@waline/emojis@1.2.0/tw-emoji".split(","),
+        meta: "nick,mail,link".split(","),
+        requiredMeta: "nick".split(","),
+        lang: "",
+        wordLimit: 0,
+        pageSize: "10",
+        login: "enable",
+        
+    });
+</script>
+
+
+
     
 </body>
 </html>
