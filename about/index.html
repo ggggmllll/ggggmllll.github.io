@@ -23,14 +23,27 @@
 />
 <script> const mixins = {}; </script>
 
+<!-- 主题CSS文件 -->
+<link rel="stylesheet" href="/css/main.css" id="light-theme">
+<link rel="stylesheet" href="/css/night.css" id="dark-theme" disabled>
+
 <script src="https://polyfill.alicdn.com/v3/polyfill.min.js?features=default"></script>
 
 
 <script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<!-- 白天代码高亮主题 -->
 <link
     rel="stylesheet"
-    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs.min.css"
+    id="light-highlight"
+/>
+<!-- 黑夜代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css"
+    id="dark-highlight"
+    disabled
 />
 <script src="/js/lib/highlight.js"></script>
 
@@ -47,10 +60,6 @@
 
 
 
-
-<script src="https://s4.zstatic.net/ajax/libs/waline/2.15.8/waline.min.js"></script>
-<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/waline/2.15.8/waline.min.css" />
-<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/waline/2.15.8/waline-meta.min.css" />
 
 
 
@@ -100,6 +109,11 @@
             <span>&ensp;Tags</span>
         </a>
         
+        <!-- 主题切换按钮 -->
+        <a href="javascript:void(0);" @click="toggleTheme" :title="themeTooltip" class="theme-toggle">
+            <i :class="themeIcon"></i>
+            <span>&ensp;{{ themeText }}</span>
+        </a>
     </nav>
     <nav id="mobile-menu">
         <div class="title" @click="showMenuItems = !showMenuItems">
@@ -154,6 +168,17 @@
                     </div>
                 </a>
                 
+                <!-- 移动端主题切换按钮 -->
+                <a href="javascript:void(0);" @click="toggleTheme">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i :class="themeIcon"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">
+                            主题 ({{ themeText }})
+                        </div>
+                    </div>
+                </a>
             </div>
         </transition>
     </nav>
@@ -161,7 +186,6 @@
 <transition name="fade">
     <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
 </transition>
-
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div class="article">
     <div>
@@ -206,10 +230,6 @@
     
     
     
-    <div id="comment">
-        <div id="waline-container"></div>
-    </div>
-    
     
     
 </div>
@@ -245,23 +265,6 @@
     
     
 
-
-<script>
-    Waline.init({
-        el: "#waline-container",
-        serverURL: "",
-        commentCount: true,
-        pageview: false,
-        emoji: "https://unpkg.com/@waline/emojis@1.2.0/weibo,https://unpkg.com/@waline/emojis@1.2.0/alus,https://unpkg.com/@waline/emojis@1.2.0/bilibili,https://unpkg.com/@waline/emojis@1.2.0/qq,https://unpkg.com/@waline/emojis@1.2.0/tieba,https://unpkg.com/@waline/emojis@1.2.0/tw-emoji".split(","),
-        meta: "nick,mail,link".split(","),
-        requiredMeta: "nick".split(","),
-        lang: "",
-        wordLimit: 0,
-        pageSize: "10",
-        login: "enable",
-        
-    });
-</script>
 
 
 

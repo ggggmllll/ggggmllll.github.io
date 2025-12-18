@@ -23,14 +23,27 @@
 />
 <script> const mixins = {}; </script>
 
+<!-- 主题CSS文件 -->
+<link rel="stylesheet" href="/css/main.css" id="light-theme">
+<link rel="stylesheet" href="/css/night.css" id="dark-theme" disabled>
+
 <script src="https://polyfill.alicdn.com/v3/polyfill.min.js?features=default"></script>
 
 
 <script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<!-- 白天代码高亮主题 -->
 <link
     rel="stylesheet"
-    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs.min.css"
+    id="light-highlight"
+/>
+<!-- 黑夜代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css"
+    id="dark-highlight"
+    disabled
 />
 <script src="/js/lib/highlight.js"></script>
 
@@ -94,6 +107,11 @@
             <span>&ensp;Tags</span>
         </a>
         
+        <!-- 主题切换按钮 -->
+        <a href="javascript:void(0);" @click="toggleTheme" :title="themeTooltip" class="theme-toggle">
+            <i :class="themeIcon"></i>
+            <span>&ensp;{{ themeText }}</span>
+        </a>
     </nav>
     <nav id="mobile-menu">
         <div class="title" @click="showMenuItems = !showMenuItems">
@@ -148,6 +166,17 @@
                     </div>
                 </a>
                 
+                <!-- 移动端主题切换按钮 -->
+                <a href="javascript:void(0);" @click="toggleTheme">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i :class="themeIcon"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">
+                            主题 ({{ themeText }})
+                        </div>
+                    </div>
+                </a>
             </div>
         </transition>
     </nav>
@@ -155,7 +184,6 @@
 <transition name="fade">
     <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
 </transition>
-
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div id="home-head">
     <div
@@ -184,6 +212,117 @@
 >
     <div id="home-posts">
         
+
+<div class="post">
+    <a href="/2025/12/14/Instrumentation%E7%B1%BB%E8%AF%A6%E8%A7%A3/">
+        <h2 class="post-title">Instrumentation类详解</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="category">
+            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                计算机
+            </a>
+        </span>
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2025/12/14
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <p>最近抽时间分析了一下java.lang.instrument包的使用方式，记录下来写成一篇的文章。</p>
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <i class="fa-solid fa-tags fa-fw"></i>
+        </span>
+        
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/java/" style="color: #00bcd4">java</a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/jvmti/" style="color: #ffa2c4">jvmti</a>
+        </span>
+        
+    </div>
+    <a href="/2025/12/14/Instrumentation%E7%B1%BB%E8%AF%A6%E8%A7%A3/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post">
+    <a href="/2025/12/14/SRpatch%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">
+        <h2 class="post-title">SRpatch原理分析</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="category">
+            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                计算机
+            </a>
+        </span>
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2025/12/14
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <p>好奇一些常见的java层签名校验实现思路，于是研究了一下SRpatch这一优秀的工具，学到了不少知识</p>
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <i class="fa-solid fa-tags fa-fw"></i>
+        </span>
+        
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/java/" style="color: #00a596">java</a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/%E9%80%86%E5%90%91/" style="color: #00bcd4">逆向</a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/%E7%AD%BE%E5%90%8D%E6%A0%A1%E9%AA%8C/" style="color: #03a9f4">签名校验</a>
+        </span>
+        
+    </div>
+    <a href="/2025/12/14/SRpatch%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/" class="go-post">阅读全文</a>
+</div>
 
 <div class="post">
     <a href="/2025/12/13/Git%E6%95%99%E7%A8%8B-1/">
@@ -226,17 +365,17 @@
         
         <span class="tag">
             
-            <a href="/tags/Git/" style="color: #00bcd4">Git</a>
+            <a href="/tags/Git/" style="color: #ffa2c4">Git</a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/%E6%95%99%E7%A8%8B/" style="color: #00a596">教程</a>
+            <a href="/tags/%E6%95%99%E7%A8%8B/" style="color: #00bcd4">教程</a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/" style="color: #00bcd4">版本控制</a>
+            <a href="/tags/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/" style="color: #03a9f4">版本控制</a>
         </span>
         
     </div>

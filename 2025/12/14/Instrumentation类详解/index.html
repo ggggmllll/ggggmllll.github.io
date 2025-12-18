@@ -1,0 +1,431 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <title>Instrumentation类详解 | 孤木落の博客</title>
+    <meta name="author" content="Gumuluo" />
+    <meta name="description" content="Gumuluo's Blog" />
+    <meta name="keywords" content="" />
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <link rel="icon" href="/images/avatar.jpg" />
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.cn" />
+<link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin />
+<link
+    rel="stylesheet"
+    href="https://fonts.googleapis.cn/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap"
+/>
+<script> const mixins = {}; </script>
+
+<!-- 主题CSS文件 -->
+<link rel="stylesheet" href="/css/main.css" id="light-theme">
+<link rel="stylesheet" href="/css/night.css" id="dark-theme" disabled>
+
+<script src="https://polyfill.alicdn.com/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<!-- 白天代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs.min.css"
+    id="light-highlight"
+/>
+<!-- 黑夜代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css"
+    id="dark-highlight"
+    disabled
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.css" />
+<script src="/js/lib/math.js"></script>
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>孤木落の博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+        <!-- 主题切换按钮 -->
+        <a href="javascript:void(0);" @click="toggleTheme" :title="themeTooltip" class="theme-toggle">
+            <i :class="themeIcon"></i>
+            <span>&ensp;{{ themeText }}</span>
+        </a>
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;孤木落の博客</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+                <!-- 移动端主题切换按钮 -->
+                <a href="javascript:void(0);" @click="toggleTheme">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i :class="themeIcon"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">
+                            主题 ({{ themeText }})
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>Instrumentation类详解</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2025/12/14
+        </span>
+        
+        <span class="category">
+            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                计算机
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/java/" style="color: #00a596">
+                    java
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/jvmti/" style="color: #00bcd4">
+                    jvmti
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p>最近抽时间分析了一下java.lang.instrument包的使用方式，记录下来写成一篇的文章。</p>
+<span id="more"></span>
+
+<h2 id="Instrumentation简介"><a href="#Instrumentation简介" class="headerlink" title="Instrumentation简介"></a>Instrumentation简介</h2><p><code>java.lang.instrument</code>包的结构如下：</p>
+<pre><code>java.lang.instrument
+    - ClassDefinition
+    - ClassFileTransformer
+    - IllegalClassFormatException
+    - Instrumentation
+    - UnmodifiableClassException
+    - UnmodifiableModuleException
+</code></pre>
+<p>其中，核心功能由接口<code>java.lang.instrument.Instrumentation</code>提供，这里可以通过<code>Instrumentation</code>类的API注释来理解一下什么是<code>instrument</code>：</p>
+<blockquote>
+<p>Instrumentation类提供控制Java语言程序代码的服务。Instrumentation可以实现在方法插入额外的字节码从而达到收集使用中的数据到指定工具的目的。由于插入的字节码是附加的，这些更变不会修改原来程序的状态或者行为。通过这种方式实现的良性工具包括监控代理、分析器、覆盖分析程序和事件日志记录程序等等。</p>
+</blockquote>
+<p>也就是说，<code>java.lang.instrument</code>包的最大功能就是可以<strong>在已有的类上附加（修改）字节码来实现增强的逻辑</strong>，如果良性使用当然不会影响程序的正常行为，如果恶性使用就可能产生一些负面的影响（其实很多商用Java程序如IntelliJ IDEA的License的破解都可以基于Instrumentation的功能实现，前提是找到程序认证License的入口）。</p>
+<h2 id="Instrumentation原理简介"><a href="#Instrumentation原理简介" class="headerlink" title="Instrumentation原理简介"></a>Instrumentation原理简介</h2><p><code>Instrument</code>的底层实现依赖于<code>JVMTI</code>，也就是<code>JVM Tool Interface</code>，它是JVM暴露出来的一些供用户扩展的接口集合，<code>JVMTI</code>是基于事件驱动的，JVM每执行到一定的逻辑就会调用一些事件的回调接口（如果有的话），这些接口可以供开发者去扩展自己的逻辑。<code>JVMTIAgent</code>是一个利用<code>JVMTI</code>暴露出来的接口提供了代理启动时加载(<code>agent on load</code>)、代理通过运行时附加形式加载(<code>agent on attach</code>)和代理卸载(<code>agent on unload</code>)功能的动态库。而<code>instrument agent</code>可以理解为一类<code>JVMTIAgent</code>动态库，别名是<code>JPLISAgent(Java Programming Language Instrumentation Services Agent)</code>，也就是专门为java语言编写的插桩服务提供支持的代理。</p>
+<p><img src="/Instrumentation%E7%B1%BB%E8%AF%A6%E8%A7%A3/JVMTI%E6%B5%81%E7%A8%8B.jpg"></p>
+<p>其中，VM启动时加载Agent可以使用命令行参数-javaagent:yourAgent.jar的形式实现。</p>
+<h2 id="Instrumentation接口详解"><a href="#Instrumentation接口详解" class="headerlink" title="Instrumentation接口详解"></a>Instrumentation接口详解</h2><pre><code class="language-Java">void addTransformer(ClassFileTransformer transformer, boolean canRetransform)
+//注册ClassFileTransformer实例，注册多个会按照注册顺序进行调用。所有的类被加载完毕之后会调用ClassFileTransformer实例，相当于它们通过了redefineClasses方法进行重定义。布尔值参数canRetransform决定这里被重定义的类是否能够通过retransformClasses方法进行回滚。
+
+void addTransformer(ClassFileTransformer transformer)
+//相当于addTransformer(transformer, false)，也就是通过ClassFileTransformer实例重定义的类不能进行回滚。
+
+boolean removeTransformer(ClassFileTransformer transformer)
+//移除(反注册)ClassFileTransformer实例。
+
+boolean isRetransformClassesSupported()
+//返回当前JVM配置是否支持类重新转换的特性。
+
+void retransformClasses(Class&lt;?&gt;... classes) throws UnmodifiableClassException
+//已加载类进行重新转换的方法，重新转换的类会被回调到ClassFileTransformer的列表中进行处理，想深入理解建议阅读API注释。
+
+boolean isRedefineClassesSupported()
+//返回当前JVM配置是否支持重定义类（修改类的字节码）的特性。
+
+void redefineClasses(ClassDefinition... definitions) throws ClassNotFoundException, UnmodifiableClassException
+//重定义类，也就是对已经加载的类进行重定义，ClassDefinition类型的入参包括了对应的类型Class&lt;?&gt;对象和字节码文件对应的字节数组。
+
+boolean isModifiableClass(Class&lt;?&gt; theClass)
+//判断对应类是否被修改过。
+
+Class[] getAllLoadedClasses()
+//获取所有已经被加载的类。
+
+Class[] getInitiatedClasses(ClassLoader loader)
+//获取所有已经被初始化过了的类。
+
+long getObjectSize(Object objectToSize)
+//获取某个对象的(字节)大小，注意嵌套对象或者对象中的属性引用需要另外单独计算。
+
+void appendToBootstrapClassLoaderSearch(JarFile jarfile)
+//将某个jar加入到Bootstrap Classpath里优先其他jar被加载。
+
+void appendToSystemClassLoaderSearch(JarFile jarfile)
+//将某个jar加入到Classpath里供AppClassloard去加载。
+
+void setNativeMethodPrefix(ClassFileTransformer transformer, String prefix)
+//设置某些native方法的前缀，主要在找native方法的时候做规则匹配。
+
+boolean isNativeMethodPrefixSupported()
+//是否支持设置native方法的前缀。
+
+void redefineModule(...)
+//重定义Module。
+
+boolean isModifiableModule(Module module)
+//判断指定Module是否重定义过。
+</code></pre>
+<h2 id="如何使用Instrumentation"><a href="#如何使用Instrumentation" class="headerlink" title="如何使用Instrumentation"></a>如何使用Instrumentation</h2><p><code>Instrumentation</code>类在API注释中有十分简洁的使用方式描述：</p>
+<blockquote>
+<p>有两种方式可以获取Instrumentation接口的实例：</p>
+<ol>
+<li>JVM在指定代理的方式下启动，此时Instrumentation实例会传递到代理类的premain方法。</li>
+<li>JVM提供一种在启动之后的某个时刻启动代理的机制，此时Instrumentation实例会传递到代理类代码的agentmain方法。</li>
+</ol>
+</blockquote>
+<p>首先我们知道<code>Instrumentation</code>的实现类是<code>sun.instrument.InstrumentationImpl</code>，在JDK9之后，由于模块权限控制，不可能通过反射构造其实例，一般情况下反射做不到的东西只能通过JVM实现。而且根据上面简洁的API注释我们是无法得知如何使用<code>Instrumentation</code>。其实，<code>premain</code>对应的就是VM启动时的<code>Instrument Agent</code>加载，也就是上文提到的<code>agent on load</code>，而<code>agentmain</code>对应的是VM运行时的<code>Instrument Agent</code>加载，也就是上文提到的<code>agent on attach</code>。两种加载形式所加载的<code>Instrument Agent</code>都关注同一个<code>JVMTI</code>事件 —— <code>ClassFileLoadHook</code>事件，而这个事件是在读取字节码文件之后回调时用。换言之，<strong><code>premain</code>和<code>agentmain</code>方式的回调时机都是类文件字节码读取之后（或者说是类加载之后）</strong>。</p>
+<p>实际上，<code>premain</code>和<code>agentmain</code>两种方式最终的目的都是为了回调<code>Instrumentation</code>实例并且激活<code>sun.instrument.InstrumentationImpl#transform()</code>从而回调注册到<code>Instrumentation</code>中的<code>ClassFileTransformer</code>实现字节码修改，本质功能上没有很大区别。两者的非本质功能的区别如下：</p>
+<ul>
+<li><p><code>premain</code>需要通过命令行使用外部代理jar包；而<code>agentmain</code>则可以通过attach机制直接附着到目标VM中加载代理，也就是使用<code>agentmain</code>方式下，操作attach的程序和被代理的程序可以是完全不同的两个程序。</p>
+</li>
+<li><p><code>premain</code>方式回调到<code>ClassFileTransformer</code>中的类是虚拟机加载的所有类，这个是由于代理加载的顺序比较靠前决定的，在开发者逻辑看来就是：所有类首次加载并且进入程序<code>main()</code>方法之前，<code>premain</code>方法会被激活，然后所有被加载的类都会执行<code>ClassFileTransformer</code>列表中的回调。</p>
+</li>
+<li><p><code>agentmain</code>方式由于是采用attach机制，被代理的目标程序VM有可能很早之前已经启动，当然其所有类已经被加载完成，这个时候需要借助<code>Instrumentation#retransformClasses(Class&lt;?&gt;... classes)</code>让对应的类可以重新转换，从而激活重新转换的类执行<code>ClassFileTransformer</code>列表中的回调。</p>
+</li>
+<li><p><code>premain</code>方式是JDK1.5引入的，而<code>agentmain</code>方式是JDK1.6引入的，也就是JDK1.6之后可以自行选择使用<code>premain</code>或者<code>agentmain</code>。</p>
+</li>
+</ul>
+<h3 id="premain使用方式"><a href="#premain使用方式" class="headerlink" title="premain使用方式"></a>premain使用方式</h3><p><code>premain</code>方式依赖独立的<code>javaagent</code>，也就是单独建立一个项目编写好代码之后打成jar包供另一个使用程序通过代理形式引入。简单的步骤如下：</p>
+<ol>
+<li>编写premain函数，也就是编写一个普通的Java类，包含下面两个方法的其中之一。</li>
+</ol>
+<pre><code class="language-Java">public static void premain(String agentArgs, Instrumentation inst); //[1]
+public static void premain(String agentArgs); //[2]
+</code></pre>
+<ol start="2">
+<li>通过指定Agent运行。</li>
+</ol>
+<pre><code>java -javaagent:代理Jar包的路径 [=传入premain的参数] yourTarget.jar
+</code></pre>
+<h3 id="agentmain使用方式"><a href="#agentmain使用方式" class="headerlink" title="agentmain使用方式"></a>agentmain使用方式</h3><p><code>agentmain</code>的使用方式和<code>permain</code>十分相似，包括编写<code>MANIFEST.MF</code>和生成代理Jar包。但是，它并不需要通过<code>-javaagent</code>命令行形式引入代理Jar，而是在运行时通过attach工具激活指定代理即可。简单的步骤如下：</p>
+<ol>
+<li>编写<code>premain</code>函数，也就是编写一个普通的Java类，包含下面两个方法的其中之一。</li>
+</ol>
+<pre><code class="language-Java">public static void agentmain(String agentArgs, Instrumentation inst); //[1]
+public static void agentmain(String agentArgs); //[2]
+</code></pre>
+<p>[1]的回调优先级会比[2]高，也就是[1]和[2]同时存在的情况下，只有[1]会被回调。而<code>agentArgs</code>是<code>agentmain</code>函数得到的程序参数，通过<code>com.sun.tools.attach.VirtualMachine#loadAgent(var1,var2)</code>中的<code>var2</code>传入，<code>var1</code>就是代理Jar的绝对路径。</p>
+<ol start="2">
+<li>代理服务打包为Jar。</li>
+</ol>
+<p><code>Agent</code>一般是一个普通的Java服务，只是需要编写<code>agentmain</code>函数，并且该Jar包的<code>manifest</code>(也就是<code>MANIFEST.MF</code>文件)属性中需要加入<code>Agent-Class</code>来指定步骤1中编写好<code>agentmain</code>函数的那个Java类。</p>
+<ol start="3">
+<li>通过attach工具直接加载<code>Agent</code>，执行attach的程序和需要被代理的程序可以是两个完全不同的程序。</li>
+</ol>
+<pre><code class="language-Java">// 列出所有VM实例
+List&lt;VirtualMachineDescriptor&gt; list = VirtualMachine.list();
+// attach目标VM
+VirtualMachine.attach(descriptor.id());
+// 目标VM加载Agent
+VirtualMachine#loadAgent(&quot;代理Jar路径&quot;,&quot;命令参数&quot;);
+</code></pre>
+<h2 id="Instrumentation的局限性"><a href="#Instrumentation的局限性" class="headerlink" title="Instrumentation的局限性"></a>Instrumentation的局限性</h2><p>大多数情况下，我们使用<code>Instrumentation</code>都是使用其字节码插桩的功能，或者笼统说就是类重定义(<code>Class Redefine</code>)的功能，但是有以下的局限性：</p>
+<ul>
+<li><p><code>premain</code>和<code>agentmain</code>两种方式修改字节码的时机都是类文件加载之后，也就是说必须要带有Class类型的参数，不能通过字节码文件和自定义的类名重新定义一个本来不存在的类。</p>
+</li>
+<li><p>类的字节码修改称为类转换(<code>Class Transform</code>)，类转换其实最终都回归到类重定义<code>Instrumentation#redefineClasses()</code>方法，此方法有以下限制：</p>
+<ul>
+<li><p>新类和老类的父类必须相同。</p>
+</li>
+<li><p>新类和老类实现的接口数也要相同，并且是相同的接口。</p>
+</li>
+<li><p>新类和老类访问符必须一致。</p>
+</li>
+<li><p>新类和老类字段数和字段名要一致。</p>
+</li>
+<li><p>新类和老类新增或删除的方法必须是<code>private static/final</code>修饰的。</p>
+</li>
+<li><p>可以修改方法体。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>除了上面的方式，如果想要重新定义一个类，可以考虑基于类加载器隔离的方式：创建一个新的自定义类加载器去通过新的字节码去定义一个全新的类，不过也存在只能通过反射调用该全新类的局限性。</p>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2025 - 2025 孤木落の博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;Gumuluo
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+    <script src="/js/main.js"></script>
+    
+    
+
+
+
+
+    
+</body>
+</html>

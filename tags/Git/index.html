@@ -23,14 +23,27 @@
 />
 <script> const mixins = {}; </script>
 
+<!-- 主题CSS文件 -->
+<link rel="stylesheet" href="/css/main.css" id="light-theme">
+<link rel="stylesheet" href="/css/night.css" id="dark-theme" disabled>
+
 <script src="https://polyfill.alicdn.com/v3/polyfill.min.js?features=default"></script>
 
 
 <script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<!-- 白天代码高亮主题 -->
 <link
     rel="stylesheet"
-    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs.min.css"
+    id="light-highlight"
+/>
+<!-- 黑夜代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css"
+    id="dark-highlight"
+    disabled
 />
 <script src="/js/lib/highlight.js"></script>
 
@@ -92,6 +105,11 @@
             <span>&ensp;Tags</span>
         </a>
         
+        <!-- 主题切换按钮 -->
+        <a href="javascript:void(0);" @click="toggleTheme" :title="themeTooltip" class="theme-toggle">
+            <i :class="themeIcon"></i>
+            <span>&ensp;{{ themeText }}</span>
+        </a>
     </nav>
     <nav id="mobile-menu">
         <div class="title" @click="showMenuItems = !showMenuItems">
@@ -146,6 +164,17 @@
                     </div>
                 </a>
                 
+                <!-- 移动端主题切换按钮 -->
+                <a href="javascript:void(0);" @click="toggleTheme">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i :class="themeIcon"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">
+                            主题 ({{ themeText }})
+                        </div>
+                    </div>
+                </a>
             </div>
         </transition>
     </nav>
@@ -153,7 +182,6 @@
 <transition name="fade">
     <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
 </transition>
-
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div id="archives">
     
@@ -175,7 +203,7 @@
         
         
         <span>
-            <a href="/tags/%E6%95%99%E7%A8%8B/" style="background: #03a9f4">
+            <a href="/tags/%E6%95%99%E7%A8%8B/" style="background: #ffa2c4">
                 <span class="icon">
                     <i class="fa-solid fa-tags fa-fw"></i>
                 </span>
@@ -186,11 +214,55 @@
         
         
         <span>
-            <a href="/tags/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/" style="background: #00a596">
+            <a href="/tags/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/" style="background: #00bcd4">
                 <span class="icon">
                     <i class="fa-solid fa-tags fa-fw"></i>
                 </span>
                 版本控制
+            </a>
+        </span>
+        
+        
+        
+        <span>
+            <a href="/tags/java/" style="background: #ffa2c4">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                java
+            </a>
+        </span>
+        
+        
+        
+        <span>
+            <a href="/tags/jvmti/" style="background: #00bcd4">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                jvmti
+            </a>
+        </span>
+        
+        
+        
+        <span>
+            <a href="/tags/%E9%80%86%E5%90%91/" style="background: #00a596">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                逆向
+            </a>
+        </span>
+        
+        
+        
+        <span>
+            <a href="/tags/%E7%AD%BE%E5%90%8D%E6%A0%A1%E9%AA%8C/" style="background: #00bcd4">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                签名校验
             </a>
         </span>
         
@@ -231,14 +303,14 @@
                     
                     <span class="tag">
                         
-                        <a href="/tags/%E6%95%99%E7%A8%8B/" style="color: #03a9f4">
+                        <a href="/tags/%E6%95%99%E7%A8%8B/" style="color: #ffa2c4">
                             教程
                         </a>
                     </span>
                     
                     <span class="tag">
                         
-                        <a href="/tags/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/" style="color: #ffa2c4">
+                        <a href="/tags/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/" style="color: #ff7d73">
                             版本控制
                         </a>
                     </span>

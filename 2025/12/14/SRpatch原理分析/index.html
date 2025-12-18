@@ -1,0 +1,2173 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <title>SRpatch原理分析 | 孤木落の博客</title>
+    <meta name="author" content="Gumuluo" />
+    <meta name="description" content="Gumuluo's Blog" />
+    <meta name="keywords" content="" />
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <link rel="icon" href="/images/avatar.jpg" />
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.cn" />
+<link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin />
+<link
+    rel="stylesheet"
+    href="https://fonts.googleapis.cn/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap"
+/>
+<script> const mixins = {}; </script>
+
+<!-- 主题CSS文件 -->
+<link rel="stylesheet" href="/css/main.css" id="light-theme">
+<link rel="stylesheet" href="/css/night.css" id="dark-theme" disabled>
+
+<script src="https://polyfill.alicdn.com/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<!-- 白天代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs.min.css"
+    id="light-highlight"
+/>
+<!-- 黑夜代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css"
+    id="dark-highlight"
+    disabled
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.css" />
+<script src="/js/lib/math.js"></script>
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>孤木落の博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+        <!-- 主题切换按钮 -->
+        <a href="javascript:void(0);" @click="toggleTheme" :title="themeTooltip" class="theme-toggle">
+            <i :class="themeIcon"></i>
+            <span>&ensp;{{ themeText }}</span>
+        </a>
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;孤木落の博客</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+                <!-- 移动端主题切换按钮 -->
+                <a href="javascript:void(0);" @click="toggleTheme">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i :class="themeIcon"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">
+                            主题 ({{ themeText }})
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>SRpatch原理分析</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2025/12/14
+        </span>
+        
+        <span class="category">
+            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                计算机
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/java/" style="color: #ffa2c4">
+                    java
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E9%80%86%E5%90%91/" style="color: #00a596">
+                    逆向
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E7%AD%BE%E5%90%8D%E6%A0%A1%E9%AA%8C/" style="color: #ffa2c4">
+                    签名校验
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p>好奇一些常见的java层签名校验实现思路，于是研究了一下SRpatch这一优秀的工具，学到了不少知识</p>
+<span id="more"></span>
+
+<h2 id="SRpatch入口"><a href="#SRpatch入口" class="headerlink" title="SRpatch入口"></a>SRpatch入口</h2><p>通过观察Manifest.xml，观察到app入口被改为了com.srp.patch.Init类，发现其被混淆（事实上，SRpatch的核心代码均使用Milk混淆，以增加分析难度）<br>于是进行了初步的反混淆，得到了大致执行流程：</p>
+<pre><code class="language-java">public class AppInfo {
+    
+    // 配置JSON文件中的键名常量
+    public static final String KEY_PACKAGE_NAME = &quot;packageName&quot;;
+    public static final String KEY_SIGNATURE = &quot;signature&quot;;
+    public static final String KEY_SIGNATURE_STRENGTH = &quot;signatureStrength&quot;;
+    public static final String KEY_APK_SIZE = &quot;apkSize&quot;;
+    public static final String KEY_ORIGINAL_APPLICATION_NAME = &quot;originalApplicationName&quot;;
+    public static final String KEY_PMS_PROXY_METHOD = &quot;pmsProxyMethod&quot;;
+    public static final String KEY_PATH_REDIRECTION_ENABLED = &quot;pathRedirectionEnabled&quot;;
+    
+    // 目标应用的包名（要被伪装的应用）
+    public static String packageName;
+    
+    // 伪造的签名数据（Base64编码的签名）
+    public static String signature;
+    
+    // 签名绕过强度等级（0-4，数值越大绕过能力越强）
+    public static int signatureStrength;
+    
+    // 原始APK文件大小，用于大小校验绕过
+    public static long apkSize;
+    
+    // 原始应用的Application类名，用于应用名伪装
+    public static String originalApplicationName;
+    
+    // PMS代理方法类型（&quot;IBINDER_PROXY&quot; 或 &quot;CREATOR_REPLACE&quot;）
+    public static String pmsProxyMethod;
+    
+    // 是否启用APK路径重定向
+    public static boolean pathRedirectionEnabled;
+}
+</code></pre>
+<p><code>AppInfo</code>类中保存从SRPatch_config.json中解析到的原app信息及配置</p>
+<pre><code class="language-java">//自定义application实现优先加载
+public class Init extends Application {
+
+    /**
+     * 异常处理工具类 - 提供Throwable.addSuppressed的兼容性支持
+     * 用于在try-with-resources中正确处理异常链
+     */
+    public static final class ExceptionCompat {
+        /**
+         * 安全地添加被抑制的异常
+         * 在低版本Android上捕获可能的异常
+         */
+        public static void addSuppressedSafely(Throwable mainThrowable, Throwable suppressedThrowable) {
+            try {
+                mainThrowable.addSuppressed(suppressedThrowable);
+            } catch (Exception ignored) {
+                // 在低版本Android上可能不支持addSuppressed方法
+                // 忽略异常，不影响主要功能
+            }
+        }
+    }
+
+    // 配置文件名称
+    private static final String CONFIG_FILE_NAME = &quot;SRPatch_config.json&quot;;
+    
+    // Native库名称
+    private static final String NATIVE_LIB_NAME = &quot;libSRPatch.so&quot;;
+    
+    // 日志标签
+    private static final String LOG_TAG = &quot;SRPatch.Init&quot;;
+    
+    // 原始Instrumentation对象引用
+    private Instrumentation originalInstrumentation;
+    
+    // 原始Application对象引用
+    private static Application originalApplication;
+
+    /**
+     * 应用初始化入口 - 在应用创建时最早被调用
+     * 执行所有必要的Hook和伪装操作
+     */
+    @Override
+    protected void attachBaseContext(Context context) {
+        super.attachBaseContext(context);
+        
+        try {
+            Log.i(LOG_TAG, &quot;开始初始化签名绕过工具...&quot;);
+            
+            // 步骤1: 解析配置文件
+            parseAndStoreConfig(context);
+            
+            // 步骤2: 加载Native库
+            loadNativeLibrary(context);
+            
+            // 步骤3: 如果需要路径重定向或高强度签名绕过，确保基础APK存在
+            if (AppInfo.pathRedirectionEnabled || AppInfo.signatureStrength &gt;= 2) {
+                ensureBaseApkExists(context);
+            }
+            
+            // 步骤4: 执行应用名称伪装
+            ApplicationNameSpoofing.spoofApplicationName(context);
+            
+            // 步骤5: 初始化Patch模块
+            Patch.init(context);
+            
+            // 步骤6: 伪装当前类名
+            disguiseClassName(this.getClass(), AppInfo.originalApplicationName);
+            
+            // 步骤7: 创建原始Application实例
+            createOriginalApplication(context);
+            
+            Log.i(LOG_TAG, &quot;签名绕过工具初始化完成&quot;);
+            
+        } catch (Exception e) {
+            Log.e(LOG_TAG, &quot;初始化过程中发生异常&quot;, e);
+            // 注意：这里捕获异常但不抛出，确保应用即使Hook失败也能正常启动
+        }
+    }
+
+    /**
+     * 创建原始Application实例
+     * 通过反射创建并替换原始Application，保持应用正常功能
+     */
+    private void createOriginalApplication(Context context) throws Exception {
+        if (AppInfo.originalApplicationName == null) {
+            Log.w(LOG_TAG, &quot;未配置原始应用名，跳过创建原始Application&quot;);
+            return;
+        }
+
+        // 获取当前ActivityThread实例
+        ActivityThread activityThread = ActivityThread.currentActivityThread();
+        
+        // 获取并修改Instrumentation字段
+        Field instrumentationField = ActivityThread.class.getDeclaredField(&quot;mInstrumentation&quot;);
+        instrumentationField.setAccessible(true);
+        this.originalInstrumentation = (Instrumentation) instrumentationField.get(activityThread);
+        
+        // 创建原始Application实例
+        Class&lt;?&gt; originalAppClass = context.getClassLoader().loadClass(AppInfo.originalApplicationName);
+        Init.originalApplication = Instrumentation.newApplication(originalAppClass, context);
+        
+        // 替换ActivityThread中的初始Application
+        Field initialAppField = ActivityThread.class.getDeclaredField(&quot;mInitialApplication&quot;);
+        initialAppField.setAccessible(true);
+        activityThread.mInitialApplication = Init.originalApplication;
+        
+        // 修改应用名称信息
+        modifyApplicationName(context);
+        
+        Log.i(LOG_TAG, &quot;原始Application实例创建完成: &quot; + AppInfo.originalApplicationName);
+    }
+
+    /**
+     * 伪装类名 - 通过Unsafe直接修改Class对象中的名称字段
+     * 这是一种深度Hook技术，可以改变类的身份标识
+     */
+    private static void disguiseClassName(Class&lt;?&gt; targetClass, String newClassName) throws Exception {
+        if (newClassName == null) {
+            return;
+        }
+        
+        // 获取Unsafe实例
+        Field unsafeField = Unsafe.class.getDeclaredField(&quot;theUnsafe&quot;);
+        unsafeField.setAccessible(true);
+        Unsafe unsafe = (Unsafe) unsafeField.get(null);
+        
+        // 修改类的name字段
+        Field nameField = Class.class.getDeclaredField(&quot;name&quot;);
+        unsafe.putObject(targetClass, unsafe.objectFieldOffset(nameField), newClassName);
+        
+        // 清空类加载器引用，增加伪装效果
+        Field classLoaderField = Class.class.getDeclaredField(&quot;classLoader&quot;);
+        unsafe.putObject(targetClass, unsafe.objectFieldOffset(classLoaderField), null);
+        
+        Log.i(LOG_TAG, &quot;类名伪装完成: &quot; + targetClass + &quot; -&gt; &quot; + newClassName);
+    }
+
+    /**
+     * 确保基础APK文件存在
+     * 如果不存在则从assets中复制，用于路径重定向
+     */
+    private void ensureBaseApkExists(Context context) {
+        File patchDirectory = new File(context.getFilesDir().getParentFile(), &quot;srpatch&quot;);
+        
+        // 创建目录（如果不存在）
+        if (!patchDirectory.exists()) {
+            boolean dirsCreated = patchDirectory.mkdirs();
+            Log.i(LOG_TAG, &quot;创建patch目录: &quot; + dirsCreated + &quot;, 路径: &quot; + patchDirectory.getAbsolutePath());
+        }
+
+        File baseApkFile = new File(patchDirectory, &quot;base.apk&quot;);
+        
+        if (!baseApkFile.exists()) {
+            Log.i(LOG_TAG, &quot;base.apk不存在，从assets复制...&quot;);
+            copyBaseApkFromAssets(context, baseApkFile);
+        } else {
+            Log.i(LOG_TAG, &quot;base.apk已存在: &quot; + baseApkFile.getAbsolutePath());
+        }
+    }
+
+    /**
+     * 从assets复制基础APK文件
+     */
+    private void copyBaseApkFromAssets(Context context, File targetFile) {
+        try (InputStream inputStream = context.getAssets().open(&quot;base.apk&quot;);
+             FileOutputStream outputStream = new FileOutputStream(targetFile)) {
+            
+            byte[] buffer = new byte[8192]; // 8KB缓冲区
+            int bytesRead;
+            
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            
+            Log.i(LOG_TAG, &quot;成功复制base.apk到: &quot; + targetFile.getAbsolutePath());
+            
+            // 设置文件权限 (0x100 = 256, 对应rw-r--r--)
+            Os.chmod(targetFile.getAbsolutePath(), 0x100);
+            
+        } catch (Exception e) {
+            Log.e(LOG_TAG, &quot;复制base.apk失败&quot;, e);
+        }
+    }
+
+    /**
+     * 查找已加载的APK信息对象
+     * 通过多种方式尝试获取LoadedApk实例
+     */
+    private Object findLoadedApk(Context context) throws Exception {
+        Object loadedApk = null;
+        
+        // 方式1: 尝试从Context获取mPackageInfo字段
+        try {
+            loadedApk = getFieldValue(context, &quot;mPackageInfo&quot;);
+            if (loadedApk != null) {
+                return loadedApk;
+            }
+        } catch (NoSuchFieldException e) {
+            // 字段不存在，继续尝试其他方式
+        }
+        
+        // 方式2: 尝试从Context获取mLoadedApk字段
+        try {
+            loadedApk = getFieldValue(context, &quot;mLoadedApk&quot;);
+            if (loadedApk != null) {
+                return loadedApk;
+            }
+        } catch (NoSuchFieldException e) {
+            // 字段不存在，继续尝试其他方式
+        }
+        
+        // 方式3: 从ActivityThread的包管理器中查找
+        Object activityThread = ActivityThread.currentActivityThread();
+        Map&lt;String, WeakReference&lt;?&gt;&gt; packagesMap = (Map&lt;String, WeakReference&lt;?&gt;&gt;) 
+                getFieldValue(activityThread, ActivityThread.class, &quot;mPackages&quot;);
+
+        if (packagesMap != null) {
+            WeakReference&lt;?&gt; weakRef = packagesMap.get(&quot;com.example.app&quot;);
+            if (weakRef != null) {
+                loadedApk = weakRef.get();
+            }
+        }
+
+        return loadedApk;
+    }
+
+    /**
+     * 通用的字段获取方法（带Class参数）
+     */
+    private static Object getFieldValue(Object target, Class&lt;?&gt; targetClass, String fieldName) throws Exception {
+        Field field = targetClass.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(target);
+    }
+
+    /**
+     * 通用的字段获取方法
+     */
+    private static Object getFieldValue(Object target, String fieldName) throws Exception {
+        return getFieldValue(target, target.getClass(), fieldName);
+    }
+
+    /**
+     * 加载Native库
+     * 从assets中提取并加载native so库
+     */
+    private void loadNativeLibrary(Context context) {
+        if (context == null) {
+            Log.e(LOG_TAG, &quot;Context为null，无法加载Native库&quot;);
+            return;
+        }
+
+        try {
+            File filesDir = context.getFilesDir();
+            if (filesDir == null) {
+                Log.e(LOG_TAG, &quot;filesDir为null，无法加载Native库&quot;);
+                return;
+            }
+
+            File soFile = new File(filesDir, NATIVE_LIB_NAME);
+            
+            // 如果so文件不存在或为空，从assets中提取
+            if (!soFile.exists() || soFile.length() == 0) {
+                extractSoFromAssets(context, soFile);
+            }
+            
+            // 加载Native库
+            System.load(soFile.getAbsolutePath());
+            Log.i(LOG_TAG, &quot;Native库加载成功: &quot; + soFile.getAbsolutePath());
+            
+        } catch (Throwable t) {
+            Log.e(LOG_TAG, &quot;加载Native库失败&quot;, t);
+        }
+    }
+
+    /**
+     * 从assets中提取so文件
+     */
+    private void extractSoFromAssets(Context context, File targetSoFile) {
+        String assetPath = &quot;patch/lib/arm64-v8a/&quot; + NATIVE_LIB_NAME;
+        
+        try (InputStream inputStream = context.getAssets().open(assetPath);
+             FileOutputStream outputStream = new FileOutputStream(targetSoFile)) {
+            
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            
+            outputStream.flush();
+            
+            // 设置文件权限为755 (rwxr-xr-x)
+            try {
+                Os.chmod(targetSoFile.getAbsolutePath(), 493); // 493 = 0755 in octal
+            } catch (Throwable unused) {
+                // 权限设置失败不影响主要功能
+            }
+            
+            Log.i(LOG_TAG, &quot;成功提取so文件到: &quot; + targetSoFile.getAbsolutePath());
+            
+        } catch (Exception e) {
+            Log.e(LOG_TAG, &quot;提取so文件失败，asset: &quot; + assetPath, e);
+        }
+    }
+
+    /**
+     * 修改应用名称信息
+     * 在多个位置更新应用名称，确保伪装效果
+     */
+    private void modifyApplicationName(Context context) throws Exception {
+        if (context == null) {
+            return;
+        }
+
+        // 修改当前Context中的应用信息
+        ApplicationInfo currentAppInfo = context.getApplicationInfo();
+        currentAppInfo.name = AppInfo.originalApplicationName;
+        
+        // 修改LoadedApk中的应用信息
+        Object loadedApk = findLoadedApk(context);
+        if (loadedApk != null) {
+            ApplicationInfo loadedApkAppInfo = (ApplicationInfo) getFieldValue(loadedApk, &quot;mApplicationInfo&quot;);
+            loadedApkAppInfo.className = AppInfo.originalApplicationName;
+            loadedApkAppInfo.name = AppInfo.originalApplicationName;
+        }
+    }
+
+    /**
+     * 应用创建完成回调
+     * 替换应用实例并调用原始Application的onCreate方法
+     */
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        
+        if (Init.originalApplication != null &amp;&amp; this.originalInstrumentation != null) {
+            try {
+                replaceApplicationInstance();
+                this.originalInstrumentation.callApplicationOnCreate(Init.originalApplication);
+                Log.i(LOG_TAG, &quot;原始Application onCreate调用完成&quot;);
+            } catch (Exception e) {
+                throw new RuntimeException(&quot;替换应用实例失败&quot;, e);
+            }
+        }
+    }
+
+    /**
+     * 解析并存储配置信息
+     * 从assets中的JSON配置文件读取各种Hook参数
+     */
+    private void parseAndStoreConfig(Context context) throws Exception {
+        StringBuilder configContent = new StringBuilder();
+        
+        try (InputStream inputStream = context.getAssets().open(&quot;patch/&quot; + CONFIG_FILE_NAME);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            
+            String line;
+            while ((line = reader.readLine()) != null) {
+                configContent.append(line);
+            }
+        }
+        
+        JSONObject configJson = new JSONObject(configContent.toString());
+        
+        // 解析各项配置参数
+        AppInfo.packageName = configJson.getString(&quot;packageName&quot;);
+        AppInfo.signature = configJson.getString(&quot;signature&quot;);
+        AppInfo.apkSize = configJson.getLong(&quot;apkSize&quot;);
+        AppInfo.signatureStrength = configJson.getInt(&quot;signatureStrength&quot;);
+        AppInfo.originalApplicationName = configJson.optString(&quot;originalApplicationName&quot;, null);
+        AppInfo.pmsProxyMethod = configJson.getString(&quot;pmsProxyMethod&quot;);
+        AppInfo.pathRedirectionEnabled = configJson.getBoolean(&quot;pathRedirectionEnabled&quot;);
+        
+        Log.i(LOG_TAG, &quot;配置解析完成，目标包名: &quot; + AppInfo.packageName);
+    }
+
+    /**
+     * 替换应用实例
+     * 在ActivityThread中完全替换当前应用实例为原始应用
+     */
+    private void replaceApplicationInstance() throws Exception {
+        // 获取当前ActivityThread实例
+        ActivityThread activityThread = ActivityThread.currentActivityThread();
+
+        // 替换mAllApplications列表中的应用实例
+        Field allApplicationsField = ActivityThread.class.getDeclaredField(&quot;mAllApplications&quot;);
+        allApplicationsField.setAccessible(true);
+        
+        List&lt;Application&gt; allApplications = activityThread.mAllApplications;
+        allApplications.remove(this);
+        allApplications.add(Init.originalApplication);
+
+        // 修改LoadedApk中的mApplication字段
+        Object loadedApk = findLoadedApk(this);
+        if (loadedApk != null) {
+            setFieldValue(loadedApk, &quot;mApplication&quot;, Init.originalApplication);
+
+            // 修改ApplicationInfo中的类名和名称
+            ApplicationInfo appInfo = (ApplicationInfo) getFieldValue(loadedApk, &quot;mApplicationInfo&quot;);
+            if (appInfo != null) {
+                appInfo.className = AppInfo.originalApplicationName;
+                appInfo.name = AppInfo.originalApplicationName;
+            }
+        }
+        
+        Log.i(LOG_TAG, &quot;应用实例替换完成&quot;);
+    }
+
+    /**
+     * 通用的字段设置方法（带Class参数）
+     */
+    private static void setFieldValue(Object target, Class&lt;?&gt; targetClass, String fieldName, Object value) throws Exception {
+        Field field = targetClass.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
+    }
+
+    /**
+     * 通用的字段设置方法
+     */
+    private static void setFieldValue(Object target, String fieldName, Object value) throws Exception {
+        setFieldValue(target, target.getClass(), fieldName, value);
+    }
+}
+</code></pre>
+<pre><code class="language-java">/**
+ * 应用名称伪装工具类
+ * 通过修改ApplicationInfo中的名称和类名字段，伪装应用身份
+ */
+public class ApplicationNameSpoofing {
+    
+    // 目标应用的包名常量
+    private static final String TARGET_PACKAGE_NAME = &quot;com.example.app&quot;;
+    
+    // 获取应用信息的标志位（0x80 = 128，通常用于获取元数据）
+    private static final int APPLICATION_INFO_FLAGS = 0x80;
+    
+    /**
+     * 执行应用名称伪装
+     * 修改目标应用的ApplicationInfo中的名称和类名字段
+     * 
+     * @param context Android上下文对象，用于获取PackageManager
+     * @throws PackageManager.NameNotFoundException 如果目标包名不存在
+     */
+    public static void spoofApplicationName(Context context) throws PackageManager.NameNotFoundException {
+        // 获取目标包名的ApplicationInfo对象
+        // 使用GET_META_DATA标志获取包含元数据的应用信息
+        ApplicationInfo targetAppInfo = context.getPackageManager()
+                .getApplicationInfo(TARGET_PACKAGE_NAME, APPLICATION_INFO_FLAGS);
+        
+        // 修改应用显示名称
+        targetAppInfo.name = AppInfo.originalApplicationName;
+        
+        // 修改应用类名
+        targetAppInfo.className = AppInfo.originalApplicationName;
+    }
+}
+</code></pre>
+<p>我们发现入口的主要功能是解析配置、Patch初始化和伪装Application</p>
+<h2 id="Patch类分析"><a href="#Patch类分析" class="headerlink" title="Patch类分析"></a>Patch类分析</h2><pre><code class="language-java">public class Patch {
+    
+    // 日志标签
+    private static final String LOG_TAG = &quot;SRPatch&quot;;
+    
+    // PMS代理方法常量
+    private static final String PMS_PROXY_METHOD_IBINDER = &quot;IBINDER_PROXY&quot;;
+    
+    // 伪造APK文件路径
+    public static String FakeApkPath = null;
+    
+    // 原始Parcelable.Creator引用
+    public static Parcelable.Creator ORIGINAL_APP_INFO_CREATOR = null;
+    public static Parcelable.Creator ORIGINAL_CREATOR = null;
+    
+    // 配置参数
+    public static long sApkSize;
+    public static Signature sFakeSignature;
+    public static boolean sPathRedirectionEnabled;
+    public static String sPmsProxyMethod;
+    public static int sSignatureStrength;
+    public static String sSourceDir;
+    public static String sTargetPackageName;
+
+    /**
+     * 初始化Patch模块（已弃用，使用init方法替代）
+     * 保持向后兼容性
+     * 
+     * @param context Android上下文对象
+     */
+    @Deprecated
+    public static void HookInit(Context context) {
+        init(context);
+    }
+
+    /**
+     * 应用Native层绕过方法
+     * 根据签名绕过强度等级选择不同的Native绕过策略
+     * 
+     * @param fakeApkPath 伪造APK文件路径
+     */
+    private static void applyNativeBypass(String fakeApkPath) {
+        int signatureStrength = sSignatureStrength;
+
+        // 根据签名绕过强度等级选择不同的Native绕过方法
+        switch (signatureStrength) {
+            case 2:
+            case 3:
+                // 标准签名绕过 + 大小绕过
+                SigBypass.SigBypass(sSourceDir, fakeApkPath);
+                SigBypass.SizeBypass(sApkSize);
+                break;
+                
+            case 4:
+                //SVC Hook实现绕过
+                SigBypass.SvcHookSigna(sSourceDir, fakeApkPath, AppInfo.apkSize);
+                break;
+                
+            default:
+                // 默认情况：使用标准签名绕过
+                SigBypass.SigBypass(sSourceDir, fakeApkPath);
+                SigBypass.SizeBypass(sApkSize);
+                break;
+        }
+        
+        Log.i(LOG_TAG, &quot;Native绕过方法应用完成，强度等级: &quot; + signatureStrength);
+    }
+
+    /**
+     * 应用路径重定向
+     * 修改APK路径指向伪造的APK文件
+     * 
+     * @param context Android上下文对象
+     * @param fakeApkPath 伪造APK文件路径
+     */
+    private static void applyPathRedirection(Context context, String fakeApkPath) {
+        if (sPathRedirectionEnabled) {
+            try {
+                ApkPathHook.ApkPathSpoofing(context, fakeApkPath);
+                Log.i(LOG_TAG, &quot;APK路径重定向完成: &quot; + fakeApkPath);
+            } catch (Throwable throwable) {
+                Log.e(LOG_TAG, &quot;APK路径重定向失败&quot;, throwable);
+            }
+        }
+    }
+
+    /**
+     * 初始化Patch模块
+     * 主要的初始化方法，执行所有必要的Hook和伪装操作
+     * 
+     * @param context Android上下文对象
+     */
+    public static void init(Context context) {
+        Log.i(LOG_TAG, &quot;开始初始化Patch模块...&quot;);
+        
+        // 初始化配置数据
+        initPatchData(context);
+        
+        // 如果签名绕过强度大于0，执行java层Hook
+        if (sSignatureStrength &gt; 0) {
+            try {
+                startjavaSignatureReplace();
+            } catch (Throwable throwable) {
+                Log.e(LOG_TAG, &quot;java层签名替换失败&quot;, throwable);
+            }
+
+            // 构建伪造APK路径并应用各种绕过技术
+            String fakeApkPath = PathUtils.buildFakeApkPath(context);
+            FakeApkPath = fakeApkPath;
+            
+            applyPathRedirection(context, fakeApkPath);
+            applyNativeBypass(fakeApkPath);
+        }
+        
+        Log.i(LOG_TAG, &quot;Patch模块初始化完成&quot;);
+    }
+
+    /**
+     * 初始化Patch配置数据
+     * 从AppInfo中读取配置参数
+     * 
+     * @param context Android上下文对象
+     */
+    private static void initPatchData(Context context) {
+        sTargetPackageName = AppInfo.packageName;
+        sFakeSignature = new Signature(AppInfo.signature);
+        sSourceDir = context.getApplicationInfo().sourceDir;
+        sPmsProxyMethod = AppInfo.pmsProxyMethod;
+        sSignatureStrength = AppInfo.signatureStrength;
+        sApkSize = AppInfo.apkSize;
+        sPathRedirectionEnabled = AppInfo.pathRedirectionEnabled;
+        
+        Log.i(LOG_TAG, &quot;Patch数据初始化完成 - 目标包名: &quot; + sTargetPackageName);
+    }
+
+    /**
+     * 启动java层签名替换
+     * 根据配置选择Binder代理或PMS代理方式
+     * 
+     * @throws Throwable 如果Hook过程中发生异常
+     */
+    private static void startjavaSignatureReplace() throws Throwable {
+        Log.i(LOG_TAG, &quot;开始java层签名替换，代理方法: &quot; + sPmsProxyMethod);
+        
+        // 根据配置选择不同的Hook实现方式
+        if (PMS_PROXY_METHOD_IBINDER.equals(sPmsProxyMethod)) {
+            // 使用Binder代理方式进行Hook
+            FakeIBinder.installBinderHook();
+        } else {
+            // 使用PMS代理方式进行Hook
+            PMSAgent.replaceParcelableCreators();
+        }
+        
+        Log.i(LOG_TAG, &quot;java层签名替换完成&quot;);
+    }
+}
+</code></pre>
+<p>在Patch类中，SRpatch主要进行了io重定向，代理Binder或代理PMS，分别研究这两部分</p>
+<h3 id="java层IO重定向"><a href="#java层IO重定向" class="headerlink" title="java层IO重定向"></a>java层IO重定向</h3><pre><code class="language-java">/**
+ * 路径工具类
+ * 用于构建和管理伪造的APK文件路径，支持路径重定向功能
+ * 这是签名绕过工具中路径欺骗功能的核心组件
+ */
+public class PathUtils {
+    
+    // 伪造APK存储目录名称
+    private static final String FAKE_APK_DIRECTORY = &quot;srpatch&quot;;
+    
+    // 伪造APK文件名称
+    private static final String FAKE_APK_FILENAME = &quot;base.apk&quot;;
+    
+    /**
+     * 构建伪造APK文件路径
+     * 在应用的私有数据目录下创建特定的目录结构来存储伪造的APK文件
+     * 
+     * @param context Android上下文对象，用于获取应用文件目录
+     * @return 伪造APK文件的绝对路径
+     * 
+     * 路径结构示例：
+     * /data/data/[package_name]/srpatch/base.apk
+     */
+    public static String buildFakeApkPath(Context context) {
+        // 获取应用的文件目录（/data/data/[package_name]/files）
+        File filesDir = context.getFilesDir();
+        
+        // 获取文件目录的父目录（/data/data/[package_name]）
+        File dataDir = filesDir.getParentFile();
+        
+        // 在数据目录下创建伪造APK存储目录
+        File fakeApkDirectory = new File(dataDir, FAKE_APK_DIRECTORY);
+        
+        // 创建伪造APK文件对象
+        File fakeApkFile = new File(fakeApkDirectory, FAKE_APK_FILENAME);
+        
+        // 返回伪造APK文件的绝对路径
+        return fakeApkFile.getAbsolutePath();
+    }
+    
+    /**
+     * 获取伪造APK存储目录路径
+     * 
+     * @param context Android上下文对象
+     * @return 伪造APK存储目录的绝对路径
+     */
+    public static String getFakeApkDirectoryPath(Context context) {
+        File filesDir = context.getFilesDir();
+        File dataDir = filesDir.getParentFile();
+        File fakeApkDirectory = new File(dataDir, FAKE_APK_DIRECTORY);
+        return fakeApkDirectory.getAbsolutePath();
+    }
+    
+    /**
+     * 检查伪造APK文件是否存在
+     * 
+     * @param context Android上下文对象
+     * @return 如果伪造APK文件存在返回true，否则返回false
+     */
+    public static boolean isFakeApkExists(Context context) {
+        String fakeApkPath = buildFakeApkPath(context);
+        File fakeApkFile = new File(fakeApkPath);
+        return fakeApkFile.exists() &amp;&amp; fakeApkFile.length() &gt; 0;
+    }
+    
+    /**
+     * 获取伪造APK文件对象
+     * 
+     * @param context Android上下文对象
+     * @return 伪造APK文件对象
+     */
+    public static File getFakeApkFile(Context context) {
+        String fakeApkPath = buildFakeApkPath(context);
+        return new File(fakeApkPath);
+    }
+    
+    /**
+     * 清理伪造APK文件
+     * 用于在卸载或重置时清理相关文件
+     * 
+     * @param context Android上下文对象
+     * @return 如果成功删除返回true，否则返回false
+     */
+    public static boolean cleanupFakeApk(Context context) {
+        try {
+            File fakeApkFile = getFakeApkFile(context);
+            File fakeApkDirectory = fakeApkFile.getParentFile();
+            
+            boolean fileDeleted = fakeApkFile.delete();
+            boolean dirDeleted = fakeApkDirectory.delete();
+            
+            return fileDeleted || dirDeleted;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}
+</code></pre>
+<p>PathUtils类主要用于构造重定向目标app及其所在文件夹</p>
+<pre><code class="language-java">/**
+ * APK路径Hook工具类
+ * 通过修改ApplicationInfo和Context内部字段，将APK路径指向伪造的文件
+ * 这是路径重定向功能的核心实现，用于绕过基于APK路径的校验
+ */
+public class ApkPathHook {
+    
+    // 目标应用包名（会在修补时写入）
+    private static final String TARGET_PACKAGE_NAME = &quot;com.example.app&quot;;
+    
+    // 获取应用信息的标志位（0x80 = GET_META_DATA，用于获取包含元数据的应用信息）
+    private static final int APPLICATION_INFO_FLAGS = 0x80;
+
+    /**
+     * 执行APK路径欺骗
+     * 修改多个位置的APK路径指向，确保路径重定向完全生效
+     * 
+     * @param context Android上下文对象
+     * @param fakeApkPath 伪造的APK文件路径
+     * @throws PackageManager.NameNotFoundException 如果目标包名不存在
+     */
+    public static void spoofApkPath(Context context, String fakeApkPath) 
+            throws PackageManager.NameNotFoundException {
+        
+        // 步骤1: 修改当前应用的应用信息中的路径
+        modifyCurrentApplicationInfo(context, fakeApkPath);
+        
+        // 步骤2: 修改目标包名的应用信息中的路径
+        modifyTargetApplicationInfo(context, fakeApkPath);
+        
+        // 步骤3: 修改Context内部字段中的路径
+        modifyContextInternalFields(context, fakeApkPath);
+        
+        // 步骤4: 强制刷新资源管理器
+        refreshResources(context);
+    }
+
+    /**
+     * 修改当前应用的应用信息路径
+     */
+    private static void modifyCurrentApplicationInfo(Context context, String fakeApkPath) {
+        ApplicationInfo currentAppInfo = context.getApplicationInfo();
+        currentAppInfo.sourceDir = fakeApkPath;
+        currentAppInfo.publicSourceDir = fakeApkPath;
+    }
+
+    /**
+     * 修改目标包名的应用信息路径
+     */
+    private static void modifyTargetApplicationInfo(Context context, String fakeApkPath) 
+            throws PackageManager.NameNotFoundException {
+        ApplicationInfo targetAppInfo = context.getPackageManager()
+                .getApplicationInfo(TARGET_PACKAGE_NAME, APPLICATION_INFO_FLAGS);
+        targetAppInfo.sourceDir = fakeApkPath;
+        targetAppInfo.publicSourceDir = fakeApkPath;
+    }
+
+    /**
+     * 修改Context内部字段中的路径
+     * 通过反射修改ContextImpl中的mPackageInfo字段相关路径
+     */
+    private static void modifyContextInternalFields(Context context, String fakeApkPath) {
+        Context baseContext = getBaseContext(context);
+        
+        if (baseContext == null) {
+            return;
+        }
+        
+        try {
+            // 获取mPackageInfo字段
+            Field packageInfoField = baseContext.getClass().getDeclaredField(&quot;mPackageInfo&quot;);
+            packageInfoField.setAccessible(true);
+            Object packageInfoObject = packageInfoField.get(baseContext);
+            
+            if (packageInfoObject != null) {
+                // 修改mAppDir字段（APK目录）
+                modifyPackageInfoField(packageInfoObject, &quot;mAppDir&quot;, fakeApkPath);
+                
+                // 尝试修改mResDir字段（资源目录）
+                modifyPackageInfoField(packageInfoObject, &quot;mResDir&quot;, fakeApkPath);
+            }
+            
+        } catch (Throwable throwable) {
+            // 记录异常但不中断执行
+            throwable.printStackTrace();
+        }
+    }
+
+    /**
+     * 获取最底层的Base Context
+     * 遍历ContextWrapper链直到找到非包装的Context
+     */
+    private static Context getBaseContext(Context context) {
+        Context currentContext = context;
+        
+        while (currentContext instanceof ContextWrapper) {
+            Context baseContext = ((ContextWrapper) currentContext).getBaseContext();
+            if (baseContext == null) {
+                break;
+            }
+            currentContext = baseContext;
+        }
+        
+        return currentContext;
+    }
+
+    /**
+     * 修改PackageInfo对象中的字段
+     */
+    private static void modifyPackageInfoField(Object packageInfoObject, String fieldName, String newValue) {
+        try {
+            Field field = packageInfoObject.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(packageInfoObject, newValue);
+        } catch (NoSuchFieldException ignored) {
+            // 字段不存在，忽略
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
+
+    /**
+     * 强制刷新资源管理器
+     * 通过访问Resources触发重新加载，确保路径修改生效
+     */
+    private static void refreshResources(Context context) {
+        try {
+            // 访问Resources会触发重新加载，应用路径修改
+            context.getResources();
+        } catch (Throwable ignored) {
+            // 忽略资源加载异常
+        }
+    }
+    
+    /**
+     * 重载方法：使用指定的包名进行路径欺骗
+     * 
+     * @param context Android上下文
+     * @param fakeApkPath 伪造的APK文件路径
+     * @param targetPackageName 目标包名
+     * @throws PackageManager.NameNotFoundException 如果目标包名不存在
+     */
+    public static void spoofApkPath(Context context, String fakeApkPath, String targetPackageName) 
+            throws PackageManager.NameNotFoundException {
+        
+        modifyCurrentApplicationInfo(context, fakeApkPath);
+        
+        ApplicationInfo targetAppInfo = context.getPackageManager()
+                .getApplicationInfo(targetPackageName, APPLICATION_INFO_FLAGS);
+        targetAppInfo.sourceDir = fakeApkPath;
+        targetAppInfo.publicSourceDir = fakeApkPath;
+        
+        modifyContextInternalFields(context, fakeApkPath);
+        refreshResources(context);
+    }
+    
+    /**
+     * 检查APK路径欺骗是否生效
+     * 
+     * @param context Android上下文
+     * @return 如果当前应用路径已被修改返回true，否则返回false
+     */
+    public static boolean isApkPathSpoofed(Context context) {
+        ApplicationInfo appInfo = context.getApplicationInfo();
+        return appInfo.sourceDir != null &amp;&amp; 
+               !appInfo.sourceDir.equals(context.getPackageCodePath());
+    }
+}
+</code></pre>
+<h3 id="代理IBinder"><a href="#代理IBinder" class="headerlink" title="代理IBinder"></a>代理IBinder</h3><pre><code class="language-java">/**
+ * Binder代理Hook工具类
+ * 通过动态代理Hook PackageManager服务的Binder通信，拦截并修改包信息查询结果
+ * 这是签名绕过工具中最高级的Hook技术之一
+ */
+public class FakeIBinder {
+    
+    private static final String LOG_TAG = &quot;FakeIBinder&quot;;
+
+    /**
+     * Binder调用拦截处理器
+     * 负责拦截PackageManager服务的transact调用并修改返回数据
+     */
+    private static class BinderInvocationHandler implements InvocationHandler {
+        private final IBinder originalBinder;
+        private final Set&lt;Integer&gt; packageInfoTransactionCodes;
+        private final Set&lt;Integer&gt; applicationInfoTransactionCodes;
+
+        public BinderInvocationHandler(IBinder originalBinder, Set&lt;Integer&gt; packageInfoTransactions, 
+                                     Set&lt;Integer&gt; applicationInfoTransactions) {
+            this.originalBinder = originalBinder;
+            this.packageInfoTransactionCodes = packageInfoTransactions;
+            this.applicationInfoTransactionCodes = applicationInfoTransactions;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            return handleBinderTransaction(originalBinder, packageInfoTransactionCodes, 
+                                         applicationInfoTransactionCodes, proxy, method, args);
+        }
+    }
+
+    /**
+     * Binder死亡监听器
+     * 当原始Binder死亡时重新安装Hook
+     */
+    private static class BinderDeathRecipient implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            try {
+                reinstallBinderHook();
+            } catch (RemoteException | ClassNotFoundException | IllegalAccessException |
+                     NoSuchFieldException e) {
+                Log.e(LOG_TAG, &quot;Binder死亡后重新安装Hook失败&quot;, e);
+                throw new RuntimeException(&quot;重新安装Binder Hook失败&quot;, e);
+            }
+        }
+    }
+
+    /**
+     * 安装Binder代理Hook
+     * 替换系统的PackageManager服务Binder代理，拦截所有包信息查询请求
+     */
+    public static void installBinderHook() throws IllegalAccessException, ClassNotFoundException, 
+                                                 RemoteException, NoSuchFieldException {
+        Log.i(LOG_TAG, &quot;开始安装Binder代理Hook...&quot;);
+        
+        // 获取当前ActivityThread实例
+        ActivityThread activityThread = ActivityThread.currentActivityThread();
+        
+        // 获取sPackageManager字段
+        Field packageManagerField = ActivityThread.class.getDeclaredField(&quot;sPackageManager&quot;);
+        packageManagerField.setAccessible(true);
+        Object packageManagerInstance = packageManagerField.get(null);
+        
+        if (packageManagerInstance == null) {
+            Log.w(LOG_TAG, &quot;sPackageManager为null，无法安装Hook&quot;);
+            return;
+        }
+
+        // 查找IBinder类型的字段
+        Field binderField = findBinderField(packageManagerInstance);
+        if (binderField == null) {
+            Log.e(LOG_TAG, &quot;未找到IBinder类型字段&quot;);
+            return;
+        }
+
+        binderField.setAccessible(true);
+        IBinder originalBinder = (IBinder) binderField.get(packageManagerInstance);
+        
+        if (originalBinder == null) {
+            Log.w(LOG_TAG, &quot;原始Binder为null，无法安装Hook&quot;);
+            return;
+        }
+
+        // 收集需要拦截的Transaction Code
+        Set&lt;Integer&gt; packageInfoTransactions = new HashSet&lt;&gt;();
+        Set&lt;Integer&gt; applicationInfoTransactions = new HashSet&lt;&gt;();
+        collectTransactionCodes(packageInfoTransactions, applicationInfoTransactions);
+
+        // 创建动态代理
+        ClassLoader classLoader = originalBinder.getClass().getClassLoader();
+        BinderInvocationHandler handler = new BinderInvocationHandler(
+                originalBinder, packageInfoTransactions, applicationInfoTransactions);
+        
+        IBinder proxyBinder = (IBinder) Proxy.newProxyInstance(
+                classLoader, new Class[]{IBinder.class}, handler);
+        
+        // 替换原始Binder
+        binderField.set(packageManagerInstance, proxyBinder);
+        
+        // 清理缓存
+        CacheHandling.clearCaches();
+        
+        // 注册Binder死亡监听
+        originalBinder.linkToDeath(new BinderDeathRecipient(), 0);
+        
+        Log.i(LOG_TAG, &quot;Binder代理Hook安装完成&quot;);
+    }
+
+    /**
+     * 查找IBinder类型的字段
+     */
+    private static Field findBinderField(Object targetInstance) {
+        Field[] fields = targetInstance.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            Class&lt;?&gt; fieldType = field.getType();
+            if (IBinder.class.isAssignableFrom(fieldType)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 收集需要拦截的Transaction Code
+     * 通过反射获取IPackageManager中定义的所有TRANSACTION常量
+     */
+    private static void collectTransactionCodes(Set&lt;Integer&gt; packageInfoTransactions, 
+                                              Set&lt;Integer&gt; applicationInfoTransactions) 
+            throws ClassNotFoundException {
+        Class&lt;?&gt; stubClass = Class.forName(&quot;android.content.pm.IPackageManager$Stub&quot;);
+        Field[] fields = stubClass.getDeclaredFields();
+        
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) &amp;&amp; field.getType() == int.class) {
+                field.setAccessible(true);
+                String fieldName = field.getName();
+                
+                try {
+                    int transactionCode = field.getInt(null);
+                    
+                    if (fieldName.startsWith(&quot;TRANSACTION_getPackageInfo&quot;)) {
+                        packageInfoTransactions.add(transactionCode);
+                    } else if (fieldName.startsWith(&quot;TRANSACTION_getApplicationInfo&quot;)) {
+                        applicationInfoTransactions.add(transactionCode);
+                    }
+                } catch (IllegalAccessException ignored) {
+                    // 忽略无法访问的字段
+                }
+            }
+        }
+        
+        Log.i(LOG_TAG, &quot;收集到PackageInfo Transactions: &quot; + packageInfoTransactions.size());
+        Log.i(LOG_TAG, &quot;收集到ApplicationInfo Transactions: &quot; + applicationInfoTransactions.size());
+    }
+
+    /**
+     * 处理Binder事务拦截
+     * 核心拦截逻辑，修改PackageManager服务返回的数据
+     */
+    private static Object handleBinderTransaction(IBinder originalBinder, 
+                                                Set&lt;Integer&gt; packageInfoTransactions,
+                                                Set&lt;Integer&gt; applicationInfoTransactions,
+                                                Object proxy, Method method, Object[] args) 
+            throws Throwable {
+        
+        // 只拦截transact方法
+        if (!&quot;transact&quot;.equals(method.getName())) {
+            return method.invoke(originalBinder, args);
+        }
+
+        // 检查参数有效性
+        if (args == null || args.length &lt; 4) {
+            return method.invoke(originalBinder, args);
+        }
+
+        Integer transactionCode = (Integer) args[0];
+        Parcel replyParcel = (Parcel) args[2];
+        
+        // 调用原始方法
+        Object result = method.invoke(originalBinder, args);
+        
+        // 根据Transaction Code处理返回数据
+        if (packageInfoTransactions.contains(transactionCode)) {
+            patchPackageInfoReply(replyParcel);
+        } else if (applicationInfoTransactions.contains(transactionCode)) {
+            patchApplicationInfoReply(replyParcel);
+        }
+
+        return result;
+    }
+
+    /**
+     * 重新安装Binder Hook
+     * 当原始Binder死亡时调用
+     */
+    private static void reinstallBinderHook() throws RemoteException, NoSuchFieldException, 
+                                                    ClassNotFoundException, IllegalAccessException {
+        Log.i(LOG_TAG, &quot;检测到Binder死亡，重新安装Hook...&quot;);
+        installBinderHook();
+    }
+
+    /**
+     * 修补PackageInfo返回数据
+     * 修改签名信息和应用名称
+     */
+    private static void patchSignatureInfo(PackageInfo packageInfo) {
+        if (packageInfo == null || packageInfo.applicationInfo == null) {
+            return;
+        }
+
+        // 修补应用信息
+        if (AppInfo.originalApplicationName != null &amp;&amp; 
+            !AppInfo.originalApplicationName.isEmpty()) {
+            packageInfo.applicationInfo.name = AppInfo.originalApplicationName;
+            packageInfo.applicationInfo.className = AppInfo.originalApplicationName;
+        }
+
+        // 修补路径重定向
+        if (Patch.sPathRedirectionEnabled) {
+            packageInfo.applicationInfo.sourceDir = Patch.FakeApkPath;
+            packageInfo.applicationInfo.publicSourceDir = Patch.FakeApkPath;
+        }
+
+        // 修补签名信息
+        Signature fakeSignature = Patch.sFakeSignature;
+        if (fakeSignature != null) {
+            packageInfo.signatures = new Signature[]{fakeSignature};
+
+            // Android P (API 28) 及以上版本需要额外处理signingInfo
+            if (Build.VERSION.SDK_INT &gt;= 28) {
+                patchSigningInfoForAndroidP(packageInfo, fakeSignature);
+            }
+        }
+    }
+
+    /**
+     * 为Android P及以上版本修补签名信息
+     */
+    @SuppressLint(&quot;PrivateApi&quot;)
+    private static void patchSigningInfoForAndroidP(PackageInfo packageInfo, Signature fakeSignature) {
+        try {
+            if (packageInfo.signingInfo == null) {
+                // 创建新的SigningInfo
+                createNewSigningInfo(packageInfo, fakeSignature);
+            } else {
+                // 修改现有的SigningInfo
+                modifyExistingSigningInfo(packageInfo, fakeSignature);
+            }
+        } catch (Throwable t) {
+            Log.w(LOG_TAG, &quot;修改SigningInfo失败&quot;, t);
+        }
+    }
+
+    /**
+     * 创建新的SigningInfo对象
+     */
+    private static void createNewSigningInfo(PackageInfo packageInfo, Signature fakeSignature) 
+            throws Exception {
+        Class&lt;?&gt; signingDetailsClass = Class.forName(&quot;android.content.pm.SigningDetails&quot;);
+        Object signingDetails;
+        
+        try {
+            signingDetails = signingDetailsClass.getConstructor(Signature[].class, int.class, Signature[].class)
+                    .newInstance(new Signature[]{fakeSignature}, 2, null);
+        } catch (NoSuchMethodException e) {
+            signingDetails = signingDetailsClass.getConstructor(Signature[].class, int.class)
+                    .newInstance(new Signature[]{fakeSignature}, 2);
+        }
+        
+        SigningInfo newSigningInfo = (SigningInfo) SigningInfo.class.getConstructor(signingDetailsClass)
+                .newInstance(signingDetails);
+        
+        Field signingInfoField = PackageInfo.class.getDeclaredField(&quot;signingInfo&quot;);
+        signingInfoField.setAccessible(true);
+        packageInfo.signingInfo = newSigningInfo;
+    }
+
+    /**
+     * 修改现有的SigningInfo对象
+     */
+    private static void modifyExistingSigningInfo(PackageInfo packageInfo, Signature fakeSignature) {
+        try {
+            // 修改APK内容签名
+            Signature[] apkSigners = packageInfo.signingInfo.getApkContentsSigners();
+            if (apkSigners != null &amp;&amp; apkSigners.length &gt; 0) {
+                apkSigners[0] = fakeSignature;
+            }
+            
+            // 修改签名证书历史
+            Signature[] signingHistory = packageInfo.signingInfo.getSigningCertificateHistory();
+            if (signingHistory != null &amp;&amp; signingHistory.length &gt; 0) {
+                signingHistory[0] = fakeSignature;
+            }
+            
+            // 通过反射修改内部签名细节
+            modifySigningDetails(packageInfo, fakeSignature);
+        } catch (Throwable t) {
+            Log.w(LOG_TAG, &quot;修改现有SigningInfo失败&quot;, t);
+        }
+    }
+
+    /**
+     * 通过反射修改SigningDetails内部字段
+     */
+    private static void modifySigningDetails(PackageInfo packageInfo, Signature fakeSignature) {
+        try {
+            Field signingDetailsField = packageInfo.signingInfo.getClass().getDeclaredField(&quot;mSigningDetails&quot;);
+            signingDetailsField.setAccessible(true);
+            Object signingDetails = signingDetailsField.get(packageInfo.signingInfo);
+            
+            if (signingDetails != null) {
+                Field signaturesField = signingDetails.getClass().getDeclaredField(&quot;mSignatures&quot;);
+                signaturesField.setAccessible(true);
+                signaturesField.set(signingDetails, new Signature[]{fakeSignature});
+            }
+        } catch (Throwable t) {
+            Log.w(LOG_TAG, &quot;修改SigningDetails失败&quot;, t);
+        }
+    }
+
+    /**
+     * 修补ApplicationInfo返回数据
+     */
+    private static void patchApplicationInfoReply(Parcel replyParcel) {
+        if (replyParcel == null) {
+            return;
+        }
+
+        int originalPosition = replyParcel.dataPosition();
+        replyParcel.setDataPosition(0);
+
+        try {
+            // 检查Parcel中是否有数据
+            if (replyParcel.readInt() != 0) {
+                return;
+            }
+
+            ApplicationInfo applicationInfo = readApplicationInfoFromParcel(replyParcel);
+            
+            // 检查是否需要修补
+            if (shouldPatchApplicationInfo(applicationInfo)) {
+                patchApplicationInfo(applicationInfo);
+                rewriteApplicationInfoToParcel(replyParcel, applicationInfo);
+            }
+
+        } catch (Throwable t) {
+            Log.w(LOG_TAG, &quot;修补ApplicationInfo返回数据失败&quot;, t);
+        } finally {
+            replyParcel.setDataPosition(originalPosition);
+        }
+    }
+
+    /**
+     * 从Parcel中读取ApplicationInfo
+     */
+    private static ApplicationInfo readApplicationInfoFromParcel(Parcel parcel) {
+        try {
+            if (Build.VERSION.SDK_INT &gt;= 26) {
+                try {
+                    return parcel.readTypedObject(ApplicationInfo.CREATOR);
+                } catch (Throwable t) {
+                    return (ApplicationInfo) parcel.readParcelable(ApplicationInfo.class.getClassLoader());
+                }
+            } else {
+                return (ApplicationInfo) parcel.readParcelable(ApplicationInfo.class.getClassLoader());
+            }
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /**
+     * 检查是否需要修补ApplicationInfo
+     */
+    private static boolean shouldPatchApplicationInfo(ApplicationInfo appInfo) {
+        return appInfo != null &amp;&amp; 
+               appInfo.packageName != null &amp;&amp; 
+               Patch.sTargetPackageName != null &amp;&amp; 
+               Patch.sTargetPackageName.equals(appInfo.packageName);
+    }
+
+    /**
+     * 修补ApplicationInfo对象
+     */
+    private static void patchApplicationInfo(ApplicationInfo appInfo) {
+        // 修补应用名
+        if (AppInfo.originalApplicationName != null &amp;&amp; 
+            !AppInfo.originalApplicationName.isEmpty()) {
+            appInfo.name = AppInfo.originalApplicationName;
+            appInfo.className = AppInfo.originalApplicationName;
+        }
+
+        // 修补路径
+        if (Patch.sPathRedirectionEnabled) {
+            appInfo.sourceDir = Patch.FakeApkPath;
+            appInfo.publicSourceDir = Patch.FakeApkPath;
+        }
+    }
+
+    /**
+     * 重写ApplicationInfo到Parcel
+     */
+    private static void rewriteApplicationInfoToParcel(Parcel parcel, ApplicationInfo appInfo) {
+        parcel.setDataPosition(0);
+        parcel.setDataSize(0);
+        parcel.writeInt(0);  // 表示有数据
+        parcel.writeInt(1);  // 标志位
+        appInfo.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+    }
+
+    /**
+     * 修补PackageInfo返回数据
+     */
+    private static void patchPackageInfoReply(Parcel replyParcel) {
+        if (replyParcel == null) {
+            return;
+        }
+
+        int originalPosition = replyParcel.dataPosition();
+        replyParcel.setDataPosition(0);
+
+        try {
+            // 检查Parcel中是否有数据
+            if (replyParcel.readInt() != 0) {
+                return;
+            }
+
+            PackageInfo packageInfo = readPackageInfoFromParcel(replyParcel);
+            
+            // 检查是否需要修补
+            if (shouldPatchPackageInfo(packageInfo)) {
+                patchSignatureInfo(packageInfo);
+                rewritePackageInfoToParcel(replyParcel, packageInfo);
+            }
+
+        } catch (Throwable t) {
+            Log.w(LOG_TAG, &quot;修补PackageInfo返回数据失败&quot;, t);
+        } finally {
+            replyParcel.setDataPosition(originalPosition);
+        }
+    }
+
+    /**
+     * 从Parcel中读取PackageInfo
+     */
+    private static PackageInfo readPackageInfoFromParcel(Parcel parcel) {
+        try {
+            if (Build.VERSION.SDK_INT &gt;= 26) {
+                try {
+                    return parcel.readTypedObject(PackageInfo.CREATOR);
+                } catch (Throwable t) {
+                    return (PackageInfo) parcel.readParcelable(PackageInfo.class.getClassLoader());
+                }
+            } else {
+                return (PackageInfo) parcel.readParcelable(PackageInfo.class.getClassLoader());
+            }
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /**
+     * 检查是否需要修补PackageInfo
+     */
+    private static boolean shouldPatchPackageInfo(PackageInfo packageInfo) {
+        return packageInfo != null &amp;&amp; 
+               packageInfo.packageName != null &amp;&amp; 
+               Patch.sTargetPackageName != null &amp;&amp; 
+               Patch.sTargetPackageName.equals(packageInfo.packageName);
+    }
+
+    /**
+     * 重写PackageInfo到Parcel
+     */
+    private static void rewritePackageInfoToParcel(Parcel parcel, PackageInfo packageInfo) {
+        parcel.setDataPosition(0);
+        parcel.setDataSize(0);
+        parcel.writeInt(0);  // 表示有数据
+        parcel.writeInt(1);  // 标志位
+        packageInfo.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+    }
+}
+</code></pre>
+<h3 id="代理PMS"><a href="#代理PMS" class="headerlink" title="代理PMS"></a>代理PMS</h3><pre><code class="language-java">/**
+ * PackageManager服务代理工具类
+ * 通过替换Parcelable.Creator来修改PackageManager返回的包信息和应用信息
+ * 这是签名绕过工具中另一种重要的Hook技术
+ */
+public class PMSAgent {
+    
+    private static final String LOG_TAG = &quot;PMSAgent&quot;;
+
+    /**
+     * Parcelable.Creator代理基类
+     * 提供通用的Creator代理功能，子类专注于特定类型的修改逻辑
+     */
+    private static abstract class BaseCreatorProxy&lt;T&gt; implements Parcelable.Creator&lt;T&gt; {
+        
+        /**
+         * 从Parcel创建对象的具体实现，由子类提供
+         */
+        protected abstract T doCreateFromParcel(Parcel source);
+        
+        /**
+         * 创建对象数组的具体实现，由子类提供
+         */
+        protected abstract T[] doNewArray(int size);
+        
+        @Override
+        public T createFromParcel(Parcel source) {
+            return doCreateFromParcel(source);
+        }
+        
+        @Override
+        public T[] newArray(int size) {
+            return doNewArray(size);
+        }
+        
+        /**
+         * 通用的对象修改方法 - 修改应用信息
+         */
+        protected void modifyApplicationInfo(ApplicationInfo appInfo) {
+            if (appInfo == null) return;
+            
+            // 修改应用名称
+            if (shouldModifyAppName(appInfo)) {
+                appInfo.name = AppInfo.originalApplicationName;
+                appInfo.className = AppInfo.originalApplicationName;
+            }
+            
+            // 修改应用路径
+            if (Patch.sPathRedirectionEnabled) {
+                appInfo.sourceDir = Patch.FakeApkPath;
+                appInfo.publicSourceDir = Patch.FakeApkPath;
+            }
+        }
+        
+        /**
+         * 检查是否需要修改应用名称
+         */
+        private boolean shouldModifyAppName(ApplicationInfo appInfo) {
+            return appInfo.packageName != null &amp;&amp;
+                   Patch.sTargetPackageName != null &amp;&amp;
+                   Patch.sTargetPackageName.equals(appInfo.packageName) &amp;&amp;
+                   AppInfo.originalApplicationName != null &amp;&amp;
+                   !AppInfo.originalApplicationName.isEmpty();
+        }
+        
+        /**
+         * 通用的对象修改方法 - 修改包信息
+         */
+        protected void modifyPackageInfo(PackageInfo packageInfo) {
+            if (packageInfo == null) return;
+            
+            // 修改应用信息
+            modifyApplicationInfo(packageInfo.applicationInfo);
+            
+            // 修改签名信息
+            if (shouldModifySignature(packageInfo)) {
+                modifySignatureInfo(packageInfo);
+            }
+        }
+        
+        /**
+         * 检查是否需要修改签名
+         */
+        private boolean shouldModifySignature(PackageInfo packageInfo) {
+            return packageInfo.packageName != null &amp;&amp;
+                   Patch.sTargetPackageName != null &amp;&amp;
+                   Patch.sTargetPackageName.equals(packageInfo.packageName) &amp;&amp;
+                   packageInfo.signatures != null &amp;&amp;
+                   packageInfo.signatures.length &gt; 0;
+        }
+        
+        /**
+         * 修改签名信息
+         */
+        private void modifySignatureInfo(PackageInfo packageInfo) {
+            // 修改基础签名
+            packageInfo.signatures[0] = Patch.sFakeSignature;
+            
+            // Android P及以上版本需要额外处理signingInfo
+            if (Build.VERSION.SDK_INT &gt;= 28 &amp;&amp; packageInfo.signingInfo != null) {
+                modifySigningInfo(packageInfo);
+            }
+        }
+        
+        /**
+         * 修改Android P+的签名信息
+         */
+        private void modifySigningInfo(PackageInfo packageInfo) {
+            try {
+                Signature[] apkSigners = packageInfo.signingInfo.getApkContentsSigners();
+                if (apkSigners != null &amp;&amp; apkSigners.length &gt; 0) {
+                    apkSigners[0] = Patch.sFakeSignature;
+                }
+            } catch (Exception e) {
+                Log.w(LOG_TAG, &quot;修改SigningInfo失败&quot;, e);
+            }
+        }
+    }
+
+    /**
+     * ApplicationInfo Creator代理（Android P以下版本）
+     * 用于替换ApplicationInfo.CREATOR，修改返回的应用信息
+     */
+    private static class ApplicationInfoCreatorProxyLegacy extends BaseCreatorProxy&lt;ApplicationInfo&gt; {
+        
+        @Override
+        protected ApplicationInfo doCreateFromParcel(Parcel source) {
+            // 使用原始Creator创建对象
+            ApplicationInfo appInfo = (ApplicationInfo) Patch.ORIGINAL_APP_INFO_CREATOR.createFromParcel(source);
+            
+            // 修改应用信息
+            modifyApplicationInfo(appInfo);
+            
+            return appInfo;
+        }
+        
+        @Override
+        protected ApplicationInfo[] doNewArray(int size) {
+            return (ApplicationInfo[]) Patch.ORIGINAL_APP_INFO_CREATOR.newArray(size);
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            return this == obj;
+        }
+        
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(this);
+        }
+    }
+
+    /**
+     * ApplicationInfo Creator代理（Android P及以上版本）
+     * 支持ClassLoaderCreator接口
+     */
+    private static class ApplicationInfoCreatorProxyP extends BaseCreatorProxy&lt;ApplicationInfo&gt; 
+            implements Parcelable.ClassLoaderCreator&lt;ApplicationInfo&gt; {
+        
+        @Override
+        protected ApplicationInfo doCreateFromParcel(Parcel source) {
+            // 使用原始Creator创建对象
+            ApplicationInfo appInfo = (ApplicationInfo) Patch.ORIGINAL_APP_INFO_CREATOR.createFromParcel(source);
+            
+            // 修改应用信息
+            modifyApplicationInfo(appInfo);
+            
+            return appInfo;
+        }
+        
+        @Override
+        protected ApplicationInfo[] doNewArray(int size) {
+            return (ApplicationInfo[]) Patch.ORIGINAL_APP_INFO_CREATOR.newArray(size);
+        }
+        
+        @Override
+        public ApplicationInfo createFromParcel(Parcel source, ClassLoader loader) {
+            return doCreateFromParcel(source);
+        }
+    }
+
+    /**
+     * PackageInfo Creator代理（Android P以下版本）
+     * 用于替换PackageInfo.CREATOR，修改返回的包信息
+     */
+    private static class PackageInfoCreatorProxyLegacy extends BaseCreatorProxy&lt;PackageInfo&gt; {
+        
+        @Override
+        protected PackageInfo doCreateFromParcel(Parcel source) {
+            // 使用原始Creator创建对象
+            PackageInfo packageInfo = (PackageInfo) Patch.ORIGINAL_CREATOR.createFromParcel(source);
+            
+            // 修改包信息
+            modifyPackageInfo(packageInfo);
+            
+            return packageInfo;
+        }
+        
+        @Override
+        protected PackageInfo[] doNewArray(int size) {
+            return (PackageInfo[]) Patch.ORIGINAL_CREATOR.newArray(size);
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            return this == obj;
+        }
+        
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(this);
+        }
+    }
+
+    /**
+     * PackageInfo Creator代理（Android P及以上版本）
+     * 支持ClassLoaderCreator接口
+     */
+    private static class PackageInfoCreatorProxyP extends BaseCreatorProxy&lt;PackageInfo&gt; 
+            implements Parcelable.ClassLoaderCreator&lt;PackageInfo&gt; {
+        
+        @Override
+        protected PackageInfo doCreateFromParcel(Parcel source) {
+            // 使用原始Creator创建对象
+            PackageInfo packageInfo = (PackageInfo) Patch.ORIGINAL_CREATOR.createFromParcel(source);
+            
+            // 修改包信息
+            modifyPackageInfo(packageInfo);
+            
+            return packageInfo;
+        }
+        
+        @Override
+        protected PackageInfo[] doNewArray(int size) {
+            return (PackageInfo[]) Patch.ORIGINAL_CREATOR.newArray(size);
+        }
+        
+        @Override
+        public PackageInfo createFromParcel(Parcel source, ClassLoader loader) {
+            return doCreateFromParcel(source);
+        }
+    }
+
+    /**
+     * 获取Unsafe实例
+     * 用于直接操作内存，修改final字段
+     */
+    private static Unsafe getUnsafeInstance() throws Exception {
+        Field unsafeField = Unsafe.class.getDeclaredField(&quot;theUnsafe&quot;);
+        unsafeField.setAccessible(true);
+        return (Unsafe) unsafeField.get(null);
+    }
+
+    /**
+     * 替换Parcelable.Creator
+     * 核心方法：通过反射和Unsafe替换PackageInfo和ApplicationInfo的CREATOR字段
+     */
+    public static void replaceParcelableCreators() throws Exception {
+        Log.i(LOG_TAG, &quot;开始替换Parcelable.Creator...&quot;);
+        
+        // 替换PackageInfo.CREATOR
+        replacePackageInfoCreator();
+        
+        // 替换ApplicationInfo.CREATOR
+        replaceApplicationInfoCreator();
+        
+        // 清理缓存
+        CacheHandling.clearCaches();
+        
+        Log.i(LOG_TAG, &quot;Parcelable.Creator替换完成&quot;);
+    }
+
+    /**
+     * 替换PackageInfo.CREATOR
+     */
+    private static void replacePackageInfoCreator() throws Exception {
+        Field creatorField = PackageInfo.class.getDeclaredField(&quot;CREATOR&quot;);
+        creatorField.setAccessible(true);
+        
+        // 保存原始Creator
+        Patch.ORIGINAL_CREATOR = (Parcelable.Creator) creatorField.get(null);
+        
+        // 根据Android版本选择代理实现
+        BaseCreatorProxy&lt;PackageInfo&gt; packageInfoProxy = createPackageInfoProxy();
+        
+        // 伪装代理类名
+        disguiseProxyClassName(packageInfoProxy, &quot;android.content.pm.PackageInfo$1&quot;);
+        
+        // 替换CREATOR字段
+        replaceFinalField(creatorField, packageInfoProxy);
+    }
+
+    /**
+     * 替换ApplicationInfo.CREATOR
+     */
+    private static void replaceApplicationInfoCreator() throws Exception {
+        Field creatorField = ApplicationInfo.class.getDeclaredField(&quot;CREATOR&quot;);
+        creatorField.setAccessible(true);
+        
+        // 保存原始Creator
+        Patch.ORIGINAL_APP_INFO_CREATOR = (Parcelable.Creator) creatorField.get(null);
+        
+        // 根据Android版本选择代理实现
+        BaseCreatorProxy&lt;ApplicationInfo&gt; appInfoProxy = createApplicationInfoProxy();
+        
+        // 伪装代理类名
+        disguiseProxyClassName(appInfoProxy, &quot;android.content.pm.ApplicationInfo$1&quot;);
+        
+        // 替换CREATOR字段
+        replaceFinalField(creatorField, appInfoProxy);
+    }
+
+    /**
+     * 创建PackageInfo代理实例
+     */
+    private static BaseCreatorProxy&lt;PackageInfo&gt; createPackageInfoProxy() {
+        if (Build.VERSION.SDK_INT &gt;= 28) {
+            return new PackageInfoCreatorProxyP();
+        } else {
+            return new PackageInfoCreatorProxyLegacy();
+        }
+    }
+
+    /**
+     * 创建ApplicationInfo代理实例
+     */
+    private static BaseCreatorProxy&lt;ApplicationInfo&gt; createApplicationInfoProxy() {
+        if (Build.VERSION.SDK_INT &gt;= 28) {
+            return new ApplicationInfoCreatorProxyP();
+        } else {
+            return new ApplicationInfoCreatorProxyLegacy();
+        }
+    }
+
+    /**
+     * 伪装代理类名
+     * 使用Unsafe直接修改Class对象的name字段，增加隐蔽性
+     */
+    private static void disguiseProxyClassName(Object proxy, String targetClassName) throws Exception {
+        Unsafe unsafe = getUnsafeInstance();
+        Field nameField = Class.class.getDeclaredField(&quot;name&quot;);
+        long nameFieldOffset = unsafe.objectFieldOffset(nameField);
+        
+        unsafe.putObject(proxy.getClass(), nameFieldOffset, targetClassName);
+    }
+
+    /**
+     * 替换final字段的值
+     * 通过反射修改字段访问标志，然后设置新值
+     */
+    private static void replaceFinalField(Field field, Object newValue) throws Exception {
+        // 获取原始访问标志
+        Field modifiersField = Field.class.getDeclaredField(&quot;accessFlags&quot;);
+        modifiersField.setAccessible(true);
+        int originalModifiers = field.getModifiers();
+        
+        try {
+            // 移除final标志
+            modifiersField.setInt(field, originalModifiers &amp; ~Modifier.FINAL);
+            
+            // 设置新值
+            field.set(null, newValue);
+            
+        } finally {
+            // 恢复final标志
+            modifiersField.setInt(field, originalModifiers | Modifier.FINAL);
+        }
+    }
+}
+</code></pre>
+<h2 id="清理缓存"><a href="#清理缓存" class="headerlink" title="清理缓存"></a>清理缓存</h2><pre><code class="language-java">/**
+ * 缓存清理工具类
+ * 清理PackageManager和Parcel中的各种缓存，确保Hook修改能够立即生效
+ * 在修改系统状态后调用，避免缓存导致修改不生效
+ */
+public class CacheHandling {
+    
+    /**
+     * 清理所有相关缓存
+     * 包括PackageManager的包信息缓存和Parcel的Creator缓存
+     * 在修改PackageInfo或ApplicationInfo后必须调用此方法
+     */
+    public static void clearCaches() {
+        clearPackageInfoCache();
+        clearParcelCreatorCache();
+        clearParcelPairedCreatorCache();
+    }
+
+    /**
+     * 清理PackageManager的包信息缓存
+     * 清除系统对包信息的缓存，确保下次查询时重新加载修改后的信息
+     */
+    private static void clearPackageInfoCache() {
+        try {
+            // 获取PackageManager的sPackageInfoCache字段
+            Field cacheField = findFieldRecursively(PackageManager.class, &quot;sPackageInfoCache&quot;);
+            Object cacheInstance = cacheField.get(null);
+            
+            if (cacheInstance != null) {
+                // 调用缓存对象的clear方法清空缓存
+                cacheInstance.getClass().getMethod(&quot;clear&quot;).invoke(cacheInstance);
+            }
+        } catch (Throwable ignored) {
+            // 忽略清理缓存时的异常，不影响主要功能
+        }
+    }
+
+    /**
+     * 清理Parcel的Creator缓存
+     * 清除Parcel对Parcelable.Creator的缓存，确保使用我们替换的Creator
+     */
+    private static void clearParcelCreatorCache() {
+        try {
+            // 获取Parcel的mCreators字段
+            Field creatorsField = findFieldRecursively(Parcel.class, &quot;mCreators&quot;);
+            Map&lt;?, ?&gt; creatorsMap = (Map&lt;?, ?&gt;) creatorsField.get(null);
+            
+            if (creatorsMap != null) {
+                creatorsMap.clear();
+            }
+        } catch (Throwable ignored) {
+            // 忽略清理缓存时的异常
+        }
+    }
+
+    /**
+     * 清理Parcel的配对Creator缓存
+     * 清除Parcel的sPairedCreators缓存（某些Android版本特有）
+     */
+    private static void clearParcelPairedCreatorCache() {
+        try {
+            // 获取Parcel的sPairedCreators字段
+            Field pairedCreatorsField = findFieldRecursively(Parcel.class, &quot;sPairedCreators&quot;);
+            Map&lt;?, ?&gt; pairedCreatorsMap = (Map&lt;?, ?&gt;) pairedCreatorsField.get(null);
+            
+            if (pairedCreatorsMap != null) {
+                pairedCreatorsMap.clear();
+            }
+        } catch (Throwable ignored) {
+            // 忽略清理缓存时的异常
+        }
+    }
+
+    /**
+     * 递归查找字段
+     * 在当前类及其父类中查找指定字段
+     * 
+     * @param targetClass 要查找的起始类
+     * @param fieldName 要查找的字段名
+     * @return 找到的Field对象
+     * @throws NoSuchFieldException 如果字段不存在
+     */
+    private static Field findFieldRecursively(Class&lt;?&gt; targetClass, String fieldName) 
+            throws NoSuchFieldException {
+        Class&lt;?&gt; currentClass = targetClass;
+        
+        // 在当前类及其父类中递归查找字段
+        while (currentClass != null &amp;&amp; !Object.class.equals(currentClass)) {
+            try {
+                Field field = currentClass.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                return field;
+            } catch (NoSuchFieldException e) {
+                // 在当前类中未找到，继续在父类中查找
+                currentClass = currentClass.getSuperclass();
+            }
+        }
+        
+        throw new NoSuchFieldException(&quot;字段未找到: &quot; + fieldName);
+    }
+}
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2025 - 2025 孤木落の博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;Gumuluo
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+    <script src="/js/main.js"></script>
+    
+    
+
+
+
+
+    
+</body>
+</html>
