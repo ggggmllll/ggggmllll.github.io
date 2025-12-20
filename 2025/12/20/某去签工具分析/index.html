@@ -199,11 +199,1043 @@
             2025/12/20
         </span>
         
+        <span class="category">
+            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA-Android-%E9%80%86%E5%90%91/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                计算机/Android/逆向
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/%E9%80%86%E5%90%91/" style="color: #00bcd4">
+                    逆向
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E7%AD%BE%E5%90%8D%E6%A0%A1%E9%AA%8C/" style="color: #ffa2c4">
+                    签名校验
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Native/" style="color: #03a9f4">
+                    Native
+                </a>
+            </span>
+            
+        </span>
         
     </div>
     
     <div class="content" v-pre>
-        <span id="more"></span>
+        <p>听说某box的去签可以绕过360的签名校验，拿过来研究了一下</p>
+<span id="more"></span>
+
+<p>据可靠情报（bushi），其由<a target="_blank" rel="noopener" href="https://github.com/eirv/SimpleIORedirect">SimpleIORedirect</a>改进而来，先研究一下这个项目的源码</p>
+<h2 id="SimpleIORedirect源码分析"><a href="#SimpleIORedirect源码分析" class="headerlink" title="SimpleIORedirect源码分析"></a>SimpleIORedirect源码分析</h2><p>首先需要一些基础知识</p>
+<h3 id="进程间交互（sendmsg与recvmsg）"><a href="#进程间交互（sendmsg与recvmsg）" class="headerlink" title="进程间交互（sendmsg与recvmsg）"></a>进程间交互（sendmsg与recvmsg）</h3><p>SimpleIORedirect使用socket实现进程间信息传递，这涉及了重要数据结构<code>struct msghdr</code></p>
+<h4 id="Linux-msghdr结构讲解"><a href="#Linux-msghdr结构讲解" class="headerlink" title="Linux msghdr结构讲解"></a>Linux msghdr结构讲解</h4><p>定义如下：</p>
+<pre><code class="language-c">#include &lt;sys/socket.h&gt;
+
+struct msghdr {
+    void         *msg_name;       /* 可选的目标地址（用于无连接套接字） */
+    socklen_t     msg_namelen;    /* 地址结构的大小 */
+    struct iovec *msg_iov;        /* 指向 iovec 结构体数组（分散/聚集缓冲区） */
+    size_t        msg_iovlen;     /* iovec 数组中的元素个数 */
+    void         *msg_control;    /* 指向辅助数据（ancillary data）的指针 */
+    size_t        msg_controllen; /* 辅助数据缓冲区的长度 */
+    int           msg_flags;      /* 接收消息的标志位 */
+};
+</code></pre>
+<p>这里<code>msg_control</code>指针为指向与协议控制相关的消息或者辅助数据的指针，是一个<code>struct cmsghdr</code>结构. 而<code>msg_controllen</code>为<code>msg_control</code>所指向的这块缓冲的长度。</p>
+<p><code>struct msghdr</code>中涉及的<code>struct iovec</code>结构定义如下：</p>
+<pre><code class="language-c">struct iovec {
+    void  *iov_base;    /* 起始地址（指向数据缓冲区的指针） */
+    size_t iov_len;     /* 要传输的字节数 */
+};
+</code></pre>
+<p><code>struct cmsghdr</code>结构定义如下：</p>
+<pre><code class="language-c">struct cmsghdr {
+    size_t cmsg_len;    /* 数据字节数，包括头部（POSIX 中类型为 socklen_t） */
+    int    cmsg_level;  /* 原始协议级别（例如 SOL_SOCKET、IPPROTO_IP 等） */
+    int    cmsg_type;   /* 协议特定的类型（例如 SCM_RIGHTS、SCM_CREDS 等） */
+    /* 随后是实际的数据部分 */
+    /* unsigned char cmsg_data[]; */  /* 灵活数组成员，存放实际辅助数据 */
+};
+</code></pre>
+<p>要访问此辅助数据结构，一般会用到如下几个函数：</p>
+<pre><code class="language-c">struct cmsghdr *CMSG_FIRSTHDR(struct msghdr *msgh);
+struct cmsghdr *CMSG_NXTHDR(struct msghdr *msgh, struct cmsghdr
+*cmsg);
+size_t CMSG_ALIGN(size_t length);
+size_t CMSG_SPACE(size_t length);
+size_t CMSG_LEN(size_t length);
+unsigned char *CMSG_DATA(struct cmsghdr *cmsg);
+</code></pre>
+<p>这些宏用于创建和访问控制消息(msg_control)，也称为辅助数据，其并不作为socket净荷数据的一部分，净荷数据保存在<code>msg_iov</code>中（参见上述struct msghdr）。 这些辅助数据可能包括：</p>
+<ul>
+<li><p>所收到的packet的网卡接口</p>
+</li>
+<li><p>一些不太常用的头部字段</p>
+</li>
+<li><p>一个扩展的错误描述</p>
+</li>
+<li><p><strong>一个文件描述符集合</strong></p>
+</li>
+<li><p>UNIX credentials</p>
+</li>
+</ul>
+<p>例如用辅助数据可以发送一些额外的头部字段(eg. IP options)。</p>
+<p>要访问一系列的<code>cmsghdr</code>结构，我们必须使用如下这些宏，而不要直接访问：</p>
+<ul>
+<li><p><strong>CMSG_FIRSTHDR()</strong>: 返回msghdr辅助数据部分指向第一个cmsghdr的指针</p>
+</li>
+<li><p><strong>CMSG_NXTHDR()</strong>: 返回参数中cmsghdr的下一个有效<code>cmsghdr</code>。当<code>msg_control buffer</code>中没有足够剩余的空间的时候，返回<code>NULL</code></p>
+</li>
+<li><p><strong>CMSG_ALIGN()</strong>: 给定一个长度，其会返回对齐后相应的长度。它是一个常量表达式，其一般实现如下：</p>
+</li>
+</ul>
+<pre><code class="language-c">#define CMSG_ALIGN(len)  ( ((len)+sizeof(long)-1) &amp; ~(sizeof(long)-1) ) 
+</code></pre>
+<ul>
+<li><p><strong>CMSG_SPACE()</strong>: 返回辅助数据及其所传递的净荷数据的总长度。即<code>sizeof(cmsg_len) + sizeof(cmsg_level) + sizeof(cmsg_type) + len(cmsg_data)</code>长度进行<code>CMSG_ALIGN</code>后的值.</p>
+</li>
+<li><p><strong>CMSG_DATA()</strong>: 返回<code>cmsghdr</code>的净荷数据部分</p>
+</li>
+<li><p><strong>CMSG_LEN()</strong>: 返回净荷数据长度进行<code>CMSG_ALIGN</code>后的值，一般赋值给<code>cmsghdr.cmsg_len</code>。</p>
+</li>
+</ul>
+<p>为了创建辅助数据，首先初始化<code>msghdr.msg_controllen</code>字段。 在<code>msghdr</code>上使用<code>CMSG_FIRSTHDR()</code>来获取第一个控制消息，然后使用<code>CMSG_NXTHDR()</code>来获取后续的控制消息。在每一个控制消息中，使用<code>CMSG_LEN()</code>来初始化<code>cmsghdr.cmsg_len</code>，使用<code>CMSG_DATA()</code>来初始化<code>cmsghdr.cmsg_data</code>部分。</p>
+<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p>如下代码片段在unix域socket上使用<code>SCM_RIGHTS</code>传递文件句柄数组：</p>
+<pre><code class="language-c">struct msghdr msg = { 0 };
+struct cmsghdr *cmsg;
+int myfds[NUM_FD];  /* Contains the file descriptors to pass */
+int *fdptr;
+char iobuf[1];
+struct iovec io = {
+   .iov_base = iobuf,
+   .iov_len = sizeof(iobuf)
+};
+union {         /* Ancillary data buffer, wrapped in a union
+				  in order to ensure it is suitably aligned */
+   char buf[CMSG_SPACE(sizeof(myfds))];
+   struct cmsghdr align;
+} u;
+
+msg.msg_iov = &amp;io;
+msg.msg_iovlen = 1;
+msg.msg_control = u.buf;
+msg.msg_controllen = sizeof(u.buf);
+cmsg = CMSG_FIRSTHDR(&amp;msg);
+cmsg-&gt;cmsg_level = SOL_SOCKET;
+cmsg-&gt;cmsg_type = SCM_RIGHTS;
+cmsg-&gt;cmsg_len = CMSG_LEN(sizeof(int) * NUM_FD);
+fdptr = (int *) CMSG_DATA(cmsg);    /* Initialize the payload */
+memcpy(fdptr, myfds, NUM_FD * sizeof(int));
+</code></pre>
+<h3 id="seccomp的NOTIFY机制"><a href="#seccomp的NOTIFY机制" class="headerlink" title="seccomp的NOTIFY机制"></a>seccomp的NOTIFY机制</h3><p>以下内容参考Linux manpage:</p>
+<h4 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h4><blockquote>
+<p>概述 top</p>
+<pre><code class="language-c">      #include &lt;linux/seccomp.h&gt;  /* Definition of SECCOMP_* constants */
+      #include &lt;linux/filter.h&gt;   /* Definition of struct sock_fprog */
+      #include &lt;linux/audit.h&gt;    /* Definition of AUDIT_* constants */
+      #include &lt;linux/signal.h&gt;   /* Definition of SIG* constants */
+      #include &lt;sys/ptrace.h&gt;     /* Definition of PTRACE_* constants */
+      #include &lt;sys/syscall.h&gt;    /* Definition of SYS_* constants */
+      #include &lt;unistd.h&gt;
+
+      #include &lt;linux/seccomp.h&gt;  /* SECCOMP_* 常量定义 */
+      #include &lt;linux/filter.h&gt;   /* struct sock_fprog 结构体定义 */
+      #include &lt;linux/audit.h&gt;    /* AUDIT_* 常量定义 */
+      #include &lt;linux/signal.h&gt;   /* SIG* 常量定义 */
+      #include &lt;sys/ptrace.h&gt;     /* PTRACE_* 常量定义 */
+      #include &lt;sys/syscall.h&gt;    /* SYS_* 常量定义 */
+      #include &lt;unistd.h&gt;
+
+      int syscall(SYS_seccomp, unsigned int operation, unsigned int flags,
+                  void *args);
+</code></pre>
+<p>Note: glibc provides no wrapper for seccomp(), necessitating the<br>use of syscall(2).</p>
+<p>注意：glibc 未提供 seccomp() 的封装函数，因此必须使用 syscall(2)。</p>
+<p>因此，应使用如下方法调用seccomp：</p>
+</blockquote>
+<pre><code class="language-c">static inline int seccomp(int op, int fd, void *arg) {
+  return syscall(__NR_seccomp, op, fd, arg);
+}
+</code></pre>
+<blockquote>
+<p>SECCOMP_SET_MODE_FILTER</p>
+<p>   The system calls allowed are defined by a pointer to a<br>   Berkeley Packet Filter (BPF) passed via args.  This<br>   argument is a pointer to a struct sock_fprog; it can be<br>   designed to filter arbitrary system calls and system call<br>   arguments.  If the filter is invalid, seccomp() fails,<br>   returning EINVAL in errno.</p>
+<p>SECCOMP_SET_MODE_FILTER </p>
+<p>   允许的系统调用由通过 args 传递的伯克利包过滤器（BPF）指针定义。<br>   该参数是指向 struct sock_fprog 结构体的指针；可将其设计为过滤任意系统调用及系统调用参数。<br>   若过滤器无效，seccomp()将执行失败，并在 errno 中返回 EINVAL。</p>
+<p>   If fork(2) or clone(2) is allowed by the filter, any child<br>   processes will be constrained to the same system call<br>   filters as the parent.  If execve(2) is allowed, the<br>   existing filters will be preserved across a call to<br>   execve(2).</p>
+<p>   <strong>若过滤器允许 fork(2)或 clone(2)，任何子进程将受到与父进程相同的系统调用过滤器约束。</strong><br>   <strong>若允许 execve(2)，现有过滤器将在 execve(2)调用期间持续生效。</strong></p>
+<p>   In order to use the SECCOMP_SET_MODE_FILTER operation,<br>   either the calling thread must have the CAP_SYS_ADMIN<br>   capability in its user namespace, or the thread must<br>   already have the no_new_privs bit set.  If that bit was not<br>   already set by an ancestor of this thread, the thread must<br>   make the following call:</p>
+<p>   要使用 SECCOMP_SET_MODE_FILTER 操作，调用线程必须在其用户命名空间中具备 CAP_SYS_ADMIN 权限，或者该线程必须已设置 no_new_privs 标志位。<br>   若该标志位尚未被当前线程的祖先线程设置，则线程必须执行以下调用：</p>
+<pre><code class="language-c">           prctl(PR_SET_NO_NEW_PRIVS, 1);
+</code></pre>
+<p>   Otherwise, the SECCOMP_SET_MODE_FILTER operation fails and<br>   returns EACCES in errno.  This requirement ensures that an<br>   unprivileged process cannot apply a malicious filter and<br>   then invoke a set-user-ID or other privileged program using<br>   execve(2), thus potentially compromising that program.<br>   (Such a malicious filter might, for example, cause an<br>   attempt to use setuid(2) to set the caller’s user IDs to<br>   nonzero values to instead return 0 without actually making<br>   the system call.  Thus, the program might be tricked into<br>   retaining superuser privileges in circumstances where it is<br>   possible to influence it to do dangerous things because it<br>   did not actually drop privileges.)</p>
+<p>   否则，SECCOMP_SET_MODE_FILTER 操作将失败并在 errno 中返回 EACCES。<br>   这一要求确保非特权进程无法应用恶意过滤器后通过 execve(2) 调用 set-user-ID 或其他特权程序，从而可能危及该程序。<br>   （例如，此类恶意过滤器可能导致尝试使用 setuid(2) 将调用者用户 ID 设置为非零值的操作反而返回 0，而实际上并未执行系统调用。<br>   因此，程序可能会在可能受诱导执行危险操作的情况下被欺骗保留超级用户权限，因为它实际上并未放弃权限。）</p>
+<p>   If prctl(2) or seccomp() is allowed by the attached filter,<br>   further filters may be added.  This will increase<br>   evaluation time, but allows for further reduction of the<br>   attack surface during execution of a thread.</p>
+<p>   如果附加的过滤器允许 prctl(2) 或 seccomp() 调用，则可以添加更多过滤器。<br>   这会增加评估时间，但允许在线程执行期间进一步减少攻击面。</p>
+<p>   The SECCOMP_SET_MODE_FILTER operation is available only if<br>   the kernel is configured with CONFIG_SECCOMP_FILTER<br>   enabled.</p>
+<p>   仅在内核启用 CONFIG_SECCOMP_FILTER 配置时，SECCOMP_SET_MODE_FILTER 操作才可用。</p>
+<p>   When flags is 0, this operation is functionally identical<br>   to the call:</p>
+<p>   当 flags 为 0 时，此操作在功能上等同于调用：</p>
+<pre><code class="language-c">       prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, args);
+</code></pre>
+</blockquote>
+<p>所以在使用seccomp前应先调用：</p>
+<pre><code class="language-c">prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)
+</code></pre>
+<blockquote>
+<p>SECCOMP_FILTER_FLAG_NEW_LISTENER (since Linux 5.0)</p>
+<p>   After successfully installing the filter program,<br>   return a new user-space notification file<br>   descriptor.  (The close-on-exec flag is set for the<br>   file descriptor.)  When the filter returns<br>   SECCOMP_RET_USER_NOTIF a notification will be sent<br>   to this file descriptor.</p>
+<p>SECCOMP_FILTER_FLAG_NEW_LISTENER（自 Linux 5.0 起）</p>
+<p>   成功安装过滤器程序后，返回一个新的用户空间通知文件描述符。（该文件描述符设置了执行时关闭标志。）<br>   当过滤器返回 SECCOMP_RET_USER_NOTIF 时，将向此文件描述符发送通知。</p>
+<p>   At most one seccomp filter using the<br>   SECCOMP_FILTER_FLAG_NEW_LISTENER flag can be<br>   installed for a thread.</p>
+<p>   每个线程最多只能安装一个使用 SECCOMP_FILTER_FLAG_NEW_LISTENER 标志的 seccomp 过滤器。</p>
+<p>EBUSY  While installing a new filter, the<br>       SECCOMP_FILTER_FLAG_NEW_LISTENER flag was specified, but a<br>       previous filter had already been installed with that flag.</p>
+<p>EBUSY 在安装新过滤器时指定了 SECCOMP_FILTER_FLAG_NEW_LISTENER 标志，但先前已安装的过滤器已使用该标志。</p>
+<p>SECCOMP_GET_NOTIF_SIZES (since Linux 5.0)</p>
+<p>   Get the sizes of the seccomp user-space notification<br>   structures.  Since these structures may evolve and grow<br>   over time, this command can be used to determine how much<br>   memory to allocate for sending and receiving notifications.</p>
+<p>SECCOMP_GET_NOTIF_SIZES（自 Linux 5.0 起）</p>
+<p>   获取 seccomp 用户空间通知结构的大小。由于这些结构可能随时间演进和增长，该命令可用于确定需要分配多少内存来发送和接收通知。</p>
+<p>   The value of flags must be 0, and args must be a pointer to<br>   a struct seccomp_notif_sizes, which has the following form:</p>
+<p>   flags 的值必须为 0，args 必须指向一个 struct seccomp_notif_sizes 结构体</p>
+</blockquote>
+<p>其中<code>struct seccomp_notif_sizes</code>结构体形式如下：</p>
+<pre><code class="language-c">struct seccomp_notif_sizes {
+    __u16 seccomp_notif;      /* Size of notification structure */
+                        /* 通知结构体的大小 */
+    __u16 seccomp_notif_resp; /* Size of response structure */
+                        /* 响应结构体的大小 */
+    __u16 seccomp_data;       /* Size of &#39;struct seccomp_data&#39; */
+                        /* &#39;struct seccomp_data&#39; 结构体的大小 */
+};
+</code></pre>
+<blockquote>
+<p>SECCOMP_RET_USER_NOTIF (since Linux 5.0)</p>
+<p>Forward the system call to an attached user-space<br>supervisor process to allow that process to decide what to<br>do with the system call.  If there is no attached<br>supervisor (either because the filter was not installed<br>with the SECCOMP_FILTER_FLAG_NEW_LISTENER flag or because<br>the file descriptor was closed), the filter returns ENOSYS<br>(similar to what happens when a filter returns<br>SECCOMP_RET_TRACE and there is no tracer).  See<br>seccomp_unotify(2) for further details.</p>
+<p>SECCOMP_RET_USER_NOTIF（自 Linux 5.0 起）</p>
+<p>将系统调用转发给已连接的用户空间监视进程，允许该进程决定如何处理该系统调用。<br>若未连接监视器（可能因为过滤器未使用 SECCOMP_FILTER_FLAG_NEW_LISTENER 标志安装，或因为文件描述符已关闭），<br>过滤器将返回 ENOSYS（类似于过滤器返回 SECCOMP_RET_TRACE 但未连接跟踪器时的情况）。<br>更多细节请参阅 seccomp_unotify(2)。</p>
+<p>Note that the supervisor process will not be notified if<br>another filter returns an action value with a precedence<br>greater than SECCOMP_RET_USER_NOTIF.</p>
+<p>请注意，如果另一个过滤器返回的优先级高于 SECCOMP_RET_USER_NOTIF 的操作值，则不会通知监控进程。</p>
+<p>SECCOMP_RET_TRACE</p>
+</blockquote>
+<h3 id="源码分析（AI生成）"><a href="#源码分析（AI生成）" class="headerlink" title="源码分析（AI生成）"></a>源码分析（AI生成）</h3><pre><code class="language-cpp">/*
+ * 这是一个使用 Linux seccomp-bpf 和文件描述符传递机制实现的 IO 重定向工具
+ * 主要功能：拦截指定进程的 openat 系统调用，将特定文件路径的访问重定向到另一个文件
+ * 常用于沙箱环境、文件隔离或 Hook 场景
+ */
+
+#include &lt;errno.h&gt;      // 错误码定义
+#include &lt;fcntl.h&gt;      // 文件控制选项（如 openat 的 flags）
+#include &lt;jni.h&gt;        // JNI 接口，用于与 Java 层交互
+#include &lt;limits.h&gt;     // PATH_MAX 等常量
+#include &lt;linux/audit.h&gt; // seccomp 审计相关
+#include &lt;linux/filter.h&gt; // BPF 过滤规则定义
+#include &lt;linux/seccomp.h&gt; // seccomp 相关定义
+#include &lt;linux/version.h&gt; // 内核版本宏
+#include &lt;signal.h&gt;     // 信号处理
+#include &lt;stddef.h&gt;     // 标准定义（size_t, NULL）
+#include &lt;stdint.h&gt;     // 标准整数类型
+#include &lt;stdio.h&gt;      // 标准输入输出
+#include &lt;stdlib.h&gt;     // 内存分配、字符串转换等
+#include &lt;string.h&gt;     // 字符串操作
+#include &lt;sys/ioctl.h&gt;  // ioctl 系统调用
+#include &lt;sys/prctl.h&gt;  // prctl 系统调用（进程控制）
+#include &lt;sys/socket.h&gt; // 套接字相关
+#include &lt;sys/uio.h&gt;    // 向量 I/O（readv/writev）
+#include &lt;sys/utsname.h&gt; // 获取系统信息（内核版本）
+#include &lt;syscall.h&gt;    // 系统调用号
+#include &lt;unistd.h&gt;     // POSIX API（read, write, close 等）
+
+#include &quot;logging.h&quot;    // 自定义日志模块
+
+/* 封装 seccomp 系统调用，op 为操作类型，fd 为文件描述符，arg 为参数 */
+static inline int seccomp(int op, int fd, void *arg) {
+  return syscall(__NR_seccomp, op, fd, arg);
+}
+
+/* 通过 Unix 域套接字发送文件描述符 */
+static int sendfd(int sockfd, int fd) {
+    int data;  // 用于传输的占位数据
+    struct iovec iov{};    // 向量 I/O 结构
+    struct msghdr msgh{};  // 消息头结构
+    struct cmsghdr *cmsgp; // 辅助数据指针
+
+    /* 分配用于辅助数据的缓冲区，并确保对齐 */
+    union {
+        char buf[CMSG_SPACE(sizeof(int))]; // 足够容纳一个 int 的空间
+        struct cmsghdr align; // 用于对齐
+    } controlMsg{};
+
+    /* 对于已连接的套接字，不需要指定目标地址 */
+    msgh.msg_name = nullptr;
+    msgh.msg_namelen = 0;
+
+    /* 设置向量 I/O：至少需要发送一个字节的真实数据 */
+    msgh.msg_iov = &amp;iov;
+    msgh.msg_iovlen = 1;
+    iov.iov_base = &amp;data;
+    iov.iov_len = sizeof(int);
+    data = 12345; // 任意数据，接收方忽略
+
+    /* 设置辅助数据（包含文件描述符） */
+    msgh.msg_control = controlMsg.buf;
+    msgh.msg_controllen = sizeof(controlMsg.buf);
+
+    /* 配置辅助数据：传递文件描述符（SCM_RIGHTS） */
+    cmsgp = reinterpret_cast&lt;cmsghdr *&gt;(msgh.msg_control);
+    cmsgp-&gt;cmsg_level = SOL_SOCKET;     // 套接字层级
+    cmsgp-&gt;cmsg_type = SCM_RIGHTS;      // 传递文件描述符
+    cmsgp-&gt;cmsg_len = CMSG_LEN(sizeof(int));
+    memcpy(CMSG_DATA(cmsgp), &amp;fd, sizeof(int)); // 复制文件描述符
+
+    /* 发送数据和辅助数据 */
+    if (sendmsg(sockfd, &amp;msgh, 0) == -1) return -1;
+
+    return 0;
+}
+
+/* 从 Unix 域套接字接收文件描述符 */
+static int recvfd(int sockfd) {
+    int data, fd; // data 为占位数据，fd 为接收的文件描述符
+    ssize_t nr;
+    struct iovec iov{};
+    struct msghdr msgh{};
+
+    /* 分配接收辅助数据的缓冲区 */
+    union {
+        char buf[CMSG_SPACE(sizeof(int))];
+        struct cmsghdr align;
+    } controlMsg{};
+    struct cmsghdr *cmsgp;
+
+    /* 不需要获取发送方地址 */
+    msgh.msg_name = nullptr;
+    msgh.msg_namelen = 0;
+
+    /* 设置接收数据的缓冲区（占位数据） */
+    msgh.msg_iov = &amp;iov;
+    msgh.msg_iovlen = 1;
+    iov.iov_base = &amp;data;
+    iov.iov_len = sizeof(int);
+
+    /* 设置接收辅助数据的缓冲区 */
+    msgh.msg_control = controlMsg.buf;
+    msgh.msg_controllen = sizeof(controlMsg.buf);
+
+    /* 接收数据和辅助数据 */
+    nr = recvmsg(sockfd, &amp;msgh, 0);
+    if (nr == -1) return -1;
+
+    /* 获取第一个辅助数据块 */
+    cmsgp = CMSG_FIRSTHDR(&amp;msgh);
+
+    /* 验证辅助数据的有效性 */
+    if (cmsgp == nullptr || cmsgp-&gt;cmsg_len != CMSG_LEN(sizeof(int)) ||
+        cmsgp-&gt;cmsg_level != SOL_SOCKET || cmsgp-&gt;cmsg_type != SCM_RIGHTS) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    /* 从辅助数据中提取文件描述符 */
+    memcpy(&amp;fd, CMSG_DATA(cmsgp), sizeof(int));
+    return fd;
+}
+
+/* 进程内存读写封装类（用于跨进程内存操作） */
+class ProcessMemory {
+public:
+    explicit ProcessMemory(pid_t pid) : pid_(pid) {}
+
+    /* 读取目标进程的内存 */
+    int Read(uintptr_t addr, void *buf, size_t size) const {
+        iovec local{buf, size};      // 本地缓冲区
+        iovec remote{reinterpret_cast&lt;void *&gt;(addr), size}; // 远程地址
+        return process_vm_readv(pid_, &amp;local, 1, &amp;remote, 1, 0);
+    }
+
+    /* 写入目标进程的内存 */
+    int Write(uintptr_t addr, void *buf, size_t size) const {
+        iovec local{buf, size};
+        iovec remote{reinterpret_cast&lt;void *&gt;(addr), size};
+        return process_vm_writev(pid_, &amp;local, 1, &amp;remote, 1, 0);
+    }
+
+private:
+    pid_t pid_; // 目标进程 PID
+};
+
+/* Supervisor（监控进程）主循环，处理 seccomp 通知 */
+void EnterSupervisor(int nfd, const char *target, const char *redirection) {
+    seccomp_notif *req;  // 通知请求
+    seccomp_notif_resp *resp; // 响应
+    seccomp_notif_sizes sizes{};
+
+    /* 获取 seccomp 通知结构的大小并分配内存 */
+    if (seccomp(SECCOMP_GET_NOTIF_SIZES, 0, &amp;sizes) == 0) {
+        req = reinterpret_cast&lt;decltype(req)&gt;(malloc(sizes.seccomp_notif));
+        resp = reinterpret_cast&lt;decltype(resp)&gt;(malloc(sizes.seccomp_notif_resp));
+    } else {
+        LOGE(&quot;seccomp(SECCOMP_GET_NOTIF_SIZES): %m&quot;);
+        return;
+    }
+
+    char path[PATH_MAX]; // 存储被拦截的路径
+
+    /* 主循环：处理 seccomp 通知 */
+    for (;;) {
+        memset(req, 0, sizes.seccomp_notif);
+        /* 接收一个 seccomp 通知（阻塞） */
+        if (ioctl(nfd, SECCOMP_IOCTL_NOTIF_RECV, req) &lt; 0) {
+            if (errno == EINTR) continue; // 被信号中断则重试
+            LOGE(&quot;ioctl(SECCOMP_IOCTL_NOTIF_RECV): %m&quot;);
+            goto exit;
+        }
+
+        memset(resp, 0, sizes.seccomp_notif_resp);
+        resp-&gt;id = req-&gt;id; // 响应 ID 必须与请求匹配
+
+        /* 读取目标进程中的路径参数（openat 的第二个参数） */
+        ProcessMemory mem(req-&gt;pid);
+        int nread = mem.Read(req-&gt;data.args[1], path, sizeof(path) - 1);
+
+        if (nread &gt; 0) {
+            path[nread] = &#39;\0&#39;;
+            LOGV(&quot;open: %s&quot;, path);
+
+            /* 如果路径匹配目标，执行重定向 */
+            if (strcmp(path, target) == 0) {
+                /* 打开重定向文件，使用相同的 flags 和 mode */
+                int srcfd = openat(AT_FDCWD, redirection, req-&gt;data.args[2],
+                                   req-&gt;data.args[3]);
+                if (srcfd &gt; 0) {
+                    /* 将打开的文件描述符传递给目标进程 */
+                    seccomp_notif_addfd addfd = {.id = req-&gt;id,
+                            .flags = 0 /* SECCOMP_ADDFD_FLAG_SEND */,
+                            .srcfd = static_cast&lt;uint32_t&gt;(srcfd)};
+                    /* 调用 ADDFD ioctl，返回新文件描述符在目标进程中的值 */
+                    resp-&gt;val = ioctl(nfd, SECCOMP_IOCTL_NOTIF_ADDFD, &amp;addfd);
+                    close(srcfd); // 关闭 supervisor 中的描述符
+                } else {
+                    resp-&gt;error = -errno; // 打开失败，返回错误
+                }
+            } else {
+                /* 路径不匹配，继续执行原系统调用 */
+                resp-&gt;flags = SECCOMP_USER_NOTIF_FLAG_CONTINUE;
+            }
+        } else {
+            /* 读取路径失败，继续执行原系统调用 */
+            resp-&gt;flags = SECCOMP_USER_NOTIF_FLAG_CONTINUE;
+        }
+
+        /* 发送响应回内核 */
+        if (ioctl(nfd, SECCOMP_IOCTL_NOTIF_SEND, resp) &lt; 0) {
+            LOGE(&quot;ioctl(SECCOMP_IOCTL_NOTIF_SEND): %m&quot;);
+        }
+    }
+
+exit:
+    /* 清理内存并退出 */
+    free(req);
+    free(resp);
+    LOGD(&quot;supervisor exit&quot;);
+    _exit(0); // 使用 _exit 避免清理标准库状态
+}
+
+/* 初始化 IO 重定向：设置 seccomp 过滤器并启动 supervisor 进程 */
+bool InitIORedirect(const char *target, const char *redirection) {
+    /* 检查内核版本（需要 &gt;= 5.9，因为使用了 SECCOMP_USER_NOTIF_FLAG_CONTINUE） */
+    utsname un{};
+    uname(&amp;un);
+
+    char *str;
+    int kernel_major = strtol(un.release, &amp;str, 10);
+    int kernel_minor = strtol(str + 1, nullptr, 10);
+
+    if (KERNEL_VERSION(kernel_major, kernel_minor, 0) &lt; KERNEL_VERSION(5, 9, 0)) {
+        LOGE(&quot;Kernel(%s) not supported&quot;, un.release);
+        return false;
+    }
+
+    /* 禁止进程获得新权限（seccomp 要求） */
+    prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
+
+    /* BPF 过滤器：仅拦截 openat 系统调用，其他全部允许 */
+    sock_filter filter[] = {
+            /* 加载系统调用号 */
+            BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(seccomp_data, nr)),
+            /* 检查是否为 openat 系统调用 */
+            BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_openat, 1, 0),
+            /* 不是 openat，允许执行 */
+            BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW),
+            /* 是 openat，转发到用户空间处理 */
+            BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_USER_NOTIF),
+    };
+
+    sock_fprog prog{sizeof(filter) / sizeof(sock_filter), filter};
+
+    /* 创建套接字对，用于传递 seccomp 通知文件描述符 */
+    int socked_fds[2];
+    socketpair(AF_UNIX, SOCK_STREAM, 0, socked_fds);
+
+    /* 创建 supervisor 进程 */
+    int supervisor_pid = fork();
+    if (supervisor_pid &lt; 0) {
+        LOGE(&quot;Failed to fork supervisor&quot;);
+        return false;
+    } else if (supervisor_pid == 0) {
+        /* 子进程（supervisor）：接收通知描述符并进入主循环 */
+        int notify_fd = recvfd(socked_fds[1]);
+        close(socked_fds[0]);
+        close(socked_fds[1]);
+        EnterSupervisor(notify_fd, strdup(target), strdup(redirection));
+    }
+
+    /* 父进程（目标进程）：设置 seccomp 过滤器并获取通知描述符 */
+    int notify_fd = seccomp(SECCOMP_SET_MODE_FILTER,
+                                SECCOMP_FILTER_FLAG_NEW_LISTENER, &amp;prog);
+    if (notify_fd &lt; 0) {
+        LOGE(&quot;seccomp: %m&quot;);
+        return false;
+    }
+
+    /* 将通知描述符发送给 supervisor，然后关闭所有副本 */
+    sendfd(socked_fds[0], notify_fd);
+    close(socked_fds[0]);
+    close(socked_fds[1]);
+    close(notify_fd);
+
+    return true;
+}
+
+/* JNI 入口函数：供 Java 层调用 */
+extern &quot;C&quot;
+JNIEXPORT jboolean JNICALL
+Java_io_github_eirv_simpleioredirect_MainActivity_redirect(
+    JNIEnv *env, 
+    jclass,            // 静态方法，无需对象
+    jstring target,    // 目标文件路径
+    jstring redirection // 重定向文件路径
+) {
+    // 转换 Java 字符串为 C 字符串
+    auto t = env-&gt;GetStringUTFChars(target, nullptr);
+    auto r = env-&gt;GetStringUTFChars(redirection, nullptr);
+
+    LOGD(&quot;Redirect %s -&gt; %s&quot;, t, r);
+    bool result = InitIORedirect(t, r);
+
+    // 释放字符串资源
+    env-&gt;ReleaseStringUTFChars(target, t);
+    env-&gt;ReleaseStringUTFChars(redirection, r);
+
+    return result;
+}
+</code></pre>
+<h2 id="某去签分析"><a href="#某去签分析" class="headerlink" title="某去签分析"></a>某去签分析</h2><p>主要修改的地方应该就在BPF规则了，直接用Unidbg模拟执行一下：</p>
+<pre><code>BPF Program Disassembly:
+========================
+000: ldw data.nr
+001: jeq #222, 9, 2 ;mmap
+002: jeq #43, 9, 3 ;statfs
+003: jeq #167, 9, 4 ;prctl
+004: jeq #80, 9, 5 ;fstat
+005: jeq #78, 9, 6 ;readlinkat
+006: jeq #56, 9, 8 ;openat
+007: ldw data.args[2]
+008: ret ALLOW
+009: ret USER_NOTIF
+</code></pre>
+<p>用于从内存解析BPF程序的代码如下：</p>
+<pre><code class="language-Java">package com.github.unidbg.linux;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class BpfDisassembler {
+
+    // 指令结构体
+    // 跳转偏移：在X+1的基础上再+jt/jf的值
+    public static class SockFilter {
+        public short code;// 操作码（指令类型 + 修饰符）
+        public byte jt;// 条件为真时的跳转偏移
+        public byte jf;// 条件为假时的跳转偏移
+        public int k;// 通用字段（立即数/偏移量）
+
+        public SockFilter(short code, byte jt, byte jf, int k) {
+            this.code = code;
+            this.jt = jt;
+            this.jf = jf;
+            this.k = k;
+        }
+    }
+
+    // BPF 程序结构体
+    public static class SockFprog {
+        public short len;// 指令数量
+        public SockFilter[] filter;// 指令数组
+
+        public SockFprog(short len, SockFilter[] filter) {
+            this.len = len;
+            this.filter = filter;
+        }
+    }
+
+    // BPF 指令类别
+    // 索引寄存器 X 相当于 PC
+    // 累加器 A 相当于 通用寄存器 R0
+    public static int BPF_CLASS(int code) { return code &amp; 0x07; }
+    public static final int BPF_LD = 0x00;// 加载到累加器 A
+    public static final int BPF_LDX = 0x01;// 加载到索引寄存器 X
+    public static final int BPF_ST = 0x02;// 存储累加器 A 到内存
+    public static final int BPF_STX = 0x03;// 存储索引寄存器 X 到内存
+    public static final int BPF_ALU = 0x04;// 算术逻辑运算
+    public static final int BPF_JMP = 0x05;// 跳转指令
+    public static final int BPF_RET = 0x06;// 返回指令
+    public static final int BPF_MISC = 0x07;// 杂项操作
+
+    // 数据大小修饰符
+    public static int BPF_SIZE(int code) { return code &amp; 0x18; }
+    public static final int BPF_W = 0x00;  // 32-bit
+    public static final int BPF_H = 0x08;  // 16-bit
+    public static final int BPF_B = 0x10;  // 8-bit
+
+    // 寻址模式
+    public static int BPF_MODE(int code) { return code &amp; 0xE0; }
+    public static final int BPF_IMM = 0x00;  // 立即数：ld #k (A = k)
+    public static final int BPF_ABS = 0x20;  // 绝对偏移：ld [k] (A = data[k])
+    public static final int BPF_IND = 0x40;  // 间接偏移：ld [k + x] (A = data[k + X])
+    public static final int BPF_MEM = 0x60;  // 内存：ld m[k] (A = mem[k])
+    public static final int BPF_LEN = 0x80;  // 数据包长度：ld len (A = packet_length)
+    public static final int BPF_MSH = 0xA0;  // 4字节乘数：ld 4*(k) (A = 4 * data[k])
+
+    // ALU 操作
+    public static int BPF_OP(int code) { return code &amp; 0xF0; }
+    public static final int BPF_ADD = 0x00;
+    public static final int BPF_SUB = 0x10;
+    public static final int BPF_MUL = 0x20;
+    public static final int BPF_DIV = 0x30;
+    public static final int BPF_OR = 0x40;
+    public static final int BPF_AND = 0x50;
+    public static final int BPF_LSH = 0x60;
+    public static final int BPF_RSH = 0x70;
+    public static final int BPF_NEG = 0x80;
+    public static final int BPF_MOD = 0x90;
+    public static final int BPF_XOR = 0xA0;
+
+    // 跳转操作
+    public static final int BPF_JA = 0x00;   // 无条件跳转
+    public static final int BPF_JEQ = 0x10;  // 等于
+    public static final int BPF_JGT = 0x20;  // 大于
+    public static final int BPF_JGE = 0x30;  // 大于等于
+    public static final int BPF_JSET = 0x40; // 测试位
+
+    // 源操作数
+    public static int BPF_SRC(int code) { return code &amp; 0x08; }
+    public static final int BPF_K = 0x00;  // 使用常数
+    public static final int BPF_X = 0x08;  // 使用索引寄存器
+
+    // 返回值
+    public static int BPF_RVAL(int code) { return code &amp; 0x18; }
+    public static final int BPF_A = 0x10;  // 累加器
+
+    // 杂项操作
+    public static int BPF_MISCOP(int code) { return code &amp; 0xF8; }
+    public static final int BPF_TAX = 0x00;  // A -&gt; X
+    public static final int BPF_TXA = 0x80;  // X -&gt; A
+
+    // seccomp_data 结构体偏移量
+    public static final int SECCOMP_DATA_NR = 0;          // 系统调用号
+    public static final int SECCOMP_DATA_ARCH = 4;        // 架构
+    public static final int SECCOMP_DATA_IP = 8;          // 指令指针
+    public static final int SECCOMP_DATA_ARGS = 16;       // 参数开始
+
+    // 辅助数据偏移
+    public static final int SKF_AD_OFF = -0x1000;
+    public static final int SKF_AD_PROTOCOL = 0;
+    public static final int SKF_AD_PKTTYPE = 4;
+    public static final int SKF_AD_IFINDEX = 8;
+    public static final int SKF_AD_NLATTR = 12;
+    public static final int SKF_AD_NLATTR_NEST = 16;
+    public static final int SKF_AD_MARK = 20;
+    public static final int SKF_AD_QUEUE = 24;
+    public static final int SKF_AD_HATYPE = 28;
+    public static final int SKF_AD_RXHASH = 32;
+    public static final int SKF_AD_CPU = 36;
+    public static final int SKF_AD_ALU_XOR_X = 40;
+    public static final int SKF_AD_VLAN_TAG = 44;
+    public static final int SKF_AD_VLAN_TAG_PRESENT = 48;
+    public static final int SKF_AD_PAY_OFFSET = 52;
+    public static final int SKF_AD_RANDOM = 56;
+    public static final int SKF_AD_VLAN_TPID = 60;
+    public static final int SKF_AD_MAX = 64;
+
+    /**
+     * 反编译单个 BPF 指令
+     */
+    public static String disassembleInstruction(SockFilter insn, int pc) {
+        int code = insn.code &amp; 0xFFFF;
+        int cls = BPF_CLASS(code);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format(&quot;%03d: &quot;, pc));
+
+        switch (cls) {
+            case BPF_LD:
+                sb.append(disassembleLoad(code, insn.k));
+                break;
+            case BPF_LDX:
+                sb.append(disassembleLoadX(code, insn.k));
+                break;
+            case BPF_ST:
+                sb.append(disassembleStore(code, insn.k));
+                break;
+            case BPF_STX:
+                sb.append(disassembleStoreX(code, insn.k));
+                break;
+            case BPF_ALU:
+                sb.append(disassembleALU(code, insn.k));
+                break;
+            case BPF_JMP:
+                sb.append(disassembleJump(code, insn.k, insn.jt, insn.jf, pc));
+                break;
+            case BPF_RET:
+                sb.append(disassembleReturn(code, insn.k));
+                break;
+            case BPF_MISC:
+                sb.append(disassembleMisc(code));
+                break;
+            default:
+                sb.append(String.format(&quot;UNKNOWN(0x%04x)&quot;, code));
+                break;
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 反编译 LD 指令
+     */
+    private static String disassembleLoad(int code, int k) {
+        int size = BPF_SIZE(code);
+        int mode = BPF_MODE(code);
+
+        StringBuilder sb = new StringBuilder(&quot;ld&quot;);
+
+        // 大小修饰符
+        switch (size) {
+            case BPF_W: sb.append(&quot;w&quot;); break;
+            case BPF_H: sb.append(&quot;h&quot;); break;
+            case BPF_B: sb.append(&quot;b&quot;); break;
+            default: sb.append(&quot;?&quot;); break;
+        }
+
+        sb.append(&quot; &quot;);
+
+        // 寻址模式
+        switch (mode) {
+            case BPF_IMM:
+                sb.append(&quot;#&quot;).append(k);
+                break;
+            case BPF_ABS:
+                sb.append(parseSeccompDataOffset(k));
+                break;
+            case BPF_IND:
+                sb.append(&quot;[&quot;).append(parseSeccompDataOffset(k)).append(&quot; + x]&quot;);
+                break;
+            case BPF_MEM:
+                sb.append(&quot;m[&quot;).append(k).append(&quot;]&quot;);
+                break;
+            case BPF_LEN:
+                sb.append(&quot;len&quot;);
+                break;
+            case BPF_MSH:
+                sb.append(&quot;4*(&quot;).append(parseSeccompDataOffset(k)).append(&quot;)&quot;);
+                break;
+            default:
+                sb.append(&quot;???&quot;);
+                break;
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 反编译 LDX 指令
+     */
+    private static String disassembleLoadX(int code, int k) {
+        int size = BPF_SIZE(code);
+        int mode = BPF_MODE(code);
+
+        StringBuilder sb = new StringBuilder(&quot;ldx&quot;);
+
+        // 大小修饰符
+        switch (size) {
+            case BPF_W: sb.append(&quot;w&quot;); break;
+            case BPF_H: sb.append(&quot;h&quot;); break;
+            case BPF_B: sb.append(&quot;b&quot;); break;
+            default: sb.append(&quot;?&quot;); break;
+        }
+
+        sb.append(&quot; &quot;);
+
+        // 寻址模式
+        switch (mode) {
+            case BPF_IMM:
+                sb.append(&quot;#&quot;).append(k);
+                break;
+            case BPF_MEM:
+                sb.append(&quot;m[&quot;).append(k).append(&quot;]&quot;);
+                break;
+            case BPF_MSH:
+                sb.append(&quot;4*(&quot;).append(parseSeccompDataOffset(k)).append(&quot;)&quot;);
+                break;
+            default:
+                sb.append(&quot;???&quot;);
+                break;
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 反编译 ST 指令
+     */
+    private static String disassembleStore(int code, int k) {
+        return String.format(&quot;st m[%d]&quot;, k);
+    }
+
+    /**
+     * 反编译 STX 指令
+     */
+    private static String disassembleStoreX(int code, int k) {
+        return String.format(&quot;stx m[%d]&quot;, k);
+    }
+
+    /**
+     * 反编译 ALU 指令
+     */
+    private static String disassembleALU(int code, int k) {
+        int op = BPF_OP(code);
+        int src = BPF_SRC(code);
+
+        StringBuilder sb = new StringBuilder();
+
+        // 操作符
+        switch (op) {
+            case BPF_ADD: sb.append(&quot;add&quot;); break;
+            case BPF_SUB: sb.append(&quot;sub&quot;); break;
+            case BPF_MUL: sb.append(&quot;mul&quot;); break;
+            case BPF_DIV: sb.append(&quot;div&quot;); break;
+            case BPF_OR: sb.append(&quot;or&quot;); break;
+            case BPF_AND: sb.append(&quot;and&quot;); break;
+            case BPF_LSH: sb.append(&quot;lsh&quot;); break;
+            case BPF_RSH: sb.append(&quot;rsh&quot;); break;
+            case BPF_NEG: sb.append(&quot;neg&quot;); break;
+            case BPF_MOD: sb.append(&quot;mod&quot;); break;
+            case BPF_XOR: sb.append(&quot;xor&quot;); break;
+            default: sb.append(&quot;???&quot;); break;
+        }
+
+        sb.append(&quot; &quot;);
+
+        // 源操作数
+        if (src == BPF_K) {
+            sb.append(&quot;#&quot;).append(k);
+        } else { // BPF_X
+            sb.append(&quot;x&quot;);
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 反编译跳转指令
+     */
+    private static String disassembleJump(int code, int k, byte jt, byte jf, int pc) {
+        int op = BPF_OP(code);
+        int src = BPF_SRC(code);
+
+        StringBuilder sb = new StringBuilder();
+
+        // 操作符
+        switch (op) {
+            case BPF_JA:
+                int target = pc + 1 + k;
+                return String.format(&quot;ja %d&quot;, target);
+            case BPF_JEQ: sb.append(&quot;jeq&quot;); break;
+            case BPF_JGT: sb.append(&quot;jgt&quot;); break;
+            case BPF_JGE: sb.append(&quot;jge&quot;); break;
+            case BPF_JSET: sb.append(&quot;jset&quot;); break;
+            default: sb.append(&quot;???&quot;); break;
+        }
+
+        sb.append(&quot; &quot;);
+
+        // 源操作数
+        if (src == BPF_K) {
+            sb.append(&quot;#&quot;).append(k);
+        } else { // BPF_X
+            sb.append(&quot;x&quot;);
+        }
+
+        int trueTarget = pc + 1 + (jt &amp; 0xFF);
+        int falseTarget = pc + 1 + (jf &amp; 0xFF);
+
+        sb.append(String.format(&quot;, %d, %d&quot;, trueTarget, falseTarget));
+
+        return sb.toString();
+    }
+
+    /**
+     * 反编译返回指令
+     */
+    private static String disassembleReturn(int code, int k) {
+        int rval = BPF_RVAL(code);
+
+        if (rval == BPF_A) {
+            return String.format(&quot;ret a&quot;);
+        } else {
+            // 解析 seccomp 返回值
+            int action = k &amp; 0xFFFF0000;
+            int data = k &amp; 0x0000FFFF;
+
+            String actionStr;
+            switch (action) {
+                case 0x80000000: actionStr = &quot;KILL_PROCESS&quot;; break;
+                case 0x00000000: actionStr = &quot;KILL_THREAD&quot;; break;
+                case 0x00030000: actionStr = &quot;TRAP&quot;; break;
+                case 0x00050000: actionStr = &quot;ERRNO&quot;; break;
+                case 0x7FC00000: actionStr = &quot;USER_NOTIF&quot;; break;
+                case 0x7FF00000: actionStr = &quot;TRACE&quot;; break;
+                case 0x7FFC0000: actionStr = &quot;LOG&quot;; break;
+                case 0x7FFF0000: actionStr = &quot;ALLOW&quot;; break;
+                default: actionStr = String.format(&quot;UNKNOWN(0x%08x)&quot;, action); break;
+            }
+
+            if (data != 0 &amp;&amp; (action == 0x00050000 || action == 0x7FF00000)) {
+                return String.format(&quot;ret %s(%d)&quot;, actionStr, data);
+            } else {
+                return String.format(&quot;ret %s&quot;, actionStr);
+            }
+        }
+    }
+
+    /**
+     * 反编译杂项指令
+     */
+    private static String disassembleMisc(int code) {
+        int op = BPF_MISCOP(code);
+
+        switch (op) {
+            case BPF_TAX: return &quot;tax&quot;;
+            case BPF_TXA: return &quot;txa&quot;;
+            default: return String.format(&quot;misc(0x%02x)&quot;, op);
+        }
+    }
+
+    /**
+     * 解析 seccomp_data 结构体偏移量
+     */
+    private static String parseSeccompDataOffset(int offset) {
+        if (offset &gt;= SKF_AD_OFF &amp;&amp; offset &lt; SKF_AD_OFF + SKF_AD_MAX) {
+            // 辅助数据
+            int adOffset = offset - SKF_AD_OFF;
+            switch (adOffset) {
+                case SKF_AD_PROTOCOL: return &quot;skb-&gt;protocol&quot;;
+                case SKF_AD_PKTTYPE: return &quot;skb-&gt;pkt_type&quot;;
+                case SKF_AD_IFINDEX: return &quot;skb-&gt;ifindex&quot;;
+                case SKF_AD_NLATTR: return &quot;skb-&gt;nla&quot;;
+                case SKF_AD_NLATTR_NEST: return &quot;skb-&gt;nla_nest&quot;;
+                case SKF_AD_MARK: return &quot;skb-&gt;mark&quot;;
+                case SKF_AD_QUEUE: return &quot;skb-&gt;queue_mapping&quot;;
+                case SKF_AD_HATYPE: return &quot;skb-&gt;hatype&quot;;
+                case SKF_AD_RXHASH: return &quot;skb-&gt;rxhash&quot;;
+                case SKF_AD_CPU: return &quot;skb-&gt;cpu&quot;;
+                case SKF_AD_ALU_XOR_X: return &quot;skb-&gt;alu_xor_x&quot;;
+                case SKF_AD_VLAN_TAG: return &quot;skb-&gt;vlan_tci&quot;;
+                case SKF_AD_VLAN_TAG_PRESENT: return &quot;skb-&gt;vlan_present&quot;;
+                case SKF_AD_PAY_OFFSET: return &quot;skb-&gt;pay_offset&quot;;
+                case SKF_AD_RANDOM: return &quot;skb-&gt;random&quot;;
+                case SKF_AD_VLAN_TPID: return &quot;skb-&gt;vlan_proto&quot;;
+                default: return String.format(&quot;skb_aux[%d]&quot;, adOffset);
+            }
+        } else {
+            // seccomp_data 字段
+            switch (offset) {
+                case SECCOMP_DATA_NR: return &quot;data.nr&quot;;
+                case SECCOMP_DATA_ARCH: return &quot;data.arch&quot;;
+                case SECCOMP_DATA_IP: return &quot;data.ip&quot;;
+                case SECCOMP_DATA_ARGS: return &quot;data.args[0]&quot;;
+                case SECCOMP_DATA_ARGS + 8: return &quot;data.args[1]&quot;;
+                case SECCOMP_DATA_ARGS + 16: return &quot;data.args[2]&quot;;
+                case SECCOMP_DATA_ARGS + 24: return &quot;data.args[3]&quot;;
+                case SECCOMP_DATA_ARGS + 32: return &quot;data.args[4]&quot;;
+                case SECCOMP_DATA_ARGS + 40: return &quot;data.args[5]&quot;;
+                default:
+                    if (offset &gt;= SECCOMP_DATA_ARGS &amp;&amp; offset &lt; SECCOMP_DATA_ARGS + 48) {
+                        int argIndex = (offset - SECCOMP_DATA_ARGS) / 8;
+                        return String.format(&quot;data.args[%d]&quot;, argIndex);
+                    } else {
+                        return String.format(&quot;[%d]&quot;, offset);
+                    }
+            }
+        }
+    }
+
+    /**
+     * 反编译整个 BPF 程序
+     */
+    public static List&lt;String&gt; disassembleProgram(SockFilter[] program) {
+        List&lt;String&gt; result = new ArrayList&lt;&gt;();
+
+        for (int i = 0; i &lt; program.length; i++) {
+            result.add(disassembleInstruction(program[i], i));
+        }
+
+        return result;
+    }
+
+    /**
+     * 反编译 seccomp BPF 程序并输出
+     */
+    public static void printDisassembly(SockFilter[] program) {
+        List&lt;String&gt; disassembly = disassembleProgram(program);
+
+        System.out.println(&quot;BPF Program Disassembly:&quot;);
+        System.out.println(&quot;========================&quot;);
+        for (String line : disassembly) {
+            System.out.println(line);
+        }
+    }
+}
+</code></pre>
+<p>值得注意的是，内存对齐会影响结构体字段偏移，该程序需要根据实际情况调整。</p>
+<p>根据被劫持的syscall，可以参考<a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-278982-1.htm">聊聊Android签名检测7种核心检测方案详解</a>给出对应处理。（其实faccessat以及stat的其他成员也应该处理一下）</p>
+<p>检测思路（待验证）：</p>
+<ol>
+<li>利用未被处理的可用于检测的函数</li>
+<li>主动以SECCOMP_FILTER_FLAG_NEW_LISTENER注册filter，若报错EBUSY，可判断使用了NOTIF机制</li>
+<li>或者注册TRACE，如果接收不到相应bpf程序返回值则证明使用了NOTIF</li>
+<li>利用TOCTOU漏洞（反复更改内存或用信号量打断syscall）</li>
+</ol>
+
     </div>
     
     
