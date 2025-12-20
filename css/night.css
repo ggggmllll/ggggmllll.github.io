@@ -263,12 +263,11 @@
     margin-right: 25px;
 }
 #home-posts .post .category-and-date .category a,
-#archives a,
 #archives .tag-icon,
 #archives .item-time,
-#archives .categories-tags span a:hover .icon,
-.article .info a {
-    color: #b0b0b0 !important; /* 修改：深灰色改为浅灰色 */
+#archives .categories-tags span a:hover .icon 
+{
+    color: #b0b0b0; /* 修改：深灰色改为浅灰色 */
 }
 #home-posts .post .category-and-date .date,
 #archives .tags,
@@ -410,7 +409,7 @@
     width: 80%;
 }
 #menu #mobile-menu .items a {
-    color: #fff !important; /* 修改：深灰色改为白色 */
+    color: #fff; /* 修改：深灰色改为白色 */
 }
 #menu #mobile-menu .title {
     color: #fff !important; /* 修改：深灰色改为白色 */
@@ -665,7 +664,7 @@ body::-webkit-scrollbar-track {
     color: unset;
 }
 a {
-    color: #66afef !important; /* 修改：主题蓝色保持不变 */
+    color: #66afef; /* 修改：主题蓝色保持不变 */
     text-decoration: none;
 }
 a:hover,
@@ -994,9 +993,6 @@ p, ul, ol, li,
 #home-card #card-div .icon-links a,
 #footer #footer-wrap,
 #home-posts .page-current a,
-.article .info a,
-#archives a,
-#archives .tag-icon,
 #archives .item-time,
 .copycode,
 .icon,

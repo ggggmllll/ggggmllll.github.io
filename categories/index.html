@@ -185,46 +185,383 @@
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div id="archives">
     
-    <div class="categories-tags">
+    
+    <div class="categories-tree">
+        <h2 class="tree-title">
+            <i class="fa-solid fa-sitemap"></i> 分类目录
+            
+        </h2>
         
         
         
-        <span>
-            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                计算机
-            </a>
-        </span>
+        <!-- 递归渲染分类树 -->
         
         
+        <div class="tree-container">
+            
+                
+            
+                
+                
+                <div class="category-node has-children expanded " 
+                     style="margin-left: 0px">
+                    
+                    <div class="category-item">
+                        
+                            <span class="toggle-icon" data-id="计算机">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </span>
+                        
+                                                
+                        
+                        
+                        <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" 
+                        class="category-link "
+                        style="color: #3498db; font-size: 22px; font-weight: bold">
+                            <span class="category-icon">
+                                <i class="fa-solid fa-bookmark fa-fw"></i>
+                            </span>
+                            <span class="category-name">
+                                计算机
+                                <span class="post-count">(3)</span>
+                            </span>
+                        </a>
+                    </div>
+                    
+                    
+                        <div class="children-container" id="children-计算机" style="display: block;">
+                            
+            
+                
+                
+                <div class="category-node has-children expanded " 
+                     style="margin-left: 30px">
+                    
+                    <div class="category-item">
+                        
+                            <span class="toggle-icon" data-id="计算机-Android">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </span>
+                        
+                                                
+                        
+                        
+                        <a href="#" 
+                        class="category-link "
+                        style="color: #e74c3c; font-size: 20px; font-weight: bold">
+                            <span class="category-icon">
+                                <i class="fa-solid fa-bookmark fa-fw"></i>
+                            </span>
+                            <span class="category-name">
+                                Android
+                                <span class="post-count">(1)</span>
+                            </span>
+                        </a>
+                    </div>
+                    
+                    
+                        <div class="children-container" id="children-计算机-Android" style="display: block;">
+                            
+            
+                
+                
+                <div class="category-node  " 
+                     style="margin-left: 60px">
+                    
+                    <div class="category-item">
+                        
+                                                
+                        
+                        
+                        <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA-Android-%E9%80%86%E5%90%91/" 
+                        class="category-link "
+                        style="color: #2ecc71; font-size: 18px; font-weight: normal">
+                            <span class="category-icon">
+                                <i class="fa-solid fa-bookmark fa-fw"></i>
+                            </span>
+                            <span class="category-name">
+                                逆向
+                                <span class="post-count">(1)</span>
+                            </span>
+                        </a>
+                    </div>
+                    
+                    
+                </div>
+            
         
-        <span>
-            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/Android/" style="background: #00bcd4">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                Android
-            </a>
-        </span>
+                        </div>
+                    
+                </div>
+            
         
+                        </div>
+                    
+                </div>
+            
         
-        
-        <span>
-            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/Android/%E9%80%86%E5%90%91/" style="background: #ffa2c4">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                逆向
-            </a>
-        </span>
-        
-        
+            
+        </div>
     </div>
+    
+    <!-- 文章列表 -->
     
 </div>
 
+<style>
+.categories-tree {
+    margin-bottom: 40px;
+}
+
+.tree-title {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 24px;
+}
+
+.tree-title .current {
+    color: #3498db;
+    font-weight: normal;
+}
+
+.tree-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.category-node {
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    min-height: 40px;
+}
+
+.toggle-icon, .dot-icon {
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.toggle-icon {
+    color: #7f8c8d;
+    transition: transform 0.2s;
+    transform: rotate(-90deg); /* 初始状态向左 */
+}
+
+.toggle-icon:hover {
+    color: #3498db;
+    transform: scale(1.1);
+}
+
+.dot-icon {
+    color: #ddd;
+    font-size: 10px;
+}
+
+.category-link {
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 15px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: inline-block;
+    min-height: 40px;
+    line-height: 1.4;
+    border: 1px solid transparent;
+}
+
+.category-link:hover {
+    background-color: #f5f7fa;
+    text-decoration: none;
+    border: 1px solid #e0e0e0;
+    transform: translateX(5px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category-link.active {
+    font-weight: bold;
+    background-color: #f0f7ff;
+    border: 1px solid #3498db;
+}
+
+.category-name {
+    display: inline-block;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s;
+    padding-bottom: 2px;
+}
+
+.category-link:hover .category-name {
+    border-bottom-color: currentColor;
+}
+
+.category-icon {
+    margin-right: 8px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+/* 调整文章计数样式 */
+.post-count {
+    font-size: 0.85em;
+    color: #7f8c8d;
+    font-weight: normal;
+    margin-left: 8px;
+    padding: 2px 8px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.children-container {
+    margin-left: 30px;
+    padding-left: 20px;
+    border-left: 2px dashed #e0e0e0;
+}
+
+.category-node.has-children.expanded .toggle-icon {
+    transform: rotate(0deg); /* 展开状态向下 */
+}
+
+.category-posts {
+    margin-top: 40px;
+}
+
+.posts-title {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 22px;
+}
+
+.posts-count {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    font-weight: normal;
+    margin-left: 10px;
+    padding: 3px 10px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.no-posts {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 30px;
+    text-align: center;
+    color: #7f8c8d;
+    margin-top: 40px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+}
+
+.no-posts i {
+    font-size: 3em;
+    margin-bottom: 20px;
+    color: #bdc3c7;
+}
+
+.no-posts p {
+    font-size: 18px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .tree-container {
+        padding: 15px;
+    }
+    
+    .category-link {
+        padding: 6px 10px;
+        font-size: 16px !important; /* 确保在移动端字体不会太小 */
+    }
+    
+    .category-item {
+        gap: 8px;
+    }
+    
+    .tree-title {
+        font-size: 20px;
+    }
+    
+    .posts-title {
+        font-size: 18px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 分类树展开/折叠功能
+    document.querySelectorAll('.toggle-icon').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const nodeId = this.getAttribute('data-id');
+            const childrenContainer = document.getElementById('children-' + nodeId);
+            const parentNode = this.closest('.category-node');
+            
+            if (childrenContainer.style.display === 'block') {
+                childrenContainer.style.display = 'none';
+                parentNode.classList.remove('expanded');
+                this.querySelector('i').style.transform = 'rotate(-90deg)';
+            } else {
+                childrenContainer.style.display = 'block';
+                parentNode.classList.add('expanded');
+                this.querySelector('i').style.transform = 'rotate(0deg)';
+            }
+        });
+    });
+    
+    // 自动展开当前分类的父节点
+    const currentCategory = document.querySelector('.category-link.active');
+    if (currentCategory) {
+        let currentNode = currentCategory.closest('.category-node');
+        while (currentNode) {
+            const toggle = currentNode.querySelector('.toggle-icon');
+            if (toggle) {
+                const nodeId = toggle.getAttribute('data-id');
+                const childrenContainer = document.getElementById('children-' + nodeId);
+                if (childrenContainer) {
+                    childrenContainer.style.display = 'block';
+                    currentNode.classList.add('expanded');
+                    toggle.querySelector('i').style.transform = 'rotate(90deg)';
+                }
+            }
+            // 找到父节点
+            const parentContainer = currentNode.parentElement.closest('.children-container');
+            if (parentContainer) {
+                currentNode = parentContainer.parentElement;
+            } else {
+                currentNode = null;
+            }
+        }
+    }
+});
+</script>
             <footer id="footer">
     <div id="footer-wrap">
         <div>
