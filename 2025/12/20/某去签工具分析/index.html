@@ -217,14 +217,14 @@
             
             <span class="tag">
                 
-                <a href="/tags/%E9%80%86%E5%90%91/" style="color: #ffa2c4">
+                <a href="/tags/%E9%80%86%E5%90%91/" style="color: #03a9f4">
                     逆向
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/%E7%AD%BE%E5%90%8D%E6%A0%A1%E9%AA%8C/" style="color: #00a596">
+                <a href="/tags/%E7%AD%BE%E5%90%8D%E6%A0%A1%E9%AA%8C/" style="color: #ffa2c4">
                     签名校验
                 </a>
             </span>
@@ -1239,6 +1239,8 @@ public class BpfDisassembler {
 <li><p>利用TOCTOU漏洞（反复更改内存或用信号量打断syscall）</p>
 </li>
 <li><p>读取&#x2F;proc&#x2F;self&#x2F;status中fliters字段，若大于1则可能异常</p>
+</li>
+<li><p>注册notif但不设置listener，主动调用判断返回值是否为ENOSYS</p>
 </li>
 </ol>
 
