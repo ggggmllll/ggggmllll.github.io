@@ -1,0 +1,1536 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <title>Git教程-3 | 孤木落の博客</title>
+    <meta name="author" content="Gumuluo" />
+    <meta name="description" content="Gumuluo's Blog" />
+    <meta name="keywords" content="" />
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <link rel="icon" href="/images/avatar.jpg" />
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.cn" />
+<link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin />
+<link
+    rel="stylesheet"
+    href="https://fonts.googleapis.cn/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap"
+/>
+<script> const mixins = {}; </script>
+
+<!-- 主题CSS文件 -->
+<link rel="stylesheet" href="/css/main.css" id="light-theme">
+<link rel="stylesheet" href="/css/night.css" id="dark-theme" disabled>
+
+<script src="https://polyfill.alicdn.com/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<!-- 白天代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs.min.css"
+    id="light-highlight"
+/>
+<!-- 黑夜代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css"
+    id="dark-highlight"
+    disabled
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.css" />
+<script src="/js/lib/math.js"></script>
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>孤木落の博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+        <!-- 主题切换按钮 -->
+        <a href="javascript:void(0);" @click="toggleTheme" :title="themeTooltip" class="theme-toggle">
+            <i :class="themeIcon"></i>
+            <span>&ensp;{{ themeText }}</span>
+        </a>
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;孤木落の博客</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+                <!-- 移动端主题切换按钮 -->
+                <a href="javascript:void(0);" @click="toggleTheme">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i :class="themeIcon"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">
+                            主题 ({{ themeText }})
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>Git教程-3</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2026/2/1
+        </span>
+        
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p>Git教程的最后一篇，应该吧</p>
+<span id="more"></span>
+
+<h1 id="分布式工作流程"><a href="#分布式工作流程" class="headerlink" title="分布式工作流程"></a>分布式工作流程</h1><p>Git 的分布式特性使得开发者间的协作变得更加灵活多样。每个开发者同时扮演着节点和集线器的角色——也就是说，每个开发者既可以将自己的代码贡献到其他的仓库中，同时也能维护自己的公开仓库，让其他人可以在其基础上工作并贡献代码。</p>
+<p>由此，Git 的分布式协作可以为你的项目和团队衍生出种种不同的工作流程</p>
+<h2 id="集中式工作流"><a href="#集中式工作流" class="headerlink" title="集中式工作流"></a>集中式工作流</h2><p>集中式系统中通常使用的是单点协作模型——集中式工作流。一个中心集线器，或者说 <em>仓库</em>，可以接受代码，所有人将自己的工作与之同步。若干个开发者则作为节点，即中心仓库的消费者与中心仓库同步。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/centralized_workflow.png" alt="集中式工作流。"></p>
+<p>如果两个开发者从中心仓库克隆代码下来，同时作了一些修改，那么只有第一个开发者可以顺利地把数据推送回共享服务器。第二个开发者在推送修改之前，必须先将第一个人的工作合并进来，这样才不会覆盖第一个人的修改。</p>
+<h2 id="集成管理者工作流"><a href="#集成管理者工作流" class="headerlink" title="集成管理者工作流"></a>集成管理者工作流</h2><p>Git 允许多个远程仓库存在，使得这样一种工作流成为可能：每个开发者拥有自己仓库的写权限和其他所有人仓库的读权限。</p>
+<p>这种情形下通常会有个代表“官方”项目的权威的仓库。要为这个项目做贡献，你需要从该项目克隆出一个自己的公开仓库，然后将自己的修改推送上去。接着你可以请求官方仓库的维护者拉取更新合并到主项目。维护者可以将你的仓库作为远程仓库添加进来，在本地测试你的变更，将其合并入他们的分支并推送回官方仓库。</p>
+<p>这一流程的工作方式如下所示（见下图）：</p>
+<ol>
+<li>项目维护者推送到主仓库。</li>
+<li>贡献者克隆此仓库，做出修改。</li>
+<li>贡献者将数据推送到自己的公开仓库。</li>
+<li>贡献者给维护者发送邮件，请求拉取自己的更新。</li>
+<li>维护者在自己本地的仓库中，将贡献者的仓库加为远程仓库并合并修改。</li>
+<li>维护者将合并后的修改推送到主仓库。</li>
+</ol>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/integration-manager.png" alt="集成管理者工作流。"></p>
+<p><strong>forking</strong><br>这是 GitHub 和 GitLab 等集线器式（hub-based）工具最常用的工作流程。人们可以容易地将某个项目派生成为自己的公开仓库，向这个仓库推送自己的修改，并为每个人所见。</p>
+<p>这么做最主要的优点之一是你可以持续地工作，而主仓库的维护者可以随时拉取你的修改。<br>贡献者不必等待维护者处理完提交的更新——每一方都可以按照自己的节奏工作。</p>
+<h2 id="向一个项目贡献"><a href="#向一个项目贡献" class="headerlink" title="向一个项目贡献"></a>向一个项目贡献</h2><p>决定如何向一个项目贡献的影响因素主要有三个：</p>
+<ol>
+<li>活跃贡献者的数量(贡献代码的用户数量以及他们的贡献频率)</li>
+<li>项目使用的工作流程</li>
+<li>影响因素是提交权限</li>
+</ol>
+<h3 id="提交准则"><a href="#提交准则" class="headerlink" title="提交准则"></a>提交准则</h3><p>有一个好的创建提交的准则并且坚持使用会让与 Git 工作和与其他人协作更容易。</p>
+<p>首先，你的提交<strong>不应该包含任何空白错误</strong>。</p>
+<p>Git 提供了一个简单的方式来检查这点——在提交前，运行 <code>git diff --check</code>，它将会找到可能的空白错误并将它们为你列出来。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/git-diff-check.png" alt="&#96;git diff --check&#96; 的输出"></p>
+<p>如果在提交前运行那个命令，可以知道提交中是否包含可能会使其他开发者恼怒的空白问题。</p>
+<p>接下来，尝试<strong>让每一个提交成为一个逻辑上的独立变更集</strong>。</p>
+<p>尝试让改动可以理解——不要在整个周末编码解决五个问题，然后在周一时将它们提交为一个巨大的提交。即使在周末期间你无法提交，在周一时使用暂存区域将你的工作最少拆分为每个问题一个提交，并且为每一个提交附带一个有用的信息。</p>
+<p>如果其中一些改动修改了同一个文件，尝试使用 <code>git add --patch</code> 来部分暂存文件。不管你做一个或五个提交，只要所有的改动都曾添加过，项目分支末端的快照就是一样的，所以尽量让你的开发者同事们在审查你的改动的时候更容易些吧。当你之后需要时这个方法也会使拉出或还原一个变更集更容易些。</p>
+<p>最后一件要牢记的事是<strong>提交信息</strong>。</p>
+<p>有一个创建优质提交信息的习惯会使 Git 的使用与协作容易的多。<br>一般情况下，信息应当以少于 50 个字符（25个汉字）的单行开始且简要地描述变更，接着是一个空白行，再接着是一个更详细的解释。</p>
+<p>Git 项目要求一个更详细的解释，包括做改动的动机和它的实现与之前行为的对比——这是一个值得遵循的好规则。使用指令式的语气来编写提交信息，比如使用“Fix bug”而非“Fixed bug”或“Fixes bug”。</p>
+<p>这里是一份<a target="_blank" rel="noopener" href="https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html">最初由 Tim Pope 写的模板</a>：</p>
+<pre><code>首字母大写的摘要（不多于 50 个字符）
+
+如果必要的话，加入更详细的解释文字。在大概 72 个字符的时候换行。
+在某些情形下，第一行被当作一封电子邮件的标题，剩下的文本作为正文。
+分隔摘要与正文的空行是必须的（除非你完全省略正文），
+如果你将两者混在一起，那么在使用例如变基这样的工具时，它们会生成难以阅读的输出，让人困惑。
+
+使用指令式的语气来编写提交信息：使用“Fix bug”而非“Fixed bug”或“Fixes bug”。
+此约定与 git merge 和 git revert 命令生成提交说明相同。
+
+空行接着更进一步的段落。
+
+- 标号也是可以的。
+
+- 项目符号可以使用典型的连字符或星号，后跟一个空格，行之间用空行隔开，
+  但是可以依据不同的惯例有所不同。
+
+- 使用悬挂式缩进
+</code></pre>
+<p>如果你所有的提交信息都遵循此模版，那么对你和与你协作的其他开发者来说事情会变得非常容易。Git 项目有一个良好格式化的提交信息——尝试在那儿运行 <code>git log --no-merges</code> 来看看漂亮的格式化的项目提交历史像什么样。</p>
+<h2 id="私有小型团队"><a href="#私有小型团队" class="headerlink" title="私有小型团队"></a>私有小型团队</h2><p>你可能会遇到的最简单的配置是有一两个其他开发者的私有项目。<br>“私有” 在这个上下文中，意味着闭源——不可以从外面的世界中访问到。<br>你和其他的开发者都有仓库的推送权限。</p>
+<p>让我们看看当两个开发者在一个共享仓库中一起工作时会是什么样子。<br>第一个开发者，John，克隆了仓库，做了改动，然后本地提交。<br>（为了缩短这些例子长度，协议信息已被替换为 <code>...</code>。）</p>
+<pre><code class="language-shell"># John&#39;s Machine
+$ git clone john@githost:simplegit.git
+Cloning into &#39;simplegit&#39;...
+...
+$ cd simplegit/
+$ vim lib/simplegit.rb
+$ git commit -am &#39;remove invalid default value&#39;
+[master 738ee87] remove invalid default value
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+</code></pre>
+<p>第二个开发者，Jessica，做了同样的事情——克隆仓库并提交了一个改动：</p>
+<pre><code class="language-shell"># Jessica&#39;s Machine
+$ git clone jessica@githost:simplegit.git
+Cloning into &#39;simplegit&#39;...
+...
+$ cd simplegit/
+$ vim TODO
+$ git commit -am &#39;add reset task&#39;
+[master fbff5bc] add reset task
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+</code></pre>
+<p>现在，Jessica 把她的工作推送到服务器上，一切正常：</p>
+<pre><code class="language-shell"># Jessica&#39;s Machine
+$ git push origin master
+...
+To jessica@githost:simplegit.git
+   1edee6b..fbff5bc  master -&gt; master
+</code></pre>
+<p>上方输出信息中最后一行显示的是推送操作执行完毕后返回的一条很有用的消息。<br>消息的基本格式是 <code>&lt;oldref&gt;..&lt;newref&gt; fromref -&gt; toref</code> ， <code>oldref</code> 的含义是推送前所指向的引用， <code>newref</code> 的含义是推送后所指向的引用， <code>fromref</code> 是将要被推送的本地引用的名字， <code>toref</code> 是将要被更新的远程引用的名字。<br>在后面的讨论中你还会看到类似的输出消息，所以对这条消息的含义有一些基础的了解将会帮助你理解仓库的诸多状态。<br>想要了解更多细节请访问文档 <a target="_blank" rel="noopener" href="https://git-scm.com/docs/git-push">git-push</a> 。</p>
+<p>John 稍候也做了些改动，将它们提交到了本地仓库中，然后试着将它们推送到同一个服务器：</p>
+<pre><code class="language-shell"># John&#39;s Machine
+$ git push origin master
+To john@githost:simplegit.git
+ ! [rejected]        master -&gt; master (non-fast forward)
+error: failed to push some refs to &#39;john@githost:simplegit.git&#39;
+</code></pre>
+<p>这时 John 会推送失败，因为之前 Jessica 已经推送了她的更改。<br>如果之前习惯于用 Subversion 那么理解这点特别重要，因为你会注意到两个开发者并没有编辑同一个文件。<br>尽管 Subversion 会对编辑的不同文件在服务器上自动进行一次合并，但 Git 要求你先在本地合并提交。<br>换言之，John 必须先抓取 Jessica 的上游改动并将它们合并到自己的本地仓库中，才能被允许推送。</p>
+<p>第一步，John 抓取 Jessica 的工作（这只会 <em>抓取</em> Jessica 的上游工作，并不会将它合并到 John 的工作中）：</p>
+<pre><code class="language-shell">$ git fetch origin
+...
+From john@githost:simplegit
+ + 049d078...fbff5bc master     -&gt; origin/master
+</code></pre>
+<p>在这个时候，John 的本地仓库看起来像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/small-team-1.png" alt="John 的分叉历史"></p>
+<p>现在 John 可以将抓取下来的 Jessica 的工作合并到他自己的本地工作中了：</p>
+<pre><code class="language-shell">$ git merge origin/master
+Merge made by the &#39;recursive&#39; strategy.
+ TODO |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+</code></pre>
+<p>合并进行得很顺利——John 更新后的历史现在看起来像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/small-team-2.png" alt="合并了 &#96;origin&#x2F;master&#96; 之后 John 的仓库"></p>
+<p>此时，John 可能想要测试新的代码，以确保 Jessica 的工作没有影响他自己的工作，<br>当一切正常后，他就能将新合并的工作推送到服务器了：</p>
+<pre><code class="language-shell">$ git push origin master
+...
+To john@githost:simplegit.git
+   fbff5bc..72bbc59  master -&gt; master
+</code></pre>
+<p>最终，John 的提交历史看起来像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/small-team-3.png" alt="推送到 &#96;origin&#96; 服务器后 John 的历史"></p>
+<p>在此期间，Jessica 新建了一个名为 <code>issue54</code> 的主题分支，然后在该分支上提交了三次。<br>她还没有抓取 John 的改动，所以她的提交历史看起来像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/small-team-4.png" alt="Jessica 的主题分支"></p>
+<p>忽然，Jessica 发现 John 向服务器推送了一些新的工作，她想要看一下，<br>于是就抓取了所有服务器上的新内容：</p>
+<pre><code class="language-shell"># Jessica&#39;s Machine
+$ git fetch origin
+...
+From jessica@githost:simplegit
+   fbff5bc..72bbc59  master     -&gt; origin/master
+</code></pre>
+<p>那会同时拉取 John 推送的工作。<br>Jessica 的历史现在看起来像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/small-team-5.png" alt="抓取 John 的改动后 Jessica 的历史"></p>
+<p>Jessica 认为她的主题分支已经准备好了，但她想知道需要将 John 工作的哪些合并到自己的工作中才能推送。<br>她运行 <code>git log</code> 找了出来：</p>
+<pre><code class="language-shell">$ git log --no-merges issue54..origin/master
+commit 738ee872852dfaa9d6634e0dea7a324040193016
+Author: John Smith &lt;jsmith@example.com&gt;
+Date:   Fri May 29 16:01:27 2009 -0700
+
+   remove invalid default value
+</code></pre>
+<p><code>issue54..origin/master</code> 语法是一个日志过滤器，要求 Git 只显示所有在后面分支<br>（在本例中是 <code>origin/master</code>）但不在前面分支（在本例中是 <code>issue54</code>）的提交的列表。<br>我们将会在相关章节中详细介绍这个语法。</p>
+<p>目前，我们可以从输出中看到有一个 John 生成的但是 Jessica 还没有合并的提交。<br>如果她合并 <code>origin/master</code>，那个未合并的提交将会修改她的本地工作。</p>
+<p>现在，Jessica 可以合并她的特性工作到她的 master 分支，<br>合并 John 的工作（<code>origin/master</code>）进入她的 <code>master</code> 分支，然后再次推送回服务器。</p>
+<p>首先（在已经提交了所有 <code>issue54</code> 主题分支上的工作后），为了整合所有这些工作，<br>她切换回她的 master 分支。</p>
+<pre><code class="language-shell">$ git checkout master
+Switched to branch &#39;master&#39;
+Your branch is behind &#39;origin/master&#39; by 2 commits, and can be fast-forwarded.
+</code></pre>
+<p>Jessica 既可以先合并 <code>origin/master</code> 也可以先合并 <code>issue54</code> ——它们都是上游，所以顺序并没有关系。<br>不论她选择的顺序是什么最终的结果快照是完全一样的；只是历史会稍微有些不同。<br>她选择先合并 <code>issue54</code>：</p>
+<pre><code class="language-shell">$ git merge issue54
+Updating fbff5bc..4af4298
+Fast forward
+ README           |    1 +
+ lib/simplegit.rb |    6 +++++-
+ 2 files changed, 6 insertions(+), 1 deletions(-)
+</code></pre>
+<p>没有发生问题，如你所见它是一次简单的快进合并。<br>现在 Jessica 在本地合并了之前抓取的 <code>origin/master</code> 分支上 John 的工作：</p>
+<pre><code class="language-shell">$ git merge origin/master
+Auto-merging lib/simplegit.rb
+Merge made by the &#39;recursive&#39; strategy.
+ lib/simplegit.rb |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+</code></pre>
+<p>每一个文件都干净地合并了，Jessica 的历史现在看起来像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/small-team-6.png" alt="合并了 John 的改动后 Jessica 的历史"></p>
+<p>现在 <code>origin/master</code> 是可以从 Jessica 的 <code>master</code> 分支到达的，<br>所以她应该可以成功地推送（假设同一时间 John 并没有更多推送）：</p>
+<pre><code class="language-shell">$ git push origin master
+...
+To jessica@githost:simplegit.git
+   72bbc59..8059c15  master -&gt; master
+</code></pre>
+<p>每一个开发者都提交了几次并成功地合并了其他人的工作。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/small-team-7.png" alt="推送所有的改动回服务器后 Jessica 的历史"></p>
+<p>这是一个最简单的工作流程。<br>你通常会在一个主题分支上工作一会儿，当它准备好整合时就合并到你的 <code>master</code> 分支。<br>当想要共享工作时，如果有改动的话就抓取它然后合并到你自己的 <code>master</code> 分支，<br>之后推送到服务器上的 <code>master</code> 分支。通常顺序像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/small-team-flow.png" alt="一个简单的多人 Git 工作流程的通常事件顺序"></p>
+<h2 id="私有管理团队"><a href="#私有管理团队" class="headerlink" title="私有管理团队"></a>私有管理团队</h2><p>在接下来的场景中，你会看到大型私有团队中贡献者的角色。你将学到如何在这种工作环境中工作，其中小组基于特性进行协作，而这些团队的贡献将会由其他人整合。</p>
+<p>让我们假设 John 与 Jessica 在一个特性（<code>featureA</code>）上工作，<br>同时 Jessica 与第三个开发者 Josie 在第二个特性（<code>featureB</code>）上工作。<br>在本例中，公司使用了一种整合-管理者工作流程，独立小组的工作只能被特定的工程师整合，<br>主仓库的 <code>master</code> 分支只能被那些工程师更新。<br>在这种情况下，所有的工作都是在基于团队的分支上完成的并且稍后会被整合者拉到一起。</p>
+<p>因为 Jessica 在两个特性上工作，并且平行地与两个不同的开发者协作，让我们跟随她的工作流程。<br>假设她已经克隆了仓库，首先决定在 <code>featureA</code> 上工作。<br>她为那个特性创建了一个新分支然后在那做了一些工作：</p>
+<pre><code class="language-shell"># Jessica&#39;s Machine
+$ git checkout -b featureA
+Switched to a new branch &#39;featureA&#39;
+$ vim lib/simplegit.rb
+$ git commit -am &#39;add limit to log function&#39;
+[featureA 3300904] add limit to log function
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+</code></pre>
+<p>在这个时候，她需要将工作共享给 John，所以她推送了 <code>featureA</code> 分支的提交到服务器上。<br>Jessica 没有 <code>master</code> 分支的推送权限——只有整合者有——所以为了与 John 协作必须推送另一个分支。</p>
+<pre><code class="language-shell">$ git push -u origin featureA
+...
+To jessica@githost:simplegit.git
+ * [new branch]      featureA -&gt; featureA
+</code></pre>
+<p>Jessica 向 John 发邮件告诉他已经推送了一些工作到 <code>featureA</code> 分支现在可以看一看。<br>当她等待 John 的反馈时，Jessica 决定与 Josie 开始在 <code>featureB</code> 上工作。<br>为了开始工作，她基于服务器的 <code>master</code> 分支开始了一个新分支。</p>
+<pre><code class="language-shell"># Jessica&#39;s Machine
+$ git fetch origin
+$ git checkout -b featureB origin/master
+Switched to a new branch &#39;featureB&#39;
+</code></pre>
+<p>现在，Jessica 在 <code>featureB</code> 分支上创建了几次提交：</p>
+<pre><code class="language-shell">$ vim lib/simplegit.rb
+$ git commit -am &#39;made the ls-tree function recursive&#39;
+[featureB e5b0fdc] made the ls-tree function recursive
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+$ vim lib/simplegit.rb
+$ git commit -am &#39;add ls-files&#39;
+[featureB 8512791] add ls-files
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+</code></pre>
+<p>现在 Jessica 的仓库看起来像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/managed-team-1.png" alt="Jessica 的初始提交历史"></p>
+<p>她准备好推送工作了，但是一封来自 Josie 的邮件告知一些初始的“featureB”<br>工作已经被推送到服务器的 <code>featureBee</code> 上了。<br>Jessica 在能够将她的工作推送到服务器前，需要将那些改动与她自己的合并。<br>她首先通过 <code>git fetch</code> 抓取了 Josie 的改动：</p>
+<pre><code class="language-shell">$ git fetch origin
+...
+From jessica@githost:simplegit
+ * [new branch]      featureBee -&gt; origin/featureBee
+</code></pre>
+<p>假设 Jessica 还在她检出的 <code>featureB</code> 分支上，现在可以通过 <code>git merge</code> 将其合并到她做的工作中了：</p>
+<pre><code class="language-shell">$ git merge origin/featureBee
+Auto-merging lib/simplegit.rb
+Merge made by the &#39;recursive&#39; strategy.
+ lib/simplegit.rb |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+</code></pre>
+<p>此时，Jessica 想要将所有合并后的“featureB”推送回服务器，但她并不想直接推送她自己的 <code>featureB</code> 分支。<br>由于 Josie 已经开启了一个上游的 <code>featureBee</code> 分支，因此 Jessica 想要推送到 <em>这个</em> 分支上，于是她这样做：</p>
+<pre><code class="language-shell">$ git push -u origin featureB:featureBee
+...
+To jessica@githost:simplegit.git
+   fba9af8..cd685d1  featureB -&gt; featureBee
+</code></pre>
+<p>这称作一个 <em>引用规范</em>。<br>查看相关章节了解关于 Git 引用规范与通过它们可以做的不同的事情的详细讨论。<br>也要注意 <code>-u</code> 标记；这是 <code>--set-upstream</code> 的简写，该标记会为之后轻松地推送与拉取配置分支。</p>
+<p>紧接着，John 发邮件给 Jessica 说他已经推送了一些改动到 <code>featureA</code> 分支并要求她去验证它们。<br>她运行一个 <code>git fetch</code> 来拉取下那些改动：</p>
+<pre><code class="language-shell">$ git fetch origin
+...
+From jessica@githost:simplegit
+   3300904..aad881d  featureA   -&gt; origin/featureA
+</code></pre>
+<p>Jessica 通过比较新抓取的 <code>featureA</code> 分支和她同一分支的本地副本，看到了 John 的新工作日志。</p>
+<pre><code class="language-shell">$ git log featureA..origin/featureA
+commit aad881d154acdaeb2b6b18ea0e827ed8a6d671e6
+Author: John Smith &lt;jsmith@example.com&gt;
+Date:   Fri May 29 19:57:33 2009 -0700
+
+    changed log output to 30 from 25
+</code></pre>
+<p>如果 Jessica 觉得可以，她就能将 John 的新工作合并到她本地的 <code>featureA</code> 分支上：</p>
+<pre><code class="language-shell">$ git checkout featureA
+Switched to branch &#39;featureA&#39;
+$ git merge origin/featureA
+Updating 3300904..aad881d
+Fast forward
+ lib/simplegit.rb |   10 +++++++++-
+1 files changed, 9 insertions(+), 1 deletions(-)
+</code></pre>
+<p>最后，Jessica 可能想要对整个合并后的内容做一些小修改，<br>于是她将这些修改提交到了本地的 <code>featureA</code> 分支，接着将最终的结果推送回了服务器。</p>
+<pre><code class="language-shell">$ git commit -am &#39;small tweak&#39;
+[featureA 774b3ed] small tweak
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+$ git push
+...
+To jessica@githost:simplegit.git
+   3300904..774b3ed  featureA -&gt; featureA
+</code></pre>
+<p>Jessica 的提交历史现在看起来像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/managed-team-2.png" alt="在一个主题分支提交后 Jessica 的历史"></p>
+<p>这时，Jessica、Josie 与 John 通知整合者服务器上的 <code>featureA</code> 与 <code>featureBee</code> 分支准备好整合到主线中了。<br>在整合者将这些分支合并到主线后，就能一次将这个新的合并提交抓取下来，历史看起来就会像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/managed-team-3.png" alt="合并了 Jessica 的两个主题分支后她的历史"></p>
+<p>许多团队切换到 Git 就是看中了这种能让多个团队并行工作、并在之后合并不同工作的能力。<br>团队中更小一些的子小组可以通过远程分支协作而不必影响或妨碍整个团队的能力是 Git 的一个巨大优势。<br>在这儿看到的工作流程顺序类似这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/managed-team-flow.png" alt="这种管理团队工作流程的基本顺序"></p>
+<h2 id="派生的公开项目"><a href="#派生的公开项目" class="headerlink" title="派生的公开项目"></a>派生的公开项目</h2><p>向公开项目做贡献有一点儿不同。<br>因为没有权限直接更新项目的分支，你必须用其他办法将工作给维护者。<br>第一个例子描述在支持简单派生的 Git 托管上使用派生来做贡献。<br>许多托管站点支持这个功能（包括 GitHub、BitBucket、repo.or.cz 等等），许多项目维护者期望这种风格的贡献。<br>下一节会讨论偏好通过邮件接受贡献补丁的项目。</p>
+<p>首先，你可能想要克隆主仓库，为计划贡献的补丁或补丁序列创建一个主题分支，然后在那儿做工作。<br>顺序看起来基本像这样：</p>
+<pre><code class="language-shell">$ git clone &lt;url&gt;
+$ cd project
+$ git checkout -b featureA
+  ... work ...
+$ git commit
+  ... work ...
+$ git commit
+</code></pre>
+<blockquote>
+<p>你可以用 <code>rebase -i</code> 将工作压缩成一个单独的提交，或者重排提交中的工作使补丁更容易被维护者审核——<br>查看相关章节了解关于交互式变基的更多信息。</p>
+</blockquote>
+<p>当你的分支工作完成后准备将其贡献回维护者，去原始项目中然后点击“Fork”按钮，创建一份自己的可写的项目派生仓库。<br>然后需要在本地仓库中将该仓库添加为一个新的远程仓库，在本例中称作 <code>myfork</code>：</p>
+<pre><code class="language-shell">$ git remote add myfork &lt;url&gt;
+</code></pre>
+<p>然后需要推送工作到上面。<br>相对于合并到主分支再推送上去，推送你正在工作的主题分支到仓库上更简单。<br>原因是工作如果不被接受或者是被拣选的，就不必回退你的 master 分支<br>（拣选操作 <code>cherry-pick</code> 详见相关章节）。<br>如果维护者合并、变基或拣选你的工作，不管怎样你最终会通过拉取他们的仓库找回来你的工作。</p>
+<p>在任何情况下，你都可以使用下面的命令推送你的工作：</p>
+<pre><code class="language-shell">$ git push -u myfork featureA
+</code></pre>
+<p><strong>git commands, request-pull</strong><br>当工作已经被推送到你的派生仓库后，你需要通知原项目的维护者你有想要他们合并的工作。<br>这通常被称作一个 <em>拉取请求（Pull Request）</em>，你通常可以通过网站生成它——<br>GitHub 有它自己的 Pull Request 机制，我们将会在相关章节介绍——也可以运行 <code>git request-pull</code> 命令然后将随后的输出通过电子邮件手动发送给项目维护者。</p>
+<p><code>git request-pull</code> 命令接受一个要拉取主题分支的基础分支，以及它们要拉取的 Git 仓库的 URL，<br>产生一个请求拉取的所有修改的摘要。<br>例如，Jessica 想要发送给 John 一个拉取请求，她已经在刚刚推送的分支上做了两次提交。她可以运行这个：</p>
+<pre><code class="language-shell">$ git request-pull origin/master myfork
+The following changes since commit 1edee6b1d61823a2de3b09c160d7080b8d1b3a40:
+Jessica Smith (1):
+        added a new function
+
+are available in the git repository at:
+
+  git://githost/simplegit.git featureA
+
+Jessica Smith (2):
+      add limit to log function
+      change log output to 30 from 25
+
+ lib/simplegit.rb |   10 +++++++++-
+ 1 files changed, 9 insertions(+), 1 deletions(-)
+</code></pre>
+<p>此输出可被发送给维护者——它告诉他们工作是从哪个分支开始的、提交的摘要、以及从哪里拉取这些工作。</p>
+<p>在一个你不是维护者的项目上，通常有一个总是跟踪 <code>origin/master</code> 的 <code>master</code> 分支会很方便，在主题分支上做工作是因为如果它们被拒绝时你可以轻松地丢弃。<br>如果同一时间主仓库移动了然后你的提交不再能干净地应用，那么使工作主题独立于主题分支也会使你变基（rebase）工作时更容易。<br>例如，你想要提供第二个特性工作到项目，不要继续在刚刚推送的主题分支上工作——从主仓库的 <code>master</code> 分支重新开始：</p>
+<pre><code class="language-shell">$ git checkout -b featureB origin/master
+  ... work ...
+$ git commit
+$ git push myfork featureB
+$ git request-pull origin/master myfork
+  ... email generated request pull to maintainer ...
+$ git fetch origin
+</code></pre>
+<p>现在，每一个特性都保存在一个贮藏库中——类似于补丁队列——可以重写、变基与修改而不会让特性互相干涉或互相依赖，像这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/public-small-1.png" alt="&#96;featureB&#96; 的初始提交历史"></p>
+<p>假设项目维护者已经拉取了一串其他补丁，然后尝试拉取你的第一个分支，但是没有干净地合并。<br>在这种情况下，可以尝试变基那个分支到 <code>origin/master</code> 的顶部，为维护者解决冲突，然后重新提交你的改动：</p>
+<pre><code class="language-shell">$ git checkout featureA
+$ git rebase origin/master
+$ git push -f myfork featureA
+</code></pre>
+<p>这样会重写你的历史，现在看起来像是下图：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/public-small-2.png" alt="&#96;featureA&#96; 工作之后的提交历史"></p>
+<p>因为你将分支变基了，所以必须为推送命令指定 <code>-f</code> 选项，这样才能将服务器上有一个不是它的后代的提交的 <code>featureA</code> 分支替换掉。<br>一个替代的选项是推送这个新工作到服务器上的一个不同分支（可能称作 <code>featureAv2</code>）。</p>
+<p>让我们看一个更有可能的情况：维护者看到了你的第二个分支上的工作并且很喜欢其中的概念，但是想要你修改一下实现的细节。<br>你也可以利用这次机会将工作基于项目现在的 <code>master</code> 分支。<br>你从现在的 <code>origin/master</code> 分支开始一个新分支，在那儿压缩 <code>featureB</code> 的改动，解决任何冲突，改变实现，然后推送它为一个新分支。</p>
+<p><strong>git commands, merge, squash</strong></p>
+<pre><code class="language-shell">$ git checkout -b featureBv2 origin/master
+$ git merge --squash featureB
+  ... change implementation ...
+$ git commit
+$ git push myfork featureBv2
+</code></pre>
+<p><code>--squash</code> 选项接受被合并的分支上的所有工作，并将其压缩至一个变更集，<br>使仓库变成一个真正的合并发生的状态，而不会真的生成一个合并提交。<br>这意味着你的未来的提交将会只有一个父提交，并允许你引入另一个分支的所有改动，<br>然后在记录一个新提交前做更多的改动。同样 <code>--no-commit</code> 选项在默认合并过程中可以用来延迟生成合并提交。</p>
+<p>现在你可以给维护者发送一条消息，表示你已经做了要求的修改然后他们可以在你的 <code>featureBv2</code> 分支上找到那些改动。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/public-small-3.png" alt="&#96;featureBv2&#96; 工作之后的提交历史"></p>
+<h2 id="通过邮件的公开项目"><a href="#通过邮件的公开项目" class="headerlink" title="通过邮件的公开项目"></a>通过邮件的公开项目</h2><p>许多项目建立了接受补丁的流程——需要检查每一个项目的特定规则，因为它们之间有区别。<br>因为有几个历史悠久的、大型的项目会通过一个开发者的邮件列表接受补丁，现在我们将会通过一个例子来演示。</p>
+<p>工作流程与之前的用例是类似的——你为工作的每一个补丁序列创建主题分支。<br>区别是如何提交它们到项目中。<br>生成每一个提交序列的电子邮件版本然后邮寄它们到开发者邮件列表，而不是派生项目然后推送到你自己的可写版本。</p>
+<pre><code class="language-shell">$ git checkout -b topicA
+  ... work ...
+$ git commit
+  ... work ...
+$ git commit
+</code></pre>
+<p><strong>git commands, format-patch</strong><br>现在有两个提交要发送到邮件列表。<br>使用 <code>git format-patch</code> 来生成可以邮寄到列表的 mbox 格式的文件——它将每一个提交转换为一封电子邮件，提交信息的第一行作为主题，剩余信息与提交引入的补丁作为正文。<br>它有一个好处是使用 <code>format-patch</code> 生成的一封电子邮件应用的提交正确地保留了所有的提交信息。</p>
+<pre><code class="language-shell">$ git format-patch -M origin/master
+0001-add-limit-to-log-function.patch
+0002-changed-log-output-to-30-from-25.patch
+</code></pre>
+<p><code>format-patch</code> 命令打印出它创建的补丁文件名字。<br><code>-M</code> 开关告诉 Git 查找重命名。<br>文件最后看起来像这样：</p>
+<pre><code class="language-shell">$ cat 0001-add-limit-to-log-function.patch
+From 330090432754092d704da8e76ca5c05c198e71a8 Mon Sep 17 00:00:00 2001
+From: Jessica Smith &lt;jessica@example.com&gt;
+Date: Sun, 6 Apr 2008 10:17:23 -0700
+Subject: [PATCH 1/2] add limit to log function
+
+Limit log functionality to the first 20
+
+---
+ lib/simplegit.rb |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/lib/simplegit.rb b/lib/simplegit.rb
+index 76f47bc..f9815f1 100644
+--- a/lib/simplegit.rb
++++ b/lib/simplegit.rb
+@@ -14,7 +14,7 @@ class SimpleGit
+   end
+
+   def log(treeish = &#39;master&#39;)
+-    command(&quot;git log #{treeish}&quot;)
++    command(&quot;git log -n 20 #{treeish}&quot;)
+   end
+
+   def ls_tree(treeish = &#39;master&#39;)
+--
+2.1.0
+</code></pre>
+<p>也可以编辑这些补丁文件为邮件列表添加更多不想要在提交信息中显示出来的信息。<br>如果在 <code>---</code> 行与补丁开头（<code>diff --git</code> 行）之间添加文本，那么开发者就可以阅读它，但是应用补丁时会忽略它。</p>
+<p>为了将其邮寄到邮件列表，你既可以将文件粘贴进电子邮件客户端，也可以通过命令行程序发送它。<br>粘贴文本经常会发生格式化问题，特别是那些不会合适地保留换行符与其他空白的 “更聪明的” 客户端。<br>幸运的是，Git 提供了一个工具帮助你通过 IMAP 发送正确格式化的补丁，这可能对你更容易些。<br>我们将会演示如何通过 Gmail 发送一个补丁，它正好是我们所知最好的邮件代理；可以在之前提到的 Git 源代码中的 <code>Documentation/SubmittingPatches</code> 文件的最下面了解一系列邮件程序的详细指令。</p>
+<p><strong>git commands, config</strong> <strong>email</strong><br>首先，需要在 <code>~/.gitconfig</code> 文件中设置 imap 区块。<br>可以通过一系列的 <code>git config</code> 命令来分别设置每一个值，或者手动添加它们，不管怎样最后配置文件应该看起来像这样：</p>
+<pre><code class="language-ini">[imap]
+  folder = &quot;[Gmail]/Drafts&quot;
+  host = imaps://imap.gmail.com
+  user = user@gmail.com
+  pass = YX]8g76G_2^sFbd
+  port = 993
+  sslverify = false
+</code></pre>
+<p>如果 IMAP 服务器不使用 SSL，最后两行可能没有必要，host 的值会是 <code>imap://</code> 而不是 <code>imaps://</code>。<br>当那些设置完成后，可以使用 <code>git imap-send</code> 将补丁序列放在特定 IMAP 服务器的 Drafts 文件夹中：</p>
+<pre><code class="language-shell">$ cat *.patch |git imap-send
+Resolving imap.gmail.com... ok
+Connecting to [74.125.142.109]:993... ok
+Logging in...
+sending 2 messages
+100% (2/2) done
+</code></pre>
+<p>此时，你可以到 Drafts 文件夹中，修改收件人字段为想要发送补丁的邮件列表，<br>可能需要抄送给维护者或负责那个部分的人，然后发送。</p>
+<p>你也可以通过一个 SMTP 服务器发送补丁。<br>同之前一样，你可以通过一系列的 <code>git config</code> 命令来分别设置选项，<br>或者你可以手动地将它们添加到你的 <code>~/.gitconfig</code> 文件的 sendmail 区块：</p>
+<pre><code class="language-ini">[sendemail]
+  smtpencryption = tls
+  smtpserver = smtp.gmail.com
+  smtpuser = user@gmail.com
+  smtpserverport = 587
+</code></pre>
+<p>当这完成后，你可以使用 <code>git send-email</code> 发送你的补丁：</p>
+<pre><code class="language-shell">$ git send-email *.patch
+0001-added-limit-to-log-function.patch
+0002-changed-log-output-to-30-from-25.patch
+Who should the emails appear to be from? [Jessica Smith &lt;jessica@example.com&gt;]
+Emails will be sent from: Jessica Smith &lt;jessica@example.com&gt;
+Who should the emails be sent to? jessica@example.com
+Message-ID to be used as In-Reply-To for the first email? y
+</code></pre>
+<p>然后，对于正在发送的每一个补丁，Git 会吐出这样的一串日志信息：</p>
+<pre><code>(mbox) Adding cc: Jessica Smith &lt;jessica@example.com&gt; from
+  \line &#39;From: Jessica Smith &lt;jessica@example.com&gt;&#39;
+OK. Log says:
+Sendmail: /usr/sbin/sendmail -i jessica@example.com
+From: Jessica Smith &lt;jessica@example.com&gt;
+To: jessica@example.com
+Subject: [PATCH 1/2] added limit to log function
+Date: Sat, 30 May 2009 13:29:15 -0700
+Message-Id: &lt;1243715356-61726-1-git-send-email-jessica@example.com&gt;
+X-Mailer: git-send-email 1.6.2.rc1.20.g8c5b.dirty
+In-Reply-To: &lt;y&gt;
+References: &lt;y&gt;
+
+Result: OK
+</code></pre>
+<h2 id="维护项目"><a href="#维护项目" class="headerlink" title="维护项目"></a>维护项目</h2><p>除了如何有效地参与一个项目的贡献之外，你可能也需要了解如何维护项目。<br>这包含接受并应用别人使用 <code>format-patch</code> 生成并通过电子邮件发送过来的补丁，<br>或对项目添加的远程版本库分支中的更改进行整合。<br>但无论是管理版本库，还是帮忙验证、审核收到的补丁，都需要同其他贡献者约定某种长期可持续的工作方式。</p>
+<h3 id="在主题分支中工作"><a href="#在主题分支中工作" class="headerlink" title="在主题分支中工作"></a>在主题分支中工作</h3><p>如果你想向项目中整合一些新东西，最好将这些尝试局限在 <em>主题分支</em>——一种通常用来尝试新东西的临时分支中。<br>这样便于单独调整补丁，如果遇到无法正常工作的情况，可以先不用管，等到有时间的时候再来处理。<br>如果你基于你所尝试进行工作的特性为分支创建一个简单的名字，比如 <code>ruby_client</code> 或者具有类似描述性的其他名字，这样即使你必须暂时抛弃它，以后回来时也不会忘记。<br>项目的维护者一般还会为这些分支附带命名空间，比如 <code>sc/ruby_client</code>（其中 <code>sc</code> 是贡献该项工作的人名称的简写）。<br>你应该记得，可以使用如下方式基于 <code>master</code> 分支建立主题分支：</p>
+<pre><code class="language-shell">$ git branch sc/ruby_client master
+</code></pre>
+<p>或者如果你同时想立刻切换到新分支上的话，可以使用 <code>checkout -b</code> 选项：</p>
+<pre><code class="language-shell">$ git checkout -b sc/ruby_client master
+</code></pre>
+<p>现在你已经准备好将你收到的贡献加入到这个主题分支，并考虑是否将其合并到长期分支中去了。</p>
+<h3 id="应用来自邮件的补丁"><a href="#应用来自邮件的补丁" class="headerlink" title="应用来自邮件的补丁"></a>应用来自邮件的补丁</h3><p>如果你通过电子邮件收到了一个需要整合进入项目的补丁，你需要将其应用到主题分支中进行评估。<br>有两种应用该种补丁的方法：使用 <code>git apply</code>，或者使用 <code>git am</code>。</p>
+<h4 id="使用-apply-命令应用补丁"><a href="#使用-apply-命令应用补丁" class="headerlink" title="使用 apply 命令应用补丁"></a>使用 <code>apply</code> 命令应用补丁</h4><p>如果你收到了一个使用 <code>git diff</code> 或 Unix <code>diff</code> 命令的变体（不推荐使用这种方式，具体见下一节）<br>创建的补丁，可以使用 <code>git apply</code> 命令来应用。<br>假设你将补丁保存在了 <code>/tmp/patch-ruby-client.patch</code> 中，可以这样应用补丁：</p>
+<pre><code class="language-shell">$ git apply /tmp/patch-ruby-client.patch
+</code></pre>
+<p>这会修改工作目录中的文件。<br>它与运行 <code>patch -p1</code> 命令来应用补丁几乎是等效的，但是这种方式更加严格，相对于 patch 来说，它能够接受的模糊匹配更少。<br>它也能够处理 <code>git diff</code> 格式文件所描述的文件添加、删除和重命名操作，而 <code>patch</code> 则不会。<br>最后，<code>git apply</code> 命令采用了一种“全部应用，否则就全部撤销（apply all or abort all）”的模型，<br>即补丁只有全部内容都被应用和完全不被应用两个状态，而 <code>patch</code> 可能会导致补丁文件被部分应用，<br>最后使你的工作目录保持在一个比较奇怪的状态。<br>总体来看，<code>git apply</code> 命令要比 <code>patch</code> 谨慎得多。<br>并且，它不会为你创建提交——在运行之后，你需要手动暂存并提交补丁所引入的更改。</p>
+<p>在实际应用补丁前，你还可以使用 git apply 来检查补丁是否可以顺利应用——即对补丁运行 <code>git apply --check</code> 命令：</p>
+<pre><code class="language-shell">$ git apply --check 0001-seeing-if-this-helps-the-gem.patch
+error: patch failed: ticgit.gemspec:1
+error: ticgit.gemspec: patch does not apply
+</code></pre>
+<p>如果没有产生输出，则该补丁可以顺利应用。<br>如果检查失败了，该命令还会以一个非零的状态退出，所以需要时你也可以在脚本中使用它。</p>
+<h4 id="使用-am-命令应用补丁"><a href="#使用-am-命令应用补丁" class="headerlink" title="使用 am 命令应用补丁"></a>使用 <code>am</code> 命令应用补丁</h4><p>如果补丁的贡献者也是一个 Git 用户，并且其能熟练使用 <code>format-patch</code> 命令来生成补丁，这样的话你的工作会变得更加轻松，因为这种补丁中包含了作者信息和提交信息供你参考。<br>如果可能的话，请鼓励贡献者使用 <code>format-patch</code> 而不是 <code>diff</code> 来为你生成补丁。<br>而只有对老式的补丁，你才必须使用 <code>git apply</code> 命令。</p>
+<p>要应用一个由 <code>format-patch</code> 命令生成的补丁，你应该使用 <code>git am</code> 命令<br>（该命令的名字 <code>am</code> 表示它“应用（Apply）一系列来自邮箱（Mailbox）的补丁”）。<br>从技术的角度看，<code>git am</code> 是为了读取 mbox 文件而构建的，<br>mbox 是一种用来在单个文本文件中存储一个或多个电子邮件消息的简单纯文本格式。<br>其大致格式如下所示：</p>
+<pre><code>From 330090432754092d704da8e76ca5c05c198e71a8 Mon Sep 17 00:00:00 2001
+From: Jessica Smith &lt;jessica@example.com&gt;
+Date: Sun, 6 Apr 2008 10:17:23 -0700
+Subject: [PATCH 1/2] add limit to log function
+
+Limit log functionality to the first 20
+</code></pre>
+<p>这其实就是你前面看到的 <code>git format-patch</code> 命令输出的开始几行，<br>而同时它也是有效的 mbox 电子邮件格式。<br>如果有人使用 <code>git send-email</code> 命令将补丁以电子邮件的形式发送给你，<br>你便可以将它下载为 mbox 格式的文件，之后将 git am 命令指向该文件，它会应用其中包含的所有补丁。<br>如果你所使用的邮件客户端能够同时将多封邮件保存为 mbox 格式的文件，<br>你甚至能够将一系列补丁打包为单个 mbox 文件，并利用 <code>git am</code> 命令将它们一次性全部应用。</p>
+<p>然而，如果贡献者将 <code>git format-patch</code> 生成的补丁文件上传到工单系统或类似的任务处理系统，<br>你可以先将其保存到本地，之后通过 <code>git am</code> 来应用补丁：</p>
+<pre><code class="language-shell">$ git am 0001-limit-log-function.patch
+Applying: add limit to log function
+</code></pre>
+<p>你会看到补丁被顺利地应用，并且为你自动创建了一个新的提交。<br>其中的作者信息来自于电子邮件头部的 <code>From</code> 和 <code>Date</code> 字段，提交消息则取自 <code>Subject</code> 和邮件正文中补丁之前的内容。<br>比如，应用上面那个 mbox 示例后生成的提交是这样的：</p>
+<pre><code class="language-shell">$ git log --pretty=fuller -1
+commit 6c5e70b984a60b3cecd395edd5b48a7575bf58e0
+Author:     Jessica Smith &lt;jessica@example.com&gt;
+AuthorDate: Sun Apr 6 10:17:23 2008 -0700
+Commit:     Scott Chacon &lt;schacon@gmail.com&gt;
+CommitDate: Thu Apr 9 09:19:06 2009 -0700
+
+   add limit to log function
+
+   Limit log functionality to the first 20
+</code></pre>
+<p>其中 <code>Commit</code> 信息表示的是应用补丁的人和应用补丁的时间。<br><code>Author</code> 信息则表示补丁的原作者和原本的创建时间。</p>
+<p>但是，有时候无法顺利地应用补丁。<br>这也许是因为你的主分支和创建补丁的分支相差较多，也有可能是因为这个补丁依赖于其他你尚未应用的补丁。<br>这种情况下，<code>git am</code> 进程将会报错并且询问你要做什么：</p>
+<pre><code class="language-shell">$ git am 0001-seeing-if-this-helps-the-gem.patch
+Applying: seeing if this helps the gem
+error: patch failed: ticgit.gemspec:1
+error: ticgit.gemspec: patch does not apply
+Patch failed at 0001.
+When you have resolved this problem run &quot;git am --resolved&quot;.
+If you would prefer to skip this patch, instead run &quot;git am --skip&quot;.
+To restore the original branch and stop patching run &quot;git am --abort&quot;.
+</code></pre>
+<p>该命令将会在所有出现问题的文件内加入冲突标记，就和发生冲突的合并或变基操作一样。<br>而你解决问题的手段很大程度上也是一样的——即手动编辑那些文件来解决冲突，暂存新的文件，<br>之后运行 <code>git am --resolved</code> 继续应用下一个补丁：</p>
+<pre><code class="language-shell">$ (fix the file)
+$ git add ticgit.gemspec
+$ git am --resolved
+Applying: seeing if this helps the gem
+</code></pre>
+<p>如果你希望 Git 能够尝试以更加智能的方式解决冲突，你可以对其传递 <code>-3</code> 选项来使 Git 尝试进行三方合并。<br>该选项默认并没有打开，因为如果用于创建补丁的提交并不在你的版本库内的话，这样做是没有用处的。<br>而如果你确实有那个提交的话——比如补丁是基于某个公共提交的——那么通常 <code>-3</code> 选项对于应用有冲突的补丁是更加明智的选择。</p>
+<pre><code class="language-shell">$ git am -3 0001-seeing-if-this-helps-the-gem.patch
+Applying: seeing if this helps the gem
+error: patch failed: ticgit.gemspec:1
+error: ticgit.gemspec: patch does not apply
+Using index info to reconstruct a base tree...
+Falling back to patching base and 3-way merge...
+No changes -- Patch already applied.
+</code></pre>
+<p>比如上面这种情况，如果没有 <code>-3</code> 选项的话，这看起来就像是存在一个冲突。<br>由于使用了 <code>-3</code> 选项，该补丁就被干净地应用了</p>
+<p>如果你正在利用一个 mbox 文件应用多个补丁，也可以在交互模式下运行 <code>am</code> 命令，<br>这样在每个补丁之前，它会停住询问你是否要应用该补丁：</p>
+<pre><code class="language-shell">$ git am -3 -i mbox
+Commit Body is:
+--------------------------
+seeing if this helps the gem
+--------------------------
+Apply? [y]es/[n]o/[e]dit/[v]iew patch/[a]ccept all
+</code></pre>
+<p>这在你保存的补丁较多时很好用，因为你可以在应用之前查看忘掉内容的补丁，并且跳过已经应用过的补丁。</p>
+<p>当与你的特性相关的所有补丁都被应用并提交到分支中之后，你就可以选择是否以及如何将其整合到更长期的分支中去了。</p>
+<h3 id="检出远程分支"><a href="#检出远程分支" class="headerlink" title="检出远程分支"></a>检出远程分支</h3><p>如果你的贡献者建立了自己的版本库，并且向其中推送了若干修改，<br>之后将版本库的 URL 和包含更改的远程分支发送给你，那么你可以将其添加为一个远程分支，并且在本地进行合并。</p>
+<p>比如 Jessica 向你发送了一封电子邮件，内容是在她的版本库中的 <code>ruby-client</code> 分支中有一个很不错的新功能，<br>为了测试该功能，你可以将其添加为一个远程分支，并在本地检出：</p>
+<pre><code class="language-shell">$ git remote add jessica git://github.com/jessica/myproject.git
+$ git fetch jessica
+$ git checkout -b rubyclient jessica/ruby-client
+</code></pre>
+<p>如果她再次发邮件说另一个分支中包含另一个优秀功能，因为之前已经设置好远程分支了，<br>你就可以直接进行 <code>fetch</code> 和 <code>checkout</code> 操作。</p>
+<p>这对于与他人长期合作工作来说很有用。<br>而对于提交补丁频率较小的贡献者，相对于每个人维护自己的服务器，不断增删远程分支的做法，使用电子邮件来接收可能会比较省时。<br>况且你也不会想要加入数百个只提供一两个补丁的远程分支。<br>然而，脚本和托管服务在一定程度上可以简化这些工作——这很大程度上依赖于你和你的贡献者开发的方式。</p>
+<p>这种方式的另一种优点是你可以同时得到提交历史。<br>虽然代码合并中可能会出现问题，但是你能获知他人的工作是基于你的历史中的具体哪一个位置；所以 Git 会默认进行三方合并，不需要提供 <code>-3</code> 选项，你也不需要担心补丁是基于某个你无法访问的提交生成的。</p>
+<p>对于非持续性的合作，如果你依然想要以这种方式拉取数据的话，你可以对远程版本库的 URL 调用 <code>git pull</code> 命令。<br>这会执行一个一次性的抓取，而不会将该 URL 存为远程引用：</p>
+<pre><code class="language-shell">$ git pull https://github.com/onetimeguy/project
+From https://github.com/onetimeguy/project
+ * branch            HEAD       -&gt; FETCH_HEAD
+Merge made by the &#39;recursive&#39; strategy.
+</code></pre>
+<h3 id="确定引入了哪些东西"><a href="#确定引入了哪些东西" class="headerlink" title="确定引入了哪些东西"></a>确定引入了哪些东西</h3><p>你已经有了一个包含其他人贡献的主题分支。<br>现在你可以决定如何处理它们了。<br>本节回顾了若干命令，以便于你检查若将其合并入主分支所引入的更改。</p>
+<p>一般来说，你应该对该分支中所有 <code>master</code> 分支尚未包含的提交进行检查。<br>通过在分支名称前加入 <code>--not</code> 选项，你可以排除 <code>master</code> 分支中的提交。<br>这和我们之前使用的 <code>master..contrib</code> 格式是一样的。<br>假设贡献者向你发送了两个补丁，为此你创建了一个名叫 <code>contrib</code> 的分支并在其上应用补丁，你可以运行：</p>
+<pre><code class="language-shell">$ git log contrib --not master
+commit 5b6235bd297351589efc4d73316f0a68d484f118
+Author: Scott Chacon &lt;schacon@gmail.com&gt;
+Date:   Fri Oct 24 09:53:59 2008 -0700
+
+    seeing if this helps the gem
+
+commit 7482e0d16d04bea79d0dba8988cc78df655f16a0
+Author: Scott Chacon &lt;schacon@gmail.com&gt;
+Date:   Mon Oct 22 19:38:36 2008 -0700
+
+    updated the gemspec to hopefully work better
+</code></pre>
+<p>如果要查看每次提交所引入的具体修改，你应该记得可以给 <code>git log</code> 命令传递 <code>-p</code> 选项，这样它会在每次提交后面附加对应的差异（diff）。</p>
+<p>而要查看将该主题分支与另一个分支合并的完整 diff，你可能需要使用一个有些奇怪的技巧来得到正确的结果。<br>你可能会想到这种方式：</p>
+<pre><code class="language-shell">$ git diff master
+</code></pre>
+<p>这个命令会输出一个 diff，但它可能并不是我们想要的。<br>如果在你创建主题分支之后，<code>master</code> 分支向前移动了，你获得的结果就会显得有些不对。<br>这是因为 Git 会直接将该主题分支与 <code>master</code> 分支的最新提交快照进行比较。<br>比如说你在 <code>master</code> 分支中向某个文件添加了一行内容，那么直接比对最新快照的结果看上去就像是你在主题分支中将这一行删除了。</p>
+<p>如果 <code>master</code> 分支是你的主题分支的直接祖先，其实是没有任何问题的；<br>但是一旦两个分支的历史产生了分叉，上述比对产生的 diff 看上去就像是将主题分支中所有的新东西加入，<br>并且将 <code>master</code> 分支所独有的东西删除。</p>
+<p>而你真正想要检查的东西，实际上仅仅是主题分支所添加的更改——也就是该分支与 <code>master</code> 分支合并所要引入的工作。<br>要达到此目的，你需要让 Git 对主题分支上最新的提交与该分支与 <code>master</code> 分支的首个公共祖先进行比较。</p>
+<p>从技术的角度讲，你可以以手工的方式找出公共祖先，并对其显式运行 diff 命令：</p>
+<pre><code class="language-shell">$ git merge-base contrib master
+36c7dba2c95e6bbb78dfa822519ecfec6e1ca649
+$ git diff 36c7db
+</code></pre>
+<p>或者，更简洁的形式：</p>
+<pre><code class="language-shell">$ git diff $(git merge-base contrib master)
+</code></pre>
+<p>然而，这种做法比较麻烦，所以 Git 提供了一种比较便捷的方式：三点语法。<br>对于 <code>git diff</code> 命令来说，你可以通过把 <code>...</code> 置于另一个分支名后来对该分支的最新提交与两个分支的共同祖先进行比较：</p>
+<pre><code class="language-shell">$ git diff master...contrib
+</code></pre>
+<p>该命令仅会显示自当前主题分支与 <code>master</code> 分支的共同祖先起，该分支中的工作。<br>这个语法很有用，应该牢记。</p>
+<h3 id="将贡献的工作整合进来"><a href="#将贡献的工作整合进来" class="headerlink" title="将贡献的工作整合进来"></a>将贡献的工作整合进来</h3><p>当主题分支中所有的工作都已经准备好整合进入更靠近主线的分支时，接下来的问题就是如何进行整合了。<br>此外，还有一个问题是，你想使用怎样的总体工作流来维护你的项目？<br>你的选择有很多，我们会介绍其中的一部分。</p>
+<h4 id="合并工作流"><a href="#合并工作流" class="headerlink" title="合并工作流"></a>合并工作流</h4><p>一种基本的工作流就是将所有的工作直接合并到 <code>master</code> 分支。<br>在这种情况下，<code>master</code> 分支包含的代码是基本稳定的。<br>当你完成某个主题分支的工作，或审核通过了其他人所贡献的工作时，你会将其合并进入 <code>master</code> 分支，之后将主题分支删除，如此反复。</p>
+<p>举例来说，如果我们的版本库包含类似下图的两个名称分别为 <code>ruby_client</code> 和 <code>php_client</code> 的分支，<br>并且我们合并完 <code>ruby_client</code> 分支后，再合并 <code>php_client</code> 分支，那么提交历史最后会变成下图的例子。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/merging-workflows-1.png" alt="包含若干主题分支的提交历史。"></p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/merging-workflows-2.png" alt="合并主题分支之后。"></p>
+<p>这也许是最简单的工作流了，但是当项目更大，或更稳定，你对自己所引入的工作更加在意时，它可能会带来问题。</p>
+<p>如果你的项目非常重要，你可能会使用两阶段合并循环。<br>在这种情况下，你会维护两个长期分支，分别是 <code>master</code> 和 <code>develop</code>，<code>master</code> 分支只会在一个非常稳定的版本发布时才会更新，而所有的新代码会首先整合进入 <code>develop</code> 分支。<br>你定期将这两个分支推送到公共版本库中。<br>每次需要合并新的主题分支时（见下图），你都应该合并进入 <code>develop</code> 分支（见下图）；当打标签发布的时候，你会将 <code>master</code> 分支快进到已经稳定的 <code>develop</code> 分支（见下图）。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/merging-workflows-3.png" alt="合并主题分支前。"></p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/merging-workflows-4.png" alt="合并主题分支后。"></p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/merging-workflows-5.png" alt="一次发布之后。"></p>
+<p>这样当人们克隆你项目的版本库后，既可以检出 <code>master</code> 分支以构建最新的稳定版本并保持更新，<br>也可以检出包含更多前沿内容 <code>develop</code> 分支。<br>你也可以扩展这个概念，维护一个将所有工作合并到一起的整合分支。<br>当该分支的代码稳定并通过测试之后，将其合并进入 <code>develop</code> 分支；<br>经过一段时间，确认其稳定之后，将其以快进的形式并入 <code>master</code> 分支。</p>
+<h4 id="大项目合并工作流"><a href="#大项目合并工作流" class="headerlink" title="大项目合并工作流"></a>大项目合并工作流</h4><p>Git 项目包含四个长期分支：<code>master</code>、<code>next</code>，用于新工作的 <code>pu</code>（proposed updates）和用于维护性向后移植工作（maintenance backports）的 <code>maint</code> 分支。<br>贡献者的新工作会以类似之前所介绍的方式收入主题分支中（见下图）。<br>之后对主题分支进行测试评估，检查其是否已经能够合并，或者仍需要更多工作。<br>安全的主题分支会被合并入 <code>next</code> 分支，之后该分支会被推送使得所有人都可以尝试整合到一起的特性。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/large-merges-1.png" alt="管理复杂的一系列接收贡献的平行主题分支。"></p>
+<p>如果主题分支需要更多工作，它则会被并入 <code>pu</code> 分支。<br>当它们完全稳定之后，会被再次并入 <code>master</code> 分支。<br>这意味着 <code>master</code> 分支始终在进行快进，<code>next</code> 分支偶尔会被变基，而 <code>pu</code> 分支的变基比较频繁：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/large-merges-2.png" alt="将贡献的主题分支并入长期整合分支。"></p>
+<p>当主题分支最终被并入 <code>master</code> 分支后，便会被从版本库中删除掉。<br>Git 项目还有一个从上一次发布中派生出来的 <code>maint</code> 分支来提供向后移植过来的补丁以供发布维护更新。<br>因此，当你克隆 Git 的版本库之后，就会有四个可分别评估该项目开发的不同阶段的可检出的分支，<br>检出哪个分支，取决于你需要多新的版本，或者你想要如何进行贡献；<br>对于维护者来说，这套结构化的工作流能帮助它们审查新的贡献。<br>Git 项目的工作流是特别的。要清晰地理解它，请阅读<br><a target="_blank" rel="noopener" href="https://github.com/git/git/blob/master/Documentation/howto/maintain-git.txt">Git 维护者手册</a>。</p>
+<h4 id="变基与拣选工作流"><a href="#变基与拣选工作流" class="headerlink" title="变基与拣选工作流"></a>变基与拣选工作流</h4><p>为了保持线性的提交历史，有些维护者更喜欢在 <code>master</code> 分支上对贡献过来的工作进行变基和拣选，而不是直接将其合并。<br>当你完成了某个主题分支中的工作，并且决定要将其整合的时候，你可以在该分支中运行变基命令，<br>在当前 <code>master</code> 分支（或者是 <code>develop</code> 等分支）的基础上重新构造修改。<br>如果结果理想的话，你可以快进 <code>master</code> 分支，最后得到一个线性的项目提交历史。</p>
+<p>另一种将引入的工作转移到其他分支的方法是拣选。<br>Git 中的拣选类似于对特定的某次提交的变基。<br>它会提取该提交的补丁，之后尝试将其重新应用到当前分支上。<br>这种方式在你只想引入主题分支中的某个提交，或者主题分支中只有一个提交，而你不想运行变基时很有用。<br>举个例子，假设你的项目提交历史类似：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/rebasing-1.png" alt="拣选之前的示例历史。"></p>
+<p>如果你希望将提交 <code>e43a6</code> 拉取到 <code>master</code> 分支，你可以运行：</p>
+<pre><code class="language-shell">$ git cherry-pick e43a6
+Finished one cherry-pick.
+[master]: created a0a41a9: &quot;More friendly message when locking the index fails.&quot;
+ 3 files changed, 17 insertions(+), 3 deletions(-)
+</code></pre>
+<p>这样会拉取和 <code>e43a6</code> 相同的更改，但是因为应用的日期不同，你会得到一个新的提交 SHA-1 值。<br>现在你的历史会变成这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/rebasing-2.png" alt="拣选主题分支中的一个提交后的历史。"></p>
+<p>现在你可以删除这个主题分支，并丢弃不想拉入的提交。</p>
+<h4 id="Rerere"><a href="#Rerere" class="headerlink" title="Rerere"></a>Rerere</h4><p>如果你在进行大量的合并或变基，或维护一个长期的主题分支，Git 提供的一个叫做“rerere”的功能会有一些帮助。</p>
+<p>Rerere 是“重用已记录的冲突解决方案（reuse recorded resolution）”的意思——它是一种简化冲突解决的方法。<br>当启用 rerere 时，Git 将会维护一些成功合并之前和之后的镜像，当 Git 发现之前已经修复过类似的冲突时，<br>便会使用之前的修复方案，而不需要你的干预。</p>
+<p>这个功能包含两个部分：一个配置选项和一个命令。<br>其中的配置选项是 <code>rerere.enabled</code>，把它放在全局配置中就可以了：</p>
+<pre><code class="language-shell">$ git config --global rerere.enabled true
+</code></pre>
+<p>现在每当你进行一次需要解决冲突的合并时，解决方案都会被记录在缓存中，以备之后使用。</p>
+<p>如果你需要和 rerere 的缓存交互，你可以使用 <code>git rerere</code> 命令。<br>当单独调用它时，Git 会检查解决方案数据库，尝试寻找一个和当前任一冲突相关的匹配项并解决冲突<br>（尽管当 <code>rerere.enabled</code> 被设置为 <code>true</code> 时会自动进行）。<br>它也有若干子命令，可用来查看记录项，删除特定解决方案和清除缓存全部内容等。<br>我们将在相关章节中详细探讨。</p>
+<h3 id="为发布打标签"><a href="#为发布打标签" class="headerlink" title="为发布打标签"></a>为发布打标签</h3><p>当你决定进行一次发布时，你可能想要打一个标签，这样在之后的任何一个提交点都可以重新创建该发布。<br>你在相关章节中已经了解了创建新标签的过程。<br>作为一个维护者，如果你决定要为标签签名的话，打标签的过程应该是这样子的：</p>
+<pre><code class="language-shell">$ git tag -s v1.5 -m &#39;my signed 1.5 tag&#39;
+You need a passphrase to unlock the secret key for
+user: &quot;Scott Chacon &lt;schacon@gmail.com&gt;&quot;
+1024-bit DSA key, ID F721C45A, created 2009-02-09
+</code></pre>
+<p>如果你为标签签名了，你可能会遇到分发用来签名的 PGP 公钥的问题。<br>Git 项目的维护者已经解决了这一问题，其方法是在版本库中以 blob 对象的形式包含他们的公钥，并添加一个直接指向该内容的标签。<br>要完成这一任务，首先你可以通过运行 <code>gpg --list-keys</code> 找出你所想要的 key：</p>
+<pre><code class="language-shell">$ gpg --list-keys
+/Users/schacon/.gnupg/pubring.gpg
+---------------------------------
+pub   1024D/F721C45A 2009-02-09 [expires: 2010-02-09]
+uid                  Scott Chacon &lt;schacon@gmail.com&gt;
+sub   2048g/45D02282 2009-02-09 [expires: 2010-02-09]
+</code></pre>
+<p>之后你可以通过导出 key 并通过管道传递给 <code>git hash-object</code> 来直接将 key 导入到 Git 的数据库中，<code>git hash-object</code> 命令会向 Git 中写入一个包含其内容的新 blob 对象，并向你返回该 blob 对象的 SHA-1 值：</p>
+<pre><code class="language-shell">$ gpg -a --export F721C45A | git hash-object -w --stdin
+659ef797d181633c87ec71ac3f9ba29fe5775b92
+</code></pre>
+<p>既然 Git 中已经包含你的 key 的内容了，你就可以通过指定由 <code>hash-object</code> 命令给出的新 SHA-1 值来创建一个直接指向它的标签：</p>
+<pre><code class="language-shell">$ git tag -a maintainer-pgp-pub 659ef797d181633c87ec71ac3f9ba29fe5775b92
+</code></pre>
+<p>如果你运行 <code>git push --tags</code> 命令，那么 <code>maintainer-pgp-pub</code> 标签将会被共享给所有人。<br>需要校验标签的人可以通过从数据库中直接拉取 blob 对象并导入到 GPG 中来导入 PGP key：</p>
+<pre><code class="language-shell">$ git show maintainer-pgp-pub | gpg --import
+</code></pre>
+<p>人们可以使用这个 key 来校验所有由你签名的标签。<br>另外，如果你在标签信息中包含了一些操作说明，用户可以通过运行 <code>git show &lt;tag&gt;</code> 来获取更多关于标签校验的说明。</p>
+<h3 id="生成一个构建号"><a href="#生成一个构建号" class="headerlink" title="生成一个构建号"></a>生成一个构建号</h3><p>Git 中不存在随每次提交递增的“v123”之类的数字序列，如果你想要为提交附上一个可读的名称，<br>可以对其运行 <code>git describe</code> 命令。作为回应，Git 将会生成一个字符串，<br>它由最近的标签名、自该标签之后的提交数目和你所描述的提交的部分 SHA-1 值（前缀的 <code>g</code> 表示 Git）构成：</p>
+<pre><code class="language-shell">$ git describe master
+v1.6.2-rc1-20-g8c5b85c
+</code></pre>
+<p>这样你在导出一个快照或构建时，可以给出一个便于人们理解的命名。<br>实际上，如果你的 Git 是从 Git 自己的版本库克隆下来并构建的，那么 <code>git --version</code> 命令给出的结果是与此类似的。<br>如果你所描述的提交自身就有一个标签，那么它将只会输出标签名，没有后面两项信息。</p>
+<p>默认情况下， <code>git describe</code> 命令需要有注解的标签（即使用 <code>-a</code> 或 <code>-s</code> 选项创建的标签）；<br>如果你想使用轻量标签（无注解的标签），请在命令后添加 <code>--tags</code> 选项。<br>你也可以使用这个字符串来调用 <code>git checkout</code> 或 <code>git show</code> 命令，<br>但是这依赖于其末尾的简短 SHA-1 值，因此不一定一直有效。<br>比如，最近 Linux 内核为了保证 SHA-1 值对象的唯一性，将其位数由 8 位扩展到了 10 位，<br>导致以前的 <code>git describe</code> 输出全部失效。</p>
+<h3 id="准备一次发布"><a href="#准备一次发布" class="headerlink" title="准备一次发布"></a>准备一次发布</h3><p>现在你可以发布一个构建了。<br>其中一件事情就是为那些不使用 Git 的可怜包们创建一个最新的快照归档。<br>使用 <code>git archive</code> 命令完成此工作：</p>
+<pre><code class="language-shell">$ git archive master --prefix=&#39;project/&#39; | gzip &gt; `git describe master`.tar.gz
+$ ls *.tar.gz
+v1.6.2-rc1-20-g8c5b85c.tar.gz
+</code></pre>
+<p>如果有人将这个压缩包解压，他就可以在一个 <code>project</code> 目录中得到你项目的最新快照。<br>你也可以以类似的方式创建一个 zip 压缩包，但此时你应该向 <code>git archive</code> 命令传递 <code>--format=zip</code> 选项：</p>
+<pre><code class="language-shell">$ git archive master --prefix=&#39;project/&#39; --format=zip &gt; `git describe master`.zip
+</code></pre>
+<p>现在你有了本次发布的一个 tar 包和一个 zip 包，可以将其上传到网站或以电子邮件的形式发送给人们。</p>
+<h3 id="制作提交简报"><a href="#制作提交简报" class="headerlink" title="制作提交简报"></a>制作提交简报</h3><p>现在是时候通知邮件列表里那些好奇你的项目发生了什么的人了。<br>使用 <code>git shortlog</code> 命令可以快速生成一份包含从上次发布之后项目新增内容的修改日志（changelog）类文档。<br>它会对你给定范围内的所有提交进行总结；比如，你的上一次发布名称是 v1.0.1，那么下面的命令可以给出上次发布以来所有提交的总结：</p>
+<pre><code class="language-shell">$ git shortlog --no-merges master --not v1.0.1
+Chris Wanstrath (6):
+      Add support for annotated tags to Grit::Tag
+      Add packed-refs annotated tag support.
+      Add Grit::Commit#to_patch
+      Update version and History.txt
+      Remove stray `puts`
+      Make ls_tree ignore nils
+
+Tom Preston-Werner (4):
+      fix dates in history
+      dynamic version method
+      Version bump to 1.0.2
+      Regenerated gemspec for version 1.0.2
+</code></pre>
+<p>这份整洁的总结包括了自 v1.0.1 以来的所有提交，并且已经按照作者分好组，你可以通过电子邮件将其直接发送到列表中。</p>
+<h1 id="Github教程"><a href="#Github教程" class="headerlink" title="Github教程"></a>Github教程</h1><h2 id="生成-SSH-公钥"><a href="#生成-SSH-公钥" class="headerlink" title="生成 SSH 公钥"></a>生成 SSH 公钥</h2><p>许多 Git 服务器都使用 SSH 公钥进行认证。<br>为了向 Git 服务器提供 SSH 公钥，如果某系统用户尚未拥有密钥，必须事先为其生成一份。<br>这个过程在所有操作系统上都是相似的。<br>首先，你需要确认自己是否已经拥有密钥。<br>默认情况下，用户的 SSH 密钥存储在其 <code>~/.ssh</code> 目录下。<br>进入该目录并列出其中内容，你便可以快速确认自己是否已拥有密钥：</p>
+<pre><code class="language-shell">$ cd ~/.ssh
+$ ls
+authorized_keys2  id_dsa       known_hosts
+config            id_dsa.pub
+</code></pre>
+<p>我们需要寻找一对以 <code>id_dsa</code> 或 <code>id_rsa</code> 命名的文件，其中一个带有 <code>.pub</code> 扩展名。<br><code>.pub</code> 文件是你的公钥，另一个则是与之对应的私钥。<br>如果找不到这样的文件（或者根本没有 <code>.ssh</code> 目录），你可以通过运行 <code>ssh-keygen</code> 程序来创建它们。<br>在 Linux&#x2F;macOS 系统中，<code>ssh-keygen</code> 随 SSH 软件包提供；在 Windows 上，该程序包含于 MSysGit 软件包中。</p>
+<pre><code class="language-shell">$ ssh-keygen -o
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/schacon/.ssh/id_rsa):
+Created directory &#39;/home/schacon/.ssh&#39;.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/schacon/.ssh/id_rsa.
+Your public key has been saved in /home/schacon/.ssh/id_rsa.pub.
+The key fingerprint is:
+d0:82:24:8e:d7:f1:bb:9b:33:53:96:93:49:da:9b:e3 schacon@mylaptop.local
+</code></pre>
+<p>首先 <code>ssh-keygen</code> 会确认密钥的存储位置（默认是 <code>.ssh/id_rsa</code>），然后它会要求你输入两次密钥口令。<br>如果你不想在使用密钥时输入口令，将其留空即可。<br>然而，如果你使用了密码，那么请确保添加了 <code>-o</code> 选项，它会以比默认格式更能抗暴力破解的格式保存私钥。<br>你也可以用 <code>ssh-agent</code> 工具来避免每次都要输入密码。</p>
+<p>现在，进行了上述操作的用户需要将各自的公钥发送给任意一个 Git 服务器管理员<br>（假设服务器正在使用基于公钥的 SSH 验证设置）。<br>他们所要做的就是复制各自的 <code>.pub</code> 文件内容，并将其通过邮件发送。<br>公钥看起来是这样的：</p>
+<pre><code class="language-shell">$ cat ~/.ssh/id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU
+GPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3
+Pbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XA
+t3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/En
+mZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbx
+NrRFi9wrf+M7Q== schacon@mylaptop.local
+</code></pre>
+<p>关于在多种操作系统中生成 SSH 密钥的更深入教程，请参阅 GitHub 的 SSH 密钥指南<br><a target="_blank" rel="noopener" href="https://docs.github.com/cn/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent">https://docs.github.com/cn/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent</a>。</p>
+<h2 id="账户的创建和配置"><a href="#账户的创建和配置" class="headerlink" title="账户的创建和配置"></a>账户的创建和配置</h2><p>你所需要做的第一件事是创建一个免费账户。<br>直接访问 <a target="_blank" rel="noopener" href="https://github.com/">https://github.com</a>，选择一个未被占用的用户名，提供一个电子邮件地址和密码，点击写着“Sign up for GitHub”的绿色大按钮即可。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/signup.png" alt="GitHub 注册表单。"></p>
+<p>你将看到的下一个页面是升级计划的价格页面，目前我们可以直接忽略这个页面。<br>GitHub 会给你提供的邮件地址发送一封验证邮件。<br>尽快到你的邮箱进行验证，这是非常重要的（我们会在后面了解到这点）。</p>
+<blockquote>
+<p>GitHub 为免费账户提供了几乎所有的功能，除了一些高级的特性。</p>
+<p>GitHub 的付费计划包含一些高级工具和功能，不过本书将不涉及这部分内容。<br>关于可选方案及其对比的更多信息见 <a target="_blank" rel="noopener" href="https://github.com/pricing">https://github.com/pricing</a>。</p>
+</blockquote>
+<p>点击屏幕左上角的章鱼猫（Octocat）图标，你将来到控制面板页面。<br>现在，你已经做好了使用 GitHub 的准备工作。</p>
+<h3 id="SSH-访问"><a href="#SSH-访问" class="headerlink" title="SSH 访问"></a>SSH 访问</h3><p><strong>SSH keys, with GitHub</strong><br>现在，你完全可以使用 <code>https://</code> 协议，通过你刚刚创建的用户名和密码访问 Git 版本库。<br>但是，如果仅仅克隆公有项目，你甚至不需要注册——刚刚我们创建的账户是为了以后 fork 其它项目，以及推送我们自己的修改。</p>
+<p>如果你习惯使用 SSH 远程，你需要配置一个公钥。<br>（如果你没有公钥，参考相关章节。）<br>使用窗口右上角的链接打开你的账户设置：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/account-settings.png" alt="“Account settings”链接。"></p>
+<p>然后在左侧选择“SSH keys”部分。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/ssh-keys.png" alt="“SSH keys”链接。"></p>
+<p>在这个页面点击“<code>Add an SSH key</code>”按钮，给你的公钥起一个名字，将你的 <code>~/.ssh/id_rsa.pub</code><br>（或者自定义的其它名字）公钥文件的内容粘贴到文本区，然后点击“Add key”。</p>
+<blockquote>
+<p>确保给你的 SSH 密钥起一个能够记得住的名字。<br>你可以为每一个密钥起名字（例如，“我的笔记本电脑”或者“工作账户”等），以便以后需要吊销密钥时能够方便地区分。</p>
+</blockquote>
+<h3 id="头像"><a href="#头像" class="headerlink" title="头像"></a>头像</h3><p>下一步，如果愿意的话，你可以将生成的头像换成你喜欢的图片。<br>首先，来到“Profile”标签页（在“SSH Keys”标签页上方），点击“Upload new picture”。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/your-profile.png" alt="“Profile”链接。"></p>
+<p>我们选择了本地磁盘上的一个 Git 图标，上传之后还可以对其进行裁剪。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/avatar-crop.png" alt="裁剪头像"></p>
+<p>现在，在网站任意有你参与的位置，人们都可以在你的用户名旁边看到你的头像。</p>
+<p>如果你已经把头像上传到了流行的 Gravatar 托管服务（Wordpress 账户经常使用），默认就会使用这个头像，因此，你就不需要进行这一步骤了。</p>
+<h3 id="邮件地址"><a href="#邮件地址" class="headerlink" title="邮件地址"></a>邮件地址</h3><p>GitHub 使用用户邮件地址区分 Git 提交。<br>如果你在自己的提交中使用了多个邮件地址，希望 GitHub 可以正确地将它们连接起来，<br>你需要在管理页面的 Emails 部分添加你拥有的所有邮箱地址。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/email-settings.png" alt="添加邮件地址"></p>
+<p>在上图中我们可以看到一些不同的状态。<br>顶部的地址是通过验证的，并且被设置为主要地址，这意味着该地址会接收到所有的通知和回复。<br>第二个地址是通过验证的，如果愿意的话，可以将其设置为主要地址。<br>最后一个地址是未通过验证的，这意味着你不能将其设置为主要地址。<br>当 GitHub 发现任意版本库中的任意提交信息包含了这些地址，它就会将其链接到你的账户。</p>
+<h3 id="两步验证"><a href="#两步验证" class="headerlink" title="两步验证"></a>两步验证</h3><p>最后，为了额外的安全性，你绝对应当设置两步验证，简写为 “2FA”。<br>两步验证是一种用于降低因你的密码被盗而带来的账户风险的验证机制，现在已经变得越来越流行。<br>开启两步验证，GitHub 会要求你用两种不同的验证方法，这样，即使其中一个被攻破，攻击者也不能访问你的账户。</p>
+<p>你可以在 Account settings 页面的 Security 标签页中找到 Two-factor Authentication 设置。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/2fa-1.png" alt="Security 标签页中的 2FA"></p>
+<p>点击“Set up two-factor authentication”按钮，会跳转到设置页面。该页面允许你选择是要在登录时使用手机 app 生成辅助码（一种“基于时间的一次性密码”），还是要 GitHub 通过 SMS 发送辅助码。</p>
+<p>选择合适的方法后，按照提示步骤设置 2FA，你的账户会变得更安全，每次登录 GitHub 时都需要提供除密码以外的辅助码。</p>
+<h1 id="对项目做出贡献"><a href="#对项目做出贡献" class="headerlink" title="对项目做出贡献"></a>对项目做出贡献</h1><p>账户已经建立好了，现在我们来了解一些能帮助你对现有的项目做出贡献的知识。</p>
+<h2 id="派生项目"><a href="#派生项目" class="headerlink" title="派生项目"></a>派生项目</h2><p><strong>forking</strong><br>如果你想要参与某个项目，但是并没有推送权限，这时可以对这个项目进行“派生（Fork）”。<br>当你“派生”一个项目时，GitHub 会在你的空间中创建一个完全属于你的项目副本，且你对其具有推送权限。</p>
+<blockquote>
+<p>在以前，“fork”是一个贬义词，指的是某个人使开源项目向不同的方向发展，或者创建一个竞争项目，使得原项目的贡献者分裂。<br>在 GitHub，“fork”指的是你自己的空间中创建的项目副本，这个副本允许你以一种更开放的方式对其进行修改。</p>
+</blockquote>
+<p>通过这种方式，项目的管理者不再需要忙着把用户添加到贡献者列表并给予他们推送权限。<br>人们可以派生这个项目，将修改推送到派生出的项目副本中，并通过创建拉取请求（Pull Request，简称 PR）来让他们的改动进入源版本库，下文我们会详细说明。<br>创建了拉取请求后，就会开启一个可供审查代码的板块，项目的拥有者和贡献者可以在此讨论相关修改，直到项目拥有者对其感到满意，并且认为这些修改可以被合并到版本库。</p>
+<p>你可以通过点击项目页面右上角的“Fork”按钮，来派生这个项目。</p>
+<p><img src="/forkbutton.png" alt="&quot;Fork&quot;按钮"></p>
+<p>稍等片刻，你将被转到新项目页面，该项目包含可写的代码副本。</p>
+<h2 id="GitHub-流程"><a href="#GitHub-流程" class="headerlink" title="GitHub 流程"></a>GitHub 流程</h2><p>GitHub 设计了一个以拉取请求为中心的特殊合作流程。<br>它基于我们在相关章节中提到的工作流程。<br>不管你是在一个紧密的团队中使用单独的版本库，或者使用许多的“Fork”来为一个由陌生人组成的国际企业或网络做出贡献，这种合作流程都能应付。</p>
+<p>流程通常如下：</p>
+<ol>
+<li>派生一个项目</li>
+<li>从 <code>master</code> 分支创建一个新分支</li>
+<li>提交一些修改来改进项目</li>
+<li>将这个分支推送到 GitHub 上</li>
+<li>创建一个拉取请求</li>
+<li>讨论，根据实际情况继续修改</li>
+<li>项目的拥有者合并或关闭你的拉取请求</li>
+<li>将更新后的 <code>master</code> 分支同步到你的派生中</li>
+</ol>
+<p>这基本和相关章节中的一体化管理流程差不多，但是团队可以使用 GitHub 提供的网页工具替代电子邮件来交流和审查修改。</p>
+<p>现在我们来看一个使用这个流程的例子。</p>
+<h3 id="创建拉取请求"><a href="#创建拉取请求" class="headerlink" title="创建拉取请求"></a>创建拉取请求</h3><p>Tony 在找一些能在他的 Arduino 微控制器上运行的代码，他觉得 <a target="_blank" rel="noopener" href="https://github.com/schacon/blink">https://github.com/schacon/blink</a> 中的代码不错。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/blink-01-start.png" alt="他想要做出贡献的项目"></p>
+<p>但是有个问题，这个代码中的闪烁频率太高，我们觉得 3 秒一次比 1 秒一次更好一些。<br>所以让我们来改进这个程序，并将修改后的代码提交给这个项目。</p>
+<p>首先，单击“Fork”按钮来获得这个项目的副本。<br>我们使用的用户名是“tonychacon”，所以这个项目副本的访问地址是： <code>https://github.com/tonychacon/blink</code> 。<br>我们将它克隆到本地，创建一个分支，修改代码，最后再将改动推送到 GitHub。</p>
+<pre><code class="language-shell">$ git clone https://github.com/tonychacon/blink &lt;1&gt;
+Cloning into &#39;blink&#39;...
+
+$ cd blink
+$ git checkout -b slow-blink &lt;2&gt;
+Switched to a new branch &#39;slow-blink&#39;
+
+$ sed -i &#39;&#39; &#39;s/1000/3000/&#39; blink.ino (macOS) &lt;3&gt;
+# If you&#39;re on a Linux system, do this instead:
+# $ sed -i &#39;s/1000/3000/&#39; blink.ino &lt;3&gt;
+
+$ git diff --word-diff &lt;4&gt;
+diff --git a/blink.ino b/blink.ino
+index 15b9911..a6cc5a5 100644
+--- a/blink.ino
++++ b/blink.ino
+@@ -18,7 +18,7 @@ void setup() {
+// the loop routine runs over and over again forever:
+void loop() {
+  digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
+  [-delay(1000);-]{+delay(3000);+}               // wait for a second
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  [-delay(1000);-]{+delay(3000);+}               // wait for a second
+}
+
+$ git commit -a -m &#39;three seconds is better&#39; &lt;5&gt;
+[slow-blink 5ca509d] three seconds is better
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+$ git push origin slow-blink &lt;6&gt;
+Username for &#39;https://github.com&#39;: tonychacon
+Password for &#39;https://tonychacon@github.com&#39;:
+Counting objects: 5, done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 340 bytes | 0 bytes/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+To https://github.com/tonychacon/blink
+ * [new branch]      slow-blink -&gt; slow-blink
+</code></pre>
+<p>&lt;1&gt; 将派生出的副本克隆到本地<br>&lt;2&gt; 创建出名称有意义的分支<br>&lt;3&gt; 修改代码<br>&lt;4&gt; 检查改动<br>&lt;5&gt; 将改动提交到分支中<br>&lt;6&gt; 将新分支推送到 GitHub 的副本中</p>
+<p>现在到 GitHub 上查看之前的项目副本，可以看到 GitHub 提示我们有新的分支，<br>并且显示了一个大大的绿色按钮让我们可以检查我们的改动，并给源项目创建拉取请求。</p>
+<p>你也可以到“Branches”（分支）页面查看分支并创建拉取请求： <code>\https://github.com/&lt;用户名&gt;/&lt;项目名&gt;/branches</code></p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/blink-02-pr.png" alt="拉取请求按钮"></p>
+<p><strong>GitHub, pull requests</strong><br>如果我们点击那个绿色按钮，就会跳到一个新页面，在这里我们可以为拉取请求填写标题和描述。<br>花点时间编写一个清晰有用的描述是非常值得的，这能让原项目拥有者明白你做了什么，<br>为什么这个改动是正确的，以及接受此更改是否能够改进他的项目。</p>
+<p>同时我们也能看到比主分支中所“领先”（ahead）的提交（在这个例子中只有一个）以及所有将会被合并的改动与之前代码的对比。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/blink-03-pull-request-open.png" alt="拉取请求创建页面"></p>
+<p>当你单击了“Create pull request”（创建拉取请求）的按钮后，这个项目的拥有者将会收到一条包含改动和拉取请求页面的链接的提醒。</p>
+<blockquote>
+<p>虽然拉取请求通常是在贡献者准备好在公开项目中提交改动的时候提交，但是也常被用在仍处于开发阶段的内部项目中。<br>因为拉取请求在提交后 <em>依然可以加入新的改动</em> ，它也经常被用来建立团队合作的环境，而不只是在最终阶段使用。</p>
+</blockquote>
+<h3 id="利用拉取请求"><a href="#利用拉取请求" class="headerlink" title="利用拉取请求"></a>利用拉取请求</h3><p>现在，项目的拥有者可以看到你的改动并合并它，拒绝它或是发表评论。<br>在这里我们就当作他喜欢这个点子，但是他想要让灯熄灭的时间比点亮的时间稍长一些。</p>
+<p>接下来可能会通过电子邮件进行互动，就像我们在相关章节中提到的工作流程那样，但是在 GitHub，这些都在线上完成。<br>项目的拥有者可以审查修改，只需要单击某一行，就可以对其发表评论。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/blink-04-pr-comment.png" alt="对拉取请求内的特定一行发表评论"></p>
+<p>当维护者发表评论后，提交拉取请求的人，以及所有正在关注（Watching）这个版本库的用户都会收到通知。<br>我们待会儿将会告诉你如何修改这项设置。现在，如果 Tony 有开启电子邮件提醒，他将会收到这样的一封邮件：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/blink-04-email.png" alt="通过电子邮件发送的评论提醒"></p>
+<p>每个人都能在拉取请求中发表评论。在下图中我们可以看到项目拥有者对某行代码发表评论，<br>并在讨论区留下了一个普通评论。你可以看到被评论的代码也会在互动中显示出来。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/blink-05-general-comment.png" alt="拉取请求讨论页面"></p>
+<p>现在贡献者可以看到如何做才能让他们的改动被接受。幸运的是，这也是一件轻松的事情。<br>如果你使用的是电子邮件进行交流，你需要再次对代码进行修改并重新提交至邮件列表，<br>这些修改会自动更新到拉取请求上。在下图中，你也可以在更新后的拉取请求中看到已折叠的旧代码评论，<br>因为它是在修改后的行上添加的评论。</p>
+<p>对现有的拉取请求添加提交并不会触发提醒，因此 Tony 在推送了他的修正后，<br>还需要通过评论告知项目拥有者他完成了修改请求。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/blink-06-final.png" alt="最终的拉取请求"></p>
+<p>如果你点开拉取请求的“Files Changed”（更改的文件）选项卡，你将会看到“整理过的”差异表<br>—— 也就是这个分支被合并到主分支之后将会产生的所有改动，<br>其实就是 <code>git diff master...&lt;分支名&gt;</code> 命令的执行结果。<br>你可以浏览相关章节来了解更多关于差异表的知识。</p>
+<p>你还会注意到，GitHub 会检查你的拉取请求是否能直接合并，如果可以，将会提供一个按钮来进行合并操作。<br>这个按钮只在你对版本库有写入权限并且可以进行简洁合并时才会显示。<br>你点击后 GitHub 将做出一个“非快进式”（non-fast-forward）合并，<br>即使这个合并 <em>能够</em> 快进式（fast-forward）合并，GitHub 依然会创建一个合并提交。</p>
+<p>如果你需要，你还可以将分支拉取并在本地合并。<br>如果你将这个分支合并到 <code>master</code> 分支中并推送到 GitHub，这个拉取请求会被自动关闭。</p>
+<p>这就是大部分 GitHub 项目使用的工作流程。创建分支，基于分支创建拉取请求，进行讨论，<br>根据需要继续在分支上进行修改，最终关闭或合并拉取请求。</p>
+<blockquote>
+<p>不必总是 Fork<br>有件很重要的事情：你可以在同一个版本库中不同的分支提交拉取请求。<br>如果你正在和某人实现某个功能，而且你对项目有写权限，你可以推送分支到版本库，<br>并在 <code>master</code> 分支提交一个拉取请求并在此进行代码审查和讨论的操作。不需要进行“Fork”。</p>
+</blockquote>
+<h2 id="拉取请求的进阶用法"><a href="#拉取请求的进阶用法" class="headerlink" title="拉取请求的进阶用法"></a>拉取请求的进阶用法</h2><p>目前，我们学到了如何在 GitHub 平台对一个项目进行最基础的贡献。现在我们会教给你一些小技巧，让你可以更加有效率地使用拉取请求。</p>
+<h3 id="将拉取请求制作成补丁"><a href="#将拉取请求制作成补丁" class="headerlink" title="将拉取请求制作成补丁"></a>将拉取请求制作成补丁</h3><p>有一件重要的事情：和大部分通过邮件列表工作的项目对补丁贡献的看法一样，<br>许多项目并不认为拉取请求可以作为补丁。<br>大多数的 GitHub 项目将拉取请求的分支当作对改动的交流方式，并将变更集合起来统一进行合并。</p>
+<p>这是个重要的差异，因为一般来说改动会在代码完成前提出，这和基于邮件列表的补丁贡献有着天差地别。<br>这使得维护者们可以更早的沟通，由社区中的力量能提出更好的方案。<br>当有人从拉取请求提交了一些代码，并且维护者和社区提出了一些意见，这个补丁系列并不需要从头来过，<br>只需要将改动重新提交并推送到分支中，这使得讨论的背景和过程可以齐头并进。</p>
+<p>举个例子，你可以回去看看上面的最终拉取请求图，你会注意到贡献者没有变基他的提交再提交一个新的拉取请求，<br>而是直接增加了新的提交并推送到已有的分支中。<br>如果你之后再回去查看这个拉取请求，你可以轻松地找到这个修改的原因。<br>点击网页上的“Merge”（合并）按钮后，会建立一个合并提交并指向这个拉取请求，你就可以很轻松的研究原来的讨论内容。</p>
+<h3 id="与上游保持同步"><a href="#与上游保持同步" class="headerlink" title="与上游保持同步"></a>与上游保持同步</h3><p>如果你的拉取请求由于过时或其他原因不能干净地合并，你需要进行修复才能让维护者对其进行合并。<br>GitHub 会对每个提交进行测试，让你知道你的拉取请求能否简洁的合并。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/pr-01-fail.png" alt="不能进行干净合并"></p>
+<p>如果你看到了像上图这样的画面，你就需要修复你的分支让这个提示变成绿色，这样维护者就不需要再做额外的工作。</p>
+<p>你有两种方法来解决这个问题。你可以把你的分支变基到目标分支中去<br>（通常是你派生出的版本库中的 <code>master</code> 分支），或者你可以合并目标分支到你的分支中去。</p>
+<p>GitHub 上的大多数的开发者会使用后一种方法，基于我们在上一节提到的理由：<br>我们最看重的是历史记录和最后的合并，变基除了给你带来看上去简洁的历史记录，<br>只会让你的工作变得更加困难且更容易犯错。</p>
+<p>如果你想要合并目标分支来让你的拉取请求变得可合并，你需要将源版本库添加为一个新的远端，并从远端抓取内容，合并主分支的内容到你的分支中去，修复所有的问题并最终重新推送回你提交拉取请求使用的分支。</p>
+<p>在这个例子中，我们再次使用之前的“tonychacon”用户来进行示范，源作者提交了一个改动，<br>使得拉取请求和它产生了冲突。现在来看我们解决这个问题的步骤。</p>
+<pre><code class="language-shell">$ git remote add upstream https://github.com/schacon/blink &lt;1&gt;
+
+$ git fetch upstream &lt;2&gt;
+remote: Counting objects: 3, done.
+remote: Compressing objects: 100% (3/3), done.
+Unpacking objects: 100% (3/3), done.
+remote: Total 3 (delta 0), reused 0 (delta 0)
+From https://github.com/schacon/blink
+ * [new branch]      master     -&gt; upstream/master
+
+$ git merge upstream/master &lt;3&gt;
+Auto-merging blink.ino
+CONFLICT (content): Merge conflict in blink.ino
+Automatic merge failed; fix conflicts and then commit the result.
+
+$ vim blink.ino &lt;4&gt;
+$ git add blink.ino
+$ git commit
+[slow-blink 3c8d735] Merge remote-tracking branch &#39;upstream/master&#39; \
+    into slower-blink
+
+$ git push origin slow-blink &lt;5&gt;
+Counting objects: 6, done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 682 bytes | 0 bytes/s, done.
+Total 6 (delta 2), reused 0 (delta 0)
+To https://github.com/tonychacon/blink
+   ef4725c..3c8d735  slower-blink -&gt; slow-blink
+</code></pre>
+<p>&lt;1&gt; 将源版本库添加为一个远端，并命名为“upstream”（上游）<br>&lt;2&gt; 从远端抓取最新的内容<br>&lt;3&gt; 将该仓库的主分支的内容合并到你的分支中<br>&lt;4&gt; 修复产生的冲突<br>&lt;5&gt; 再推送回同一个分支</p>
+<p>你完成了上面的步骤后，拉取请求将会自动更新并重新检查是否能干净的合并。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/pr-02-merge-fix.png" alt="拉取请求现在可以干净地合并了"></p>
+<p>Git 的伟大之处就是你可以一直重复以上操作。如果你有一个运行了十分久的项目，<br>你可以轻松地合并目标分支且只需要处理最近的一次冲突，这使得管理流程更加容易。</p>
+<p>如果你一定想对分支做变基并进行清理，你可以这么做，但是强烈建议你不要强行地提交到已经提交了拉取请求的分支。<br>如果其他人拉取了这个分支并进行一些修改，你将会遇到相关章节中提到的问题。<br>相对的，将变基后的分支推送到 GitHub 上的一个新分支中，并且创建一个全新的拉取请求引用旧的拉取请求，然后关闭旧的拉取请求。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p>你的下个问题可能是“我该如何引用旧的拉取请求？”。<br>有许多方法可以让你在 GitHub 上的几乎任何地方引用其他东西。</p>
+<p>先从如何对拉取请求或议题（Issue）进行相互引用开始。所有的拉取请求和议题在项目中都会有一个独一无二的编号。<br>举个例子，你无法同时拥有 3 号拉取请求和 3 号议题。如果你想要引用任何一个拉取请求或议题，<br>你只需要在提交或描述中输入 <code>#&lt;编号&gt;</code> 即可。<br>你也可以指定引用其他版本库的议题或拉取请求，如果你想要引用其他人对该版本库的“Fork”中的议题或拉取请求，<br>输入 <code>用户名#&lt;编号&gt;</code> ，如果在不同的版本库中，输入 <code>用户名/版本库名#&lt;编号&gt;</code> 。</p>
+<p>我们来看一个例子。假设我们对上个例子中的分支进行了变基，并为此创建一个新的拉取请求，<br>现在我们希望能在新的拉取请求中引用旧的拉取请求。<br>我们同时希望引用一个派生出的项目中的议题和一个完全不同的项目中的议题，<br>就可以像下图这样填写描述。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/mentions-01-syntax.png" alt="在拉取请求中的交叉引用"></p>
+<p>当我们提交了这个拉取请求，我们将会看到以上内容被渲染成这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/mentions-02-render.png" alt="在拉取请求中渲染后的交叉引用"></p>
+<p>你会注意到完整的 GitHub 地址被简化了，只留下了必要的信息。</p>
+<p>如果 Tony 回去关闭了源拉取请求，我们可以看到一个被引用的提示，<br>GitHub 会自动的反向追踪事件并显示在拉取请求的时间轴上。<br>这意味着任何查看这个拉取请求的人可以轻松地访问新的拉取请求。<br>这个链接就像下图展示的那样。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/mentions-03-closed.png" alt="在拉取请求中渲染后的交叉引用"></p>
+<p>除了议题编号外，你还可以通过使用提交的 SHA-1 来引用提交。<br>你必须完整的写出 40 位长的 SHA-1，GitHub 会在评论中自动地产生指向这个提交的链接。<br>同样的，你可以像引用议题一样对派生的项目中的提交或者其他项目中的提交进行引用。</p>
+<h2 id="GitHub-风格的-Markdown"><a href="#GitHub-风格的-Markdown" class="headerlink" title="GitHub 风格的 Markdown"></a>GitHub 风格的 Markdown</h2><p>对于在 GitHub 中绝大多数文本框中能够做到的事，引用其他议题只是个开始。<br>在议题和拉取请求的描述，评论和代码评论还有其他地方，都可以使用“GitHub 风格的 Markdown”。<br>Markdown 可以让你输入纯文本，但是渲染出丰富的内容。</p>
+<p>查看下面的示例来了解如何书写评论或文本，并通过 Markdown 进行渲染。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/markdown-01-example.png" alt="一个 Markdown 的示例和渲染效果"></p>
+<h3 id="GitHub-风格的-Markdown-1"><a href="#GitHub-风格的-Markdown-1" class="headerlink" title="GitHub 风格的 Markdown"></a>GitHub 风格的 Markdown</h3><p>GitHub 风格的 Markdown 增加了一些基础的 Markdown 中做不到的东西。<br>它在创建拉取请求和议题中的评论和描述时十分有用。</p>
+<h4 id="任务列表"><a href="#任务列表" class="headerlink" title="任务列表"></a>任务列表</h4><p>第一个 GitHub 专属的 Markdown 功能，特别是用在拉取请求中，就是任务列表。<br>一个任务列表可以展示出一系列你想要完成的事情，并带有复选框。<br>把它们放在议题或拉取请求中时，通常可以展示你想要完成的事情。</p>
+<p>你可以这样创建一个任务列表：</p>
+<pre><code class="language-text">- [X] 编写代码
+- [ ] 编写所有测试程序
+- [ ] 为代码编写文档
+</code></pre>
+<p>如果我们将这个列表加入拉取请求或议题的描述中，它将会被渲染成下面这样。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/markdown-02-tasks.png" alt="Markdown 评论中渲染后的任务列表"></p>
+<p>在拉取请求中，任务列表经常被用来在合并之前展示这个分支将要完成的事情。<br>最酷的地方就是，你只需要点击复选框，就能更新评论 —— 你不需要直接修改 Markdown。</p>
+<p>不仅如此，GitHub 还会将你在议题和拉取请求中的任务列表整理起来集中展示。<br>举个例子，如果你在一个拉取请求中有任务清单，你将会在所有拉取请求的总览页面上看到它的进度。<br>这使得人们可以把一个拉取请求分解成不同的小任务，同时便于其他人了解分支的进度。<br>你可以在下图中看到一个例子。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/markdown-03-task-summary.png" alt="在拉取请求列表中的任务列表总结"></p>
+<p>当你在实现一个任务的早期就提交拉取请求，并使用任务清单追踪你的进度，这个功能会十分的有用。</p>
+<h4 id="代码片段"><a href="#代码片段" class="headerlink" title="代码片段"></a>代码片段</h4><p>你也可以在评论中添加代码片段。这在你想要展示尚未提交到分支中的代码时会十分有用。<br>它也经常被用在展示无法正常工作的代码或这个拉取请求需要的代码。</p>
+<p>你需要用“反引号”将需要添加的代码片段包起来。</p>
+<pre><code class="language-text">```java
+for(int i=0 ; i &lt; 5 ; i++)
+{
+   System.out.println(&quot;i is : &quot; + i);
+}
+</code></pre>
+<pre><code>
+如果加入语言的名称，就像我们这里加入的“java”一样，GitHub 会自动尝试对摘录的片段进行语法高亮。
+在下面的例子中，它最终会渲染成这个样子：
+
+![渲染后的代码片段示例](markdown-04-fenced-code.png)
+
+#### 引用
+
+如果你在回复一个很长的评论之中的一小段，你只需要复制你需要的片段，并在每行前添加 `&gt;` 符号即可。
+事实上，因为这个功能会被经常用到，它也有一个快捷键。
+只要你把你要回应的文字选中，并按下 `r` 键，选中的问题会自动引用并填入评论框。
+
+引用的部分就像这样:
+
+```text
+&gt; Whether &#39;tis Nobler in the mind to suffer
+&gt; The Slings and Arrows of outrageous Fortune,
+
+How big are these slings and in particular, these arrows?
+</code></pre>
+<p>经过渲染后，就会变成这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/markdown-05-quote.png" alt="渲染后的引用示例"></p>
+<h4 id="表情符号"><a href="#表情符号" class="headerlink" title="表情符号"></a>表情符号</h4><p>最后，我们可以在评论中使用表情符号。这经常出现在 GitHub 的议题和拉取请求的评论中。<br>GitHub 上甚至有表情助手。如果你在输入评论时以 <code>:</code> 开头，自动完成器会帮助你找到你需要的表情。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/markdown-06-emoji-complete.png" alt="表情符号自动完成器"></p>
+<p>你也可以在评论的任何地方使用 <code>:&lt;表情名称&gt;:</code> 来添加表情符号。<br>举个例子，你可以输入以下文字：</p>
+<pre><code class="language-text">I :eyes: that :bug: and I :cold_sweat:.
+
+:trophy: for :microscope: it.
+
+:+1: and :sparkles: on this :ship:, it&#39;s :fire::poop:!
+
+:clap::tada::panda_face:
+</code></pre>
+<p>渲染之后，就会变成这样：</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/markdown-07-emoji.png" alt="使用了大量表情符号的评论"></p>
+<p>虽然这个功能并不是非常实用，但是它在这种不方便表达感情的媒体里，加入了趣味的元素。</p>
+<blockquote>
+<p>事实上现在已经有大量的在线服务可以使用表情符号，这里有个列表可以让你快速的找到能表达你的情绪的表情符号：<br><a target="_blank" rel="noopener" href="https://www.webfx.com/tools/emoji-cheat-sheet/">https://www.webfx.com/tools/emoji-cheat-sheet/</a></p>
+</blockquote>
+<h4 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h4><p>从技术层面来说，这并不是 GitHub 风格 Markdown 的功能，但是也很有用。<br>如果不想使用 Markdown 语法来插入图片，GitHub 允许你通过拖拽图片到文本区来插入图片。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/markdown-08-drag-drop.png" alt="通过拖拽的方式自动插入图片"></p>
+<p>如果你回去查看上图 ，你会发现文本区上有个“Parsed as Markdown”的提示。<br>点击它你可以了解所有能在 GitHub 上使用的 Markdown 功能。</p>
+<h2 id="让你的-GitHub-公共仓库保持更新"><a href="#让你的-GitHub-公共仓库保持更新" class="headerlink" title="让你的 GitHub 公共仓库保持更新"></a>让你的 GitHub 公共仓库保持更新</h2><p>当你派生了一个 GitHub 仓库之后，你的仓库（即你的“派生”）会独立于原仓库而独立。<br>特别地，当原仓库有新的提交时，GitHub 会通知你：</p>
+<pre><code class="language-text">This branch is 5 commits behind progit:master.
+（本分支落后 progit:master 5 个提交。）
+</code></pre>
+<p>但你的 GitHub 仓库不会被 GitHub 自动更新，这件事必须由你自己来做。还好，这事儿很简单。</p>
+<p>第一种方法无需配置。例如，若你从 <code>https://github.com/progit/progit2.git</code> 派生了项目，<br>你可以像这样更新你的 <code>master</code> 分支：</p>
+<pre><code class="language-shell">$ git checkout master &lt;1&gt;
+$ git pull https://github.com/progit/progit2.git &lt;2&gt;
+$ git push origin master &lt;3&gt;
+</code></pre>
+<p>&lt;1&gt; 如果在另一个分支上，就切换到 <code>master</code><br>&lt;2&gt; 从 <code>https://github.com/progit/progit2.git</code> 抓取更改后合并到 <code>master</code><br>&lt;3&gt; 将 <code>master</code> 分支推送到 <code>origin</code></p>
+<p>这虽然可行，但每次都要输入从哪个 URL 抓取有点麻烦。你可以稍微设置一下来自动完成它：</p>
+<pre><code class="language-shell">$ git remote add progit https://github.com/progit/progit2.git &lt;1&gt;
+$ git branch --set-upstream-to=progit/master master &lt;2&gt;
+$ git config --local remote.pushDefault origin &lt;3&gt;
+</code></pre>
+<p>&lt;1&gt; 添加源仓库并取一个名字，这里叫它 <code>progit</code><br>&lt;2&gt; 将 <code>master</code> 分支设置为从 <code>progit</code> 远端抓取<br>&lt;3&gt; 将默认推送仓库设置为 <code>origin</code></p>
+<p>搞定之后，工作流程为更加简单：</p>
+<pre><code class="language-shell">$ git checkout master &lt;1&gt;
+$ git pull &lt;2&gt;
+$ git push &lt;3&gt;
+</code></pre>
+<p>&lt;1&gt; 如果在另一个分支上，就切换到 <code>master</code><br>&lt;2&gt; 从 <code>progit</code> 抓取更改后合并到 <code>master</code><br>&lt;3&gt; 将 <code>master</code> 分支推送到 <code>origin</code></p>
+<p>这种方法可能很有用，但也不是没有缺点。如果你向 <code>master</code> 提交，再从 <code>progit</code> 中拉取，然后推送到<br><code>origin</code>，Git 会很乐意安静地为您完成这项工作，但不会警告你——所有这些操作在以上设置下都是有效的。<br>所以你必须注意永远不要直接提交到 <code>master</code>，因为该分支实际上属于上游仓库。</p>
+<h2 id="维护项目-1"><a href="#维护项目-1" class="headerlink" title="维护项目"></a>维护项目</h2><p>现在我们可以很方便地向一个项目贡献内容，来看一下另一个方面的内容：创建、维护和管理你自己的项目。</p>
+<h3 id="创建新的版本库"><a href="#创建新的版本库" class="headerlink" title="创建新的版本库"></a>创建新的版本库</h3><p>让我们创建一个版本库来分享我们的项目。<br>通过点击面板右侧的“New repository”按钮，或者顶部工具条你用户名旁边的 <code>+</code> 按钮来开始我们的旅程。 参见下图。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/newrepo.png" alt="这是 “Your repositories” 区域."></p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/new-repo.png" alt="这是 “New repository” 下拉列表."></p>
+<p>这会带你到 “new repository” 表单:</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/newrepoform.png" alt="这是 “new repository” 表单."></p>
+<p>这里除了一个你必须要填的项目名，其他字段都是可选的。<br>现在只需要点击 “Create Repository” 按钮，Duang!!! – 你就在 GitHub 上拥有了一个以 <code>&lt;user&gt;/&lt;project_name&gt;</code> 命名的新仓库了。</p>
+<p>因为目前暂无代码，GitHub 会显示有关创建新版本库或者关联到一个已有的 Git 版本库的一些说明。<br>我们不会在这里详细说明此项，如果你需要复习，去看相关章节。</p>
+<p>现在你的项目就托管在 GitHub 上了，你可以把 URL 给任何你想分享的人。<br>GitHub 上的项目可通过 HTTP 或 SSH 访问，HTTPS 为 <code>\https://github.com/&lt;user&gt;/&lt;project_name&gt;</code> ，<br> SSH 为 <code>git@github.com:&lt;user&gt;/&lt;project_name&gt;</code> 。<br>Git 可以通过以上两种 URL 进行抓取和推送，但是用户的访问权限又因连接时使用的证书不同而异。</p>
+<blockquote>
+<p>通常对于公开项目可以优先分享基于 HTTPS 的 URL，因为用户克隆项目不需要有一个 GitHub 帐号。<br>如果你分享 SSH URL，用户必须有一个帐号并且上传 SSH 密钥才能访问你的项目。<br>HTTPS URL 与你贴到浏览器里查看项目用的地址是一样的。</p>
+</blockquote>
+<h3 id="添加合作者"><a href="#添加合作者" class="headerlink" title="添加合作者"></a>添加合作者</h3><p>如果你想与他人合作，并想给他们提交的权限，你需要把他们添加为 “Collaborators”。<br>如果 Ben，Jeff，Louise 都在 GitHub 上注册了，你想给他们推送的权限，你可以将他们添加到你的项目。<br>这样做会给他们 “推送” 权限，就是说他们对项目和 Git 版本库都有读写的权限。</p>
+<p>点击边栏底部的 “Settings” 链接。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/reposettingslink.png" alt="版本库设置链接."></p>
+<p>然后从左侧菜单中选择 “Collaborators” 。<br>然后，在输入框中填写用户名，点击 “Add collaborator.”<br>如果你想授权给多个人，你可以多次重复这个步骤。<br>如果你想收回权限，点击他们同一行右侧的 “X”</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/collaborators.png" alt="版本库合作者."></p>
+<h3 id="管理合并请求"><a href="#管理合并请求" class="headerlink" title="管理合并请求"></a>管理合并请求</h3><p>现在你有一个包含一些代码的项目，可能还有几个有推送权限的合作者，下面来看当你收到合并请求时该做什么。</p>
+<p>合并请求可以来自仓库副本的一个分支，或者同一仓库的另一个分支。<br>唯一的区别是 fork 过来的通常是和你不能互相推送的人，而内部的推送通常都可以互相访问。</p>
+<p>作为例子，假设你是 “tonychacon” ，你创建了一个名为 “fade” 的 Arduino 项目.</p>
+<h4 id="邮件通知"><a href="#邮件通知" class="headerlink" title="邮件通知"></a>邮件通知</h4><p>有人来修改了你的代码，给你发了一个合并请求。<br>你会收一封关于合并请求的提醒邮件，它看起来像下图。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-01-email.png" alt="新的合并请求的邮件通知."></p>
+<p>关于这个邮件有几个要注意的地方。<br>它会给你一个小的变动统计结果 – 一个包含合并请求中改变的文件和改变了多少的列表。<br>它还给你一个 GitHub 上进行合并请求操作的链接。<br>还有几个可以在命令行使用的 URL。</p>
+<p>如果你注意到 <code>git pull &lt;url&gt; patch-1</code> 这一行，这是一种合并远程分支的简单方式，无需必须添加一个远程分支。<br>我们很快会在相关章节讲到它。<br>如果你愿意，你可以创建并切换到一个主题分支，然后运行这个命令把合并请求合并进来。</p>
+<p>还有一些有趣的 URL，像 <code>.diff</code> 和 <code>.patch</code> ，就像你猜的那样，它们提供 diff 和 patch 的标准版本。<br>你可以技术性地用下面的方法合并“合并请求”：</p>
+<pre><code class="language-shell">$ curl https://github.com/tonychacon/fade/pull/1.patch | git am
+</code></pre>
+<h4 id="在合并请求上进行合作"><a href="#在合并请求上进行合作" class="headerlink" title="在合并请求上进行合作"></a>在合并请求上进行合作</h4><p>就像我们在相关章节中说过的，现在你可以跟开启合并请求的人进行会话。<br>你既可以对某些代码发表评论，也可以对整个提交或整个合并请求发表评论，<br>在任何地方都可以用 GitHub 风格的 Markdown。</p>
+<p>每次有人在合并请求上发表了评论，你都会收到邮件，通知你哪里发生了改变。邮件里面包含一个链接，指向改变的位置，你可以直接在邮件中回复，相当于在合并请求上发表评论。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-03-email-resp.png" alt="回复邮件会包含在帖子（thread）中。"></p>
+<p>一旦代码符合了你的要求，你想把它合并进来，你可以把代码拉取下来在本地进行合并，也可以用我们之前提到过的 <code>git pull &lt;url&gt; &lt;branch&gt;</code> 语法，或者把 fork 添加为一个 remote，然后进行抓取和合并。</p>
+<p>对于很琐碎的合并，你也可以用 GitHub 网站上的 “Merge” 按钮。<br>它会做一个 “non-fast-forward” 合并，即使可以快进（fast-forward）合并也会产生一个合并提交记录。<br>就是说无论如何，只要你点击 merge 按钮，就会产生一个合并提交记录。<br>你可以在下图中看到，如果你点击提示链接，GitHub 会给你所有的这些信息。</p>
+<p><img src="/images/maint-02-merge.png" alt="合并按钮和手工合并一个合并请求的指令."></p>
+<p>如果你决定不合并它，你可以把合并请求关掉，开启合并请求的人会收到通知。</p>
+<h4 id="合并请求引用"><a href="#合并请求引用" class="headerlink" title="合并请求引用"></a>合并请求引用</h4><p>如果你正在处理 <em>许多</em> 合并请求，不想添加一堆 remote 或者每次都要做一次拉取，这里有一个可以在 GitHub 上用的小技巧。<br>这是有点高级的技巧，但它相当有用，我们会在相关章节有更多的细节说明。</p>
+<p>实际上 GitHub 在服务器上把合并请求分支视为一种 “假分支”。<br>默认情况下你克隆时不会得到它们，但它们还是隐式地存在，你可以很容易地访问到它们。</p>
+<p>为了展示这个，我们要用到一个叫做 <code>ls-remote</code> 的低级命令（通常被叫做“plumbing”，<br>我们会在相关章节读到更多相关内容）。<br>这个命令在日常 Git 操作中基本不会用到，但在显示服务器上有哪些引用（reference）时很管用。</p>
+<p>如果在我们之前用过的 “blink” 版本库上使用这个命令，我们会得到一个版本库里所有的分支，标签和其它引用（reference）的列表。</p>
+<pre><code class="language-shell">$ git ls-remote https://github.com/schacon/blink
+10d539600d86723087810ec636870a504f4fee4d	HEAD
+10d539600d86723087810ec636870a504f4fee4d	refs/heads/master
+6a83107c62950be9453aac297bb0193fd743cd6e	refs/pull/1/head
+afe83c2d1a70674c9505cc1d8b7d380d5e076ed3	refs/pull/1/merge
+3c8d735ee16296c242be7a9742ebfbc2665adec1	refs/pull/2/head
+15c9f4f80973a2758462ab2066b6ad9fe8dcf03d	refs/pull/2/merge
+a5a7751a33b7e86c5e9bb07b26001bb17d775d1a	refs/pull/4/head
+31a45fc257e8433c8d8804e3e848cf61c9d3166c	refs/pull/4/merge
+</code></pre>
+<p>当然，如果你在你自己的版本库或其它你想检查的远程版本库中使用 <code>git ls-remote origin</code> ，它会显示相似的内容。</p>
+<p>如果版本库在 GitHub 上并且有打开的合并请求，你会得到一些以 <code>refs/pull/</code> 开头的引用。<br>它们实际上是分支，但因为它们不在 <code>refs/heads/</code> 中，所以正常情况下你克隆时不会从服务器上得到它们<br>——抓取过程正常情况下会忽略它们。</p>
+<p>每个合并请求有两个引用——其中以 <code>/head</code> 结尾的引用指向的提交记录与合并请求分支中的最后一个提交记录是同一个。<br>所以如果有人在我们的版本库中开启了一个合并请求，他们的分支叫做 <code>bug-fix</code>，<br>指向 <code>a5a775</code> 这个提交记录，那么在 <em>我们的</em> 版本库中我们没有 <code>bug-fix</code> 分支（因为那是在他们的 fork 中），<br>但我们 <em>可以</em> 有一个 <code>pull/&lt;pr#&gt;/head</code> 指向 <code>a5a775</code>。<br>这意味着我们可以很容易地拉取每一个合并请求分支而不用添加一堆远程仓库。</p>
+<p>现在，你可以像直接抓取引用一样抓取那些分支或提交。</p>
+<pre><code class="language-shell">$ git fetch origin refs/pull/958/head
+From https://github.com/libgit2/libgit2
+ * branch            refs/pull/958/head -&gt; FETCH_HEAD
+</code></pre>
+<p>这告诉 Git： “连接到 <code>origin</code> 这个 remote，下载名字为 <code>refs/pull/958/head</code> 的引用。”<br>Git 高高兴兴去执行，下载构建那个引用需要的所有内容，然后把指针指向 <code>.git/FETCH_HEAD</code> 下面你想要的提交记录。<br>然后你可以用 <code>git merge FETCH_HEAD</code> 把它合并到你想进行测试的分支，但那个合并的提交信息看起来有点怪。<br>然而，如果你需要审查 <em>一大批</em> 合并请求，这样操作会很麻烦。</p>
+<p>还有一种方法可以抓取 <em>所有的</em> 合并请求，并且在你连接到远程仓库的时候保持更新。<br>用你最喜欢的编辑器打开 <code>.git/config</code> ，查找 <code>origin</code> 远程仓库。<br>看起来差不多像下面这样：</p>
+<pre><code class="language-ini">[remote &quot;origin&quot;]
+    url = https://github.com/libgit2/libgit2
+    fetch = +refs/heads/*:refs/remotes/origin/*
+</code></pre>
+<p>以 <code>fetch =</code> 开头的行是一个 “refspec.”<br>它是一种把 remote 的名称映射到你本地 <code>.git</code> 目录的方法。<br>这一条（就是上面的这一条）告诉 Git，“remote 上 <code>refs/heads</code> 下面的内容在我本地版本库中都放在 <code>refs/remotes/origin</code> 。”<br>你可以把这一段修改一下，添加另一个 refspec：</p>
+<pre><code class="language-ini">[remote &quot;origin&quot;]
+    url = https://github.com/libgit2/libgit2.git
+    fetch = +refs/heads/*:refs/remotes/origin/*
+    fetch = +refs/pull/*/head:refs/remotes/origin/pr/*
+</code></pre>
+<p>最后一行告诉 Git： “所有看起来像 <code>refs/pull/123/head</code> 的引用应该在本地版本库像 <code>refs/remotes/origin/pr/123</code> 一样存储”<br>现在，如果你保存那个文件，执行 <code>git fetch</code>：</p>
+<pre><code class="language-shell">$ git fetch
+# …
+ * [new ref]         refs/pull/1/head -&gt; origin/pr/1
+ * [new ref]         refs/pull/2/head -&gt; origin/pr/2
+ * [new ref]         refs/pull/4/head -&gt; origin/pr/4
+# …
+</code></pre>
+<p>现在所有的合并请求在本地像分支一样展现，它们是只读的，当你执行抓取时它们也会更新。<br>这让在本地测试合并请求中的代码变得超级简单：</p>
+<pre><code class="language-shell">$ git checkout pr/2
+Checking out files: 100% (3769/3769), done.
+Branch pr/2 set up to track remote branch pr/2 from origin.
+Switched to a new branch &#39;pr/2&#39;
+</code></pre>
+<p>你的鹰眼系统会发现在 refspec 的 remote 部分的结尾有个 <code>head</code> 。<br>在 GitHub 那边也有一个 <code>refs/pull/#/merge</code> 引用，它代表的是如果你在网站上按了 “merge” 按钮对应的提交记录。<br>这甚至让你可以在按按钮之前就测试这个合并。</p>
+<h4 id="合并请求之上的合并请求"><a href="#合并请求之上的合并请求" class="headerlink" title="合并请求之上的合并请求"></a>合并请求之上的合并请求</h4><p>你不仅可以在主分支或者说 <code>master</code> 分支上开启合并请求，实际上你可以在网络上的任何一个分支上开启合并请求。<br>其实，你甚至可以在另一个合并请求上开启一个合并请求。</p>
+<p>如果你看到一个合并请求在向正确的方向发展，然后你想在这个合并请求上做一些修改或者你不太确定这是个好主意，或者你没有目标分支的推送权限，你可以直接在合并请求上开启一个合并请求。</p>
+<p>当你开启一个合并请求时，在页面的顶端有一个框框显示你要合并到哪个分支和你从哪个分支合并过来的。<br>如果你点击那个框框右边的 “Edit” 按钮，你不仅可以改变分支，还可以选择哪个 fork。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-04-target.png" alt="手工修改合并请求的目标."></p>
+<p>这里你可以很简单地指明合并你的分支到哪一个合并请求或 fork。</p>
+<h3 id="提醒和通知"><a href="#提醒和通知" class="headerlink" title="提醒和通知"></a>提醒和通知</h3><p>GitHub 内置了一个很好的通知系统，当你需要与别人或别的团队交流时用起来很方便。</p>
+<p>在任何评论中你可以先输入一个 <code>@</code> ，系统会自动补全项目中合作者或贡献者的名字和用户名。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-05-mentions.png" alt="输入 @ 来提醒某人."></p>
+<p>你也可以提醒不在列表中的用户，但是通常自动补全用起更快。</p>
+<p>当你发布了一个带用户提醒的评论，那个用户会收到通知。<br>这意味着把人们拉进会话中要比让他们投票有效率得多。<br>对于 GitHub 上的合并请求，人们经常把他们团队或公司中的其它人拉来审查问题或合并请求。</p>
+<p>如果有人收到了合并请求或问题的提醒，他们会“订阅”它，后面有新的活动发生他们都会持续收到提醒。<br>如果你是合并请求或者问题的发起方你也会被订阅上，比如你在关注一个版本库或者你评论了什么东西。<br>如果你不想再收到提醒，在页面上有个 “Unsubscribe” 按钮，点一下就不会再收到更新了。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-06-unsubscribe.png" alt="取消订阅一个问题或合并请求."></p>
+<h3 id="通知页面"><a href="#通知页面" class="headerlink" title="通知页面"></a>通知页面</h3><p>当我们在这提到特指 GitHub 的 “notifications” ，指的是当 GitHub 上有事件发生时，它通知你的方式，这里有几种不同的方式来配置它们。<br>如果你打开配置页面的 “Notification center” 标签，你可以看到一些选项。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-07-notifications.png" alt="通知中心选项."></p>
+<p>有两个选项，通过“邮件（Email）”和通过“网页（Web）”，你可以选用一个或者都不选或者都选。</p>
+<h4 id="网页通知"><a href="#网页通知" class="headerlink" title="网页通知"></a>网页通知</h4><p>网页通知只在 GitHub 上存在，你也只能在 GitHub 上查看。<br>如果你打开了这个选项并且有一个你的通知，你会在你屏幕上方的通知图标上看到一个小蓝点。参见下图。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-08-notifications-page.png" alt="通知中心."></p>
+<p>如果你点击那个玩意儿，你会看到你被通知到的所有条目，按照项目分好了组。<br>你可以点击左边栏的项目名字来过滤项目相关的通知。<br>你可以点击通知旁边的对号图标把通知标为已读，或者点击组上面的图标把项目中 <em>所有的</em> 通知标为已读。<br>在每个对号图标旁边都有一个静音按钮，你可以点一下，以后就不会收到它相关的通知。</p>
+<p>所有这些工具对于处理大量通知非常有用。<br>很多 GitHub 资深用户都关闭邮件通知，在这个页面上处理他们所有的通知。</p>
+<h4 id="邮件通知-1"><a href="#邮件通知-1" class="headerlink" title="邮件通知"></a>邮件通知</h4><p>邮件通知是你处理 GitHub 通知的另一种方式。<br>如果你打开这个选项，每当有通知时，你会收到一封邮件。<br>我们在相关章节看到了一些例子。<br>邮件也会被合适地按话题组织在一起，如果你使用一个具有会话功能的邮件客户端那会很方便。</p>
+<p>GitHub 在发送给你的邮件头中附带了很多元数据，这对于设置过滤器和邮件规则非常有帮助。</p>
+<p>举个例子，我们来看一看在相关章节中发给 Tony 的一封真实邮件的头部，我们会看到下面这些：</p>
+<pre><code>To: tonychacon/fade &lt;fade@noreply.github.com&gt;
+Message-ID: &lt;tonychacon/fade/pull/1@github.com&gt;
+Subject: [fade] Wait longer to see the dimming effect better (#1)
+X-GitHub-Recipient: tonychacon
+List-ID: tonychacon/fade &lt;fade.tonychacon.github.com&gt;
+List-Archive: https://github.com/tonychacon/fade
+List-Post: &lt;mailto:reply+i-4XXX@reply.github.com&gt;
+List-Unsubscribe: &lt;mailto:unsub+i-XXX@reply.github.com&gt;，...
+X-GitHub-Recipient-Address: tchacon@example.com
+</code></pre>
+<p>这里有一些有趣的东西。如果你想高亮或者转发这个项目甚至这个合并请求相关的邮件，<br><code>Message-ID</code> 中的信息会以<code>&lt;user&gt;/&lt;project&gt;/&lt;type&gt;/&lt;id&gt;</code> 的格式展现所有的数据。<br>例如，如果这是一个问题（issue），那么 <code>&lt;type&gt;</code> 字段就会是 “issues” 而不是 “pull” 。</p>
+<p><code>List-Post</code> 和 <code>List-Unsubscribe</code> 字段表示如果你的邮件客户端能够处理这些，那么你可以很容易地在列表中发贴或取消对这个相关帖子的订阅。<br>那会很有效率，就像在页面中点击静音按钮或在问题&#x2F;合并请求页面点击 “Unsubscribe” 一样。</p>
+<p>值得注意的是，如果你同时打开了邮件和网页通知，那么当你在邮件客户端允许加载图片的情况下阅读邮件通知时，对应的网页通知也将会同时被标记为已读。</p>
+<h3 id="特殊文件"><a href="#特殊文件" class="headerlink" title="特殊文件"></a>特殊文件</h3><p>如果你的版本库中有一些特殊文件，GitHub 会提醒你。</p>
+<h4 id="README"><a href="#README" class="headerlink" title="README"></a>README</h4><p>第一个就是 <code>README</code> 文件，可以是几乎任何 GitHub 可以识别的格式。<br>例如，它可以是 <code>README</code> ，<code>README.md</code> ， <code>README.asciidoc</code> 。<br>如果 GitHub 在你的版本库中找到 README 文件，会把它在项目的首页渲染出来。</p>
+<p>很多团队在这个文件里放版本库或项目新人需要了解的所有相关的信息。<br>它一般包含这些内容：</p>
+<ul>
+<li>该项目的作用</li>
+<li>如何配置与安装</li>
+<li>有关如何使用和运行的例子</li>
+<li>项目的许可证</li>
+<li>如何向项目贡献力量</li>
+</ul>
+<p>因为 GitHub 会渲染这个文件，你可以在文件里植入图片或链接让它更容易理解。</p>
+<h4 id="贡献-CONTRIBUTING"><a href="#贡献-CONTRIBUTING" class="headerlink" title="贡献 CONTRIBUTING"></a>贡献 CONTRIBUTING</h4><p>另一个 GitHub 可以识别的特殊文件是 <code>CONTRIBUTING</code> 。<br>如果你有一个任意扩展名的 <code>CONTRIBUTING</code> 文件，当有人开启一个合并请求时 GitHub 会显示下图。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-09-contrib.png" alt="开启合并请求时有 CONTRIBUTING 文件存在."></p>
+<p>这个的作用就是你可以在这里指出对于你的项目开启的合并请求你想要的／不想要的各种事情。<br>这样别人在开启合并请求之前可以读到这些指导方针。</p>
+<h3 id="项目管理"><a href="#项目管理" class="headerlink" title="项目管理"></a>项目管理</h3><p>对于一个单个项目其实没有很多管理事务要做，但也有几点有趣的。</p>
+<h4 id="改变默认分支"><a href="#改变默认分支" class="headerlink" title="改变默认分支"></a>改变默认分支</h4><p>如果你想用 “master” 之外的分支作为你的默认分支，其他人将默认会在这个分支上开启合并请求或进行浏览，你可以在你版本库的设置页面的 “options” 标签下修改。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-10-default-branch.png" alt="改变项目的默认分支."></p>
+<p>简单地改变默认分支下拉列表中的选项，它就会作为所有主要操作的默认分支，他人进行克隆时该分支也将被默认检出。</p>
+<h4 id="移交项目"><a href="#移交项目" class="headerlink" title="移交项目"></a>移交项目</h4><p>如果你想把一个项目移交给 GitHub 中的另一个人或另一个组织，还是设置页面的这个 “options” 标签下有一个 “Transfer ownership” 选项可以用来干这个。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/maint-11-transfer.png" alt="把项目移交给另一个 GitHub 用户或组织。"></p>
+<p>当你正准备放弃一个项目且正好有别人想要接手时，或者你的项目壮大了想把它移到一个组织里时，这就管用了。</p>
+<p>这么做不仅会把版本库连带它所有的关注者和星标数都移到另一个地方，它还会将你的 URL 重定向到新的位置。<br>它也重定向了来自 Git 的克隆和抓取，而不仅仅是网页端请求。</p>
+<h2 id="管理组织"><a href="#管理组织" class="headerlink" title="管理组织"></a>管理组织</h2><p>除了个人帐户之外，GitHub 还提供被称为组织（Organizations）的帐户。<br>组织账户和个人账户一样都有一个用于存放所拥有项目的命名空间，但是许多其他的东西都是不同的。<br>组织帐户代表了一组共同拥有多个项目的人，同时也提供一些工具用于对成员进行分组管理。<br>通常，这种账户被用于开源群组（例如：“perl”或者“rails”），或者公司（例如：“google”或者“twitter”）。</p>
+<h3 id="组织的基本知识"><a href="#组织的基本知识" class="headerlink" title="组织的基本知识"></a>组织的基本知识</h3><p>我们可以很简单地创建一个组织，只需要点击任意 GitHub 页面右上角的“+”图标，在菜单中选择“New organization”即可。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/neworg.png" alt="“New organization”菜单项"></p>
+<p>首先你必须提供组织的名称和组织的主要联系邮箱。<br>然后，如果你希望的话，也可以邀请其他用户作为共同拥有人。</p>
+<p>完成以上步骤后，你就会拥有一个全新的组织。<br>类似于个人帐户，如果组织的所有内容都是开源的，那么你就可以免费使用这个组织。</p>
+<p>作为一个组织的拥有者，当你在派生一个版本库的时候，你可以选择把它派生到你的组织的命名空间内。<br>当你新建版本库时，你可以把它存放到你的个人帐户或你拥有的组织内。<br>同时，你也会自动地“关注”所有这些组织内的新版本库。</p>
+<p>就像个人帐户一样，你可以为你的组织上传头像，使它更个性化。<br>同时，也和个人帐户类似，组织会有一个着陆页（landing page），用于列出该组织所有的版本库，并且该页面可供所有人浏览。</p>
+<p>下面我们来说一些组织和个人帐户不同的地方。</p>
+<h3 id="团队"><a href="#团队" class="headerlink" title="团队"></a>团队</h3><p>组织使用团队（Teams）来管理成员，团队就是组织中的一组个人账户和版本库，以及团队成员对这些版本库的访问权限。</p>
+<p>例如，假设你的公司有三个版本库：<code>frontend</code>、<code>backend</code> 和 <code>deployscripts</code>。<br>你会希望你的 HTML&#x2F;CSS&#x2F;Javascript 开发者有 <code>frontend</code> 或者 <code>backend</code> 的访问权限，操作人员有 <code>backend</code> 和 <code>deployscripts</code> 的访问权限。<br>团队让这个任务变得更简单，而不用为每个版本库管理它的协作者。</p>
+<p>组织页面主要由一个面板（dashboard）构成，这个仪表盘包含了这个组织内的所有版本库，用户和团队。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/orgs-01-page.png" alt="组织页面"></p>
+<p>你可以点击上图右边的团队侧边栏（Teams）来管理你的团队。<br>点击之后，你会进入一个新页面，在这里你可以添加新成员和版本库到团队中，或者管理团队的访问权限和其它设置。<br>每个团队对于版本库可以有只读、读写和管理三种权限。<br>你可以通过点击在下图内的 “Settings” 按钮更改相应权限等级。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/orgs-02-teams.png" alt="团队页面"></p>
+<p>当你邀请一个用户加入团队，该用户会收到一封通知他被邀请的邮件。</p>
+<p>除此之外，团队也类似于个人帐户，有 <code>@mentions</code>（例如：<code>@acmecorp/frontend</code>）的功能，不同之处就在于被提及的团队内 <em>所有</em> 成员都会成为这个话题的订阅者。<br>当你希望得到团队中某个人的关注，又不知道具体应该问谁的时候，这个功能就显得很有帮助。</p>
+<p>一个用户可以加入任意数量的团队，所以别把自己局限于拥有访问控制的团队。<br>对于某一类课题，像 <code>ux</code>、 <code>css</code> 或者 <code>refactoring</code> 这样有着特殊关注点的团队就显得很有帮助，而像 <code>legal</code> 和 <code>colorblind</code> 这样的就完全是针对它们各自领域的。</p>
+<h3 id="审计日志"><a href="#审计日志" class="headerlink" title="审计日志"></a>审计日志</h3><p>组织的拥有者还可以访问组织中发生的事情的所有信息。<br>在 ‘Audit Log’ 标签页有整个组织的日志，你可以看到谁在世界上哪个地方做了什么事。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/orgs-03-audit.png" alt="审计日志"></p>
+<p>你也可以通过选定某一类型的事件、某个地方、某个人对日志进行过滤。</p>
+<h2 id="脚本-GitHub"><a href="#脚本-GitHub" class="headerlink" title="脚本 GitHub"></a>脚本 GitHub</h2><p>所以现在我们已经介绍了 GitHub 的大部分功能与工作流程，但是任意一个小组或项目都会去自定义，因为他们想要创造或扩展想要整合的服务。</p>
+<p>对我们来说很幸运的是，GitHub 在许多方面都真的很方便 Hack。<br>在本节中我们将会介绍如何使用 GitHub 钩子系统与 API 接口，使 GitHub 按照我们的设想来工作。</p>
+<h3 id="服务与钩子"><a href="#服务与钩子" class="headerlink" title="服务与钩子"></a>服务与钩子</h3><p>GitHub 仓库管理中的钩子与服务区块是 GitHub 与外部系统交互最简单的方式。</p>
+<h4 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h4><p>首先我们来看一下服务。<br>钩子与服务整合都可以在仓库的设置区块中找到，就在我们之前添加协作者与改变项目的默认分支的地方。<br>在 “Webhooks and Services” 标签下你会看到与下面类似的内容。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/scripting-01-services.png" alt="服务与钩子"></p>
+<p>有许多可以选择的服务，大多数是整合到其他的商业与开源系统中。<br>它们中的大多数是为了整合持续集成服务、BUG 与问题追踪系统、聊天室系统与文档系统。<br>我们将会通过设置一个非常简单的例子来介绍。<br>如果从 “Add Service” 选择 “email”，会得到一个类似下面的配置屏幕。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/scripting-02-email-service.png" alt="电子邮件服务配置"></p>
+<p>在本例中，如果我们点击 “Add service” 按钮，每次有人推送内容到仓库时，指定的电子邮件地址都会收到一封邮件。<br>服务可以监听许多不同类型的事件，但是大多数只监听推送事件然后使用那些数据做一些事情。</p>
+<p>如果有一个正在使用的系统想要整合到 GitHub，应当先检查这里看有没有已有的可用的服务整合。<br>例如，如果正使用 Jenkins 来测试你的代码库，当每次有人推送到你的仓库时你可以启用 Jenkins 内置的整合启动测试运行。</p>
+<h4 id="钩子"><a href="#钩子" class="headerlink" title="钩子"></a>钩子</h4><p>如果需要做一些更具体的事，或者想要整合一个不在这个列表中的服务或站点，可以转而使用更通用的钩子系统。<br>GitHub 仓库钩子是非常简单的。<br>指定一个 URL 然后 GitHub 在任一期望的事件发生时就会发送一个 HTTP 请求到那个 URL 。</p>
+<p>通常做这件事的方式是可以设置一个小的 web 服务来监听 GitHub 钩子请求然后使用收到的数据做一些事情。</p>
+<p>为了启用一个钩子，点击上面的 “Add webhook” 按钮。<br>这会将你引导至一个类似下面的页面。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/scripting-03-webhook.png" alt="Web 钩子配置"></p>
+<p>Web 钩子的设置非常简单。<br>大多数情况下只需要输入一个 URL 与一个密钥然后点击 “Add webhook”。<br>有几个选项可以指定在哪个事件时想要 GitHub 发送请求——<br>默认的行为是只有当某人推送新代码到仓库的任一分支时的 <code>push</code> 事件获得一个请求。</p>
+<p>让我们看一个设置处理 web 钩子的 web 服务的小例子。<br>我们将会使用 Ruby web 框架 Sinatra，因为它相当简洁，应该能够轻松地看到我们正在做什么。</p>
+<p>假设我们想要在某个特定的人推送到我们的项目的特定分支并修改一个特定文件时得到一封邮件。<br>我们可以相当容易地使用类似下面的代码做到：</p>
+<pre><code class="language-ruby">require &#39;sinatra&#39;
+require &#39;json&#39;
+require &#39;mail&#39;
+
+post &#39;/payload&#39; do
+  push = JSON.parse(request.body.read) # parse the JSON
+
+  # gather the data we&#39;re looking for
+  pusher = push[&quot;pusher&quot;][&quot;name&quot;]
+  branch = push[&quot;ref&quot;]
+
+  # get a list of all the files touched
+  files = push[&quot;commits&quot;].map do |commit|
+    commit[&#39;added&#39;] + commit[&#39;modified&#39;] + commit[&#39;removed&#39;]
+  end
+  files = files.flatten.uniq
+
+  # check for our criteria
+  if pusher == &#39;schacon&#39; &amp;&amp;
+     branch == &#39;ref/heads/special-branch&#39; &amp;&amp;
+     files.include?(&#39;special-file.txt&#39;)
+
+    Mail.deliver do
+      from     &#39;tchacon@example.com&#39;
+      to       &#39;tchacon@example.com&#39;
+      subject  &#39;Scott Changed the File&#39;
+      body     &quot;ALARM&quot;
+    end
+  end
+end
+</code></pre>
+<p>这里我们拿到一个 GitHub 传送给我们的 JSON 请求然后查找推送者，他们推送到了什么分支以及推送的所有提交都改动了哪些文件。<br>然后我们检查它是否与我们的条件区配，如果匹配则发送一封邮件。</p>
+<p>为了开发与测试类似这样的东西，在设置钩子的地方有一个漂亮的开发者控制台。<br>可以看到 GitHub 为那个 webhook 的最后几次请求。<br>对每一个钩子，当它发送后都可以深入挖掘，检测它是否是成功的与请求及回应的消息头与消息体。<br>这使得测试与调试钩子非常容易。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/scripting-04-webhook-debug.png" alt="Web 钩子调试信息"></p>
+<p>开发者控制台的另一个很棒的功能是可以轻松地重新发送任何请求来测试你的服务。</p>
+<p>关于如何编写 web 钩子与所有可监听的不同事件类型的更多信息，请访问在 <a target="_blank" rel="noopener" href="https://docs.github.com/cn/developers/webhooks-and-events/webhooks/about-webhooks">https://docs.github.com/cn/developers/webhooks-and-events/webhooks/about-webhooks</a> 的 GitHub 开发者文档。</p>
+<h3 id="GitHub-API"><a href="#GitHub-API" class="headerlink" title="GitHub API"></a>GitHub API</h3><p>服务与钩子给你提供了一种方式来接收关于在仓库中发生的事件的推送通知，但是如何获取相关事件的详情呢？<br>如何自动化一些诸如添加协作者或给问题加标签的事情呢？</p>
+<p>这是 GitHub API 派上用场的地方。<br>在自动化流行的趋势下，GitHub 提供了大量的 API 接口，可以进行几乎任何能在网站上进行的操作。<br>在本节中我们将会学习如何授权与连接到 API，如何通过 API 在一个问题上评论与如何修改一个 Pull Request 的状态。</p>
+<h4 id="基本用途"><a href="#基本用途" class="headerlink" title="基本用途"></a>基本用途</h4><p>可以做的最基本的事情是向一个不需要授权的接口上发送一个简单的 GET 请求。<br>该接口可能是一个用户或开源项目的只读信息。<br>例如，如果我们想要知道更多关于名为 “schacon” 的用户信息，我们可以运行类似下面的东西：</p>
+<pre><code class="language-javascript">$ curl https://api.github.com/users/schacon
+{
+  &quot;login&quot;: &quot;schacon&quot;,
+  &quot;id&quot;: 70,
+  &quot;avatar_url&quot;: &quot;https://avatars.githubusercontent.com/u/70&quot;,
+# …
+  &quot;name&quot;: &quot;Scott Chacon&quot;,
+  &quot;company&quot;: &quot;GitHub&quot;,
+  &quot;following&quot;: 19,
+  &quot;created_at&quot;: &quot;2008-01-27T17:19:28Z&quot;,
+  &quot;updated_at&quot;: &quot;2014-06-10T02:37:23Z&quot;
+}
+</code></pre>
+<p>有大量类似这样的接口来获得关于组织、项目、问题、提交的信息 – 差不多就是你能在 GitHub 上看到的所有东西。<br>甚至可以使用 API 来渲染任意 Markdown 或寻找一个 <code>.gitignore</code> 模板。</p>
+<pre><code class="language-javascript">$ curl https://api.github.com/gitignore/templates/Java
+{
+  &quot;name&quot;: &quot;Java&quot;,
+  &quot;source&quot;: &quot;*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see https://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+&quot;
+}
+</code></pre>
+<h4 id="在一个问题上评论"><a href="#在一个问题上评论" class="headerlink" title="在一个问题上评论"></a>在一个问题上评论</h4><p>然而，如果想要在网站上进行一个操作，如在 Issue 或 Pull Request 上评论，或者想要查看私有内容或与其交互，你需要授权。</p>
+<p>这里提供了几种授权方式。<br>你可以使用仅需用户名与密码的基本授权，但是通常更好的主意是使用一个个人访问令牌。<br>可以从设置页的 “Applications” 标签生成访问令牌。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/scripting-05-access-token.png" alt="从设置页的 “Applications” 标签生成访问令牌。"></p>
+<p>它会询问这个令牌的作用域与一个描述。<br>确保使用一个好的描述信息，这样当脚本或应用不再使用时你会很放心地移除。</p>
+<p>GitHub 只会显示令牌一次，所以记得一定要拷贝它。<br>现在可以在脚本中使用它代替使用用户名写密码来授权。<br>这很漂亮，因为可以限制想要做的范围并且令牌是可废除的。</p>
+<p>这也会有一个提高频率上限的附加优点。<br>如果没有授权的话，你会被限制在一小时最多发起 60 次请求。<br>如果授权则可以一小时最多发起 5000 次请求。</p>
+<p>所以让我们利用它来对我们的其中一个问题进行评论。<br>想要对一个特定问题 Issue #6 留下一条评论。<br>必须使用刚刚生成的令牌作为 Authorization 头信息，发送一个到 <code>repos/&lt;user&gt;/&lt;repo&gt;/issues/&lt;num&gt;/comments</code> 的 HTTP POST 请求。</p>
+<pre><code class="language-javascript">$ curl -H &quot;Content-Type: application/json&quot; \
+       -H &quot;Authorization: token TOKEN&quot; \
+       --data &#39;{&quot;body&quot;:&quot;A new comment, :+1:&quot;}&#39; \
+       https://api.github.com/repos/schacon/blink/issues/6/comments
+{
+  &quot;id&quot;: 58322100,
+  &quot;html_url&quot;: &quot;https://github.com/schacon/blink/issues/6#issuecomment-58322100&quot;,
+  ...
+  &quot;user&quot;: {
+    &quot;login&quot;: &quot;tonychacon&quot;,
+    &quot;id&quot;: 7874698,
+    &quot;avatar_url&quot;: &quot;https://avatars.githubusercontent.com/u/7874698?v=2&quot;,
+    &quot;type&quot;: &quot;User&quot;,
+  },
+  &quot;created_at&quot;: &quot;2014-10-08T07:48:19Z&quot;,
+  &quot;updated_at&quot;: &quot;2014-10-08T07:48:19Z&quot;,
+  &quot;body&quot;: &quot;A new comment, :+1:&quot;
+}
+</code></pre>
+<p>现在如果进入到那个问题，可以看到我们刚刚发布的评论，像下面一样。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/scripting-06-comment.png" alt="从 GitHub API 发布的一条评论"></p>
+<p>可以使用 API 去做任何可以在网站上做的事情 – 创建与设置里程碑、指派人员到 Issues 与 Pull Requests，创建与修改标签、访问提交数据、创建新的提交与分支、打开关闭或合并 Pull Requests、创建与编辑团队、在 Pull Request 中评论某行代码、搜索网站等等。</p>
+<h4 id="修改-Pull-Request-的状态"><a href="#修改-Pull-Request-的状态" class="headerlink" title="修改 Pull Request 的状态"></a>修改 Pull Request 的状态</h4><p>我们要看最后一个例子在使用拉取请求时非常有用。<br>每一个提交可以有一个或多个与它关联的状态，有 API 来添加与查询状态。</p>
+<p>大多数持续集成与测试服务通过测试推送的代码后使用这个 API 来回应，然后报告提交是否通过了全部测试。<br>你也可以使用该接口来检查提交信息是否经过合适的格式化、提交者是否遵循了所有你的贡献准则、提交是否经过有效的签名 – 种种这类事情。</p>
+<p>假设在仓库中设置了一个 web 钩子访问一个用来检查提交信息中的 <code>Signed-off-by</code> 字符串的小的 web 服务。</p>
+<pre><code class="language-ruby">require &#39;httparty&#39;
+require &#39;sinatra&#39;
+require &#39;json&#39;
+
+post &#39;/payload&#39; do
+  push = JSON.parse(request.body.read) # parse the JSON
+  repo_name = push[&#39;repository&#39;][&#39;full_name&#39;]
+
+  # look through each commit message
+  push[&quot;commits&quot;].each do |commit|
+
+    # look for a Signed-off-by string
+    if /Signed-off-by/.match commit[&#39;message&#39;]
+      state = &#39;success&#39;
+      description = &#39;Successfully signed off!&#39;
+    else
+      state = &#39;failure&#39;
+      description = &#39;No signoff found.&#39;
+    end
+
+    # post status to GitHub
+    sha = commit[&quot;id&quot;]
+    status_url = &quot;https://api.github.com/repos/#{repo_name}/statuses/#{sha}&quot;
+
+    status = {
+      &quot;state&quot;       =&gt; state,
+      &quot;description&quot; =&gt; description,
+      &quot;target_url&quot;  =&gt; &quot;http://example.com/how-to-signoff&quot;,
+      &quot;context&quot;     =&gt; &quot;validate/signoff&quot;
+    }
+    HTTParty.post(status_url,
+      :body =&gt; status.to_json,
+      :headers =&gt; {
+        &#39;Content-Type&#39;  =&gt; &#39;application/json&#39;,
+        &#39;User-Agent&#39;    =&gt; &#39;tonychacon/signoff&#39;,
+        &#39;Authorization&#39; =&gt; &quot;token #{ENV[&#39;TOKEN&#39;]}&quot; }
+    )
+  end
+end
+</code></pre>
+<p>希望这相当容易做。<br>在这个 web 钩子处理器中我们浏览刚刚推送上来的每一个提交，在提交信息中查找字符串<br>‘Signed-off-by’ 并且最终使用 HTTP 向 <code>/repos/&lt;user&gt;/&lt;repo&gt;/statuses/&lt;commit_sha&gt;</code><br>API 接口发送一个带有状态的 POST 请求。</p>
+<p>在本例中可以发送一个状态（’success’, ‘failure’, ‘error’）、一个发生了什么的描述信息、<br>一个用户可以了解更多信息的目标 URL 与一个 “context” 以防一个单独的提交有多个状态。<br>例如，一个测试服务可以提供一个状态与一个类似这样的验证服务也可能提供一个状态 – “context” 字段是用来区别它们的。</p>
+<p>如果某人在 GitHub 中打开了一个新的拉取请求并且这个钩子已经设置，会看到类似下面的信息。</p>
+<p><img src="/2026/02/01/Git%E6%95%99%E7%A8%8B-3/scripting-07-status.png" alt="通过 API 的提交状态"></p>
+<p>现在可以看到一个小的绿色对勾标记在提交信息中有 “Signed-off-by” 的提交旁边，红色的对勾标记在作者忘记签名的提交旁边。<br>也可以看到 Pull Request 显示在那个分支上的最后提交的状态，如果失败的话会警告你。<br>如果对测试结果使用这个 API 那么就不会不小心合并某些未通过测试的最新提交。</p>
+<h4 id="Octokit"><a href="#Octokit" class="headerlink" title="Octokit"></a>Octokit</h4><p>尽管我们在这些例子中都是通过 <code>curl</code> 与基本的 HTTP 请求来做几乎所有的事情，还有一些以更自然的方式利用 API 的开源库存在着。<br>在写这篇文章的时候，被支持的语言包括 Go、Objective-C、Ruby 与 .NET。<br>访问 <a target="_blank" rel="noopener" href="https://github.com/octokit">https://github.com/octokit</a> 了解更多相关信息，它们帮你处理了更多 HTTP 相关的内容。</p>
+<p>希望这些工具能帮助你自定义与修改 GitHub 来更好地为特定的工作流程工作。<br>关于全部 API 的完整文档与常见任务的指南，请查阅 <a target="_blank" rel="noopener" href="https://docs.github.com/cn">https://docs.github.com/cn</a>。</p>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2025 - 2026 孤木落の博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;Gumuluo
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+    <script src="/js/main.js"></script>
+    
+    
+
+
+
+
+    
+</body>
+</html>
