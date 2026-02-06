@@ -217,28 +217,28 @@
             
             <span class="tag">
                 
-                <a href="/tags/%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/" style="color: #00a596">
+                <a href="/tags/%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/" style="color: #ffa2c4">
                     异常处理
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81/" style="color: #03a9f4">
+                <a href="/tags/%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81/" style="color: #ff7d73">
                     内核源码
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/linux/" style="color: #00bcd4">
+                <a href="/tags/linux/" style="color: #ffa2c4">
                     linux
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/page-fault/" style="color: #ffa2c4">
+                <a href="/tags/page-fault/" style="color: #00bcd4">
                     page fault
                 </a>
             </span>
@@ -4178,7 +4178,7 @@ mm_counter_file(folio)  // 根据folio类型返回MM_FILEPAGES或MM_SHMEMPAGES
 <li><strong>引用计数</strong>：精确管理页面生命周期</li>
 </ol>
 <p>这些函数展示了Linux内核如何高效处理文件映射的缺页异常，结合了性能优化（预读、大页）和鲁棒性（错误处理、边界检查）。</p>
-<h1 id="A10"><a href="#A10" class="headerlink" title="A10"></a>A10</h1><pre><code class="language-c">/**
+<h1 id="Q10"><a href="#Q10" class="headerlink" title="Q10"></a>Q10</h1><pre><code class="language-c">/**
  * filemap_fault - read in file data for page fault handling
  * @vmf:	struct vm_fault containing details of the fault
  *
@@ -4361,7 +4361,7 @@ out_retry:
 	return ret | VM_FAULT_RETRY;
 }
 </code></pre>
-<h1 id="Q10"><a href="#Q10" class="headerlink" title="Q10"></a>Q10</h1><p>我来详细注释这个文件映射缺页处理的核心函数：</p>
+<h1 id="A10"><a href="#A10" class="headerlink" title="A10"></a>A10</h1><p>我来详细注释这个文件映射缺页处理的核心函数：</p>
 <pre><code class="language-c">/**
  * filemap_fault - 为页面错误处理读取文件数据
  * @vmf: 包含错误详细信息的struct vm_fault
