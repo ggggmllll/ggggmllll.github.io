@@ -1,0 +1,448 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <title>手撸一个ARM64 ELF静态修补工具 | 孤木落の博客</title>
+    <meta name="author" content="Gumuluo" />
+    <meta name="description" content="Gumuluo's Blog" />
+    <meta name="keywords" content="" />
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <link rel="icon" href="/images/avatar.jpg" />
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.cn" />
+<link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin />
+<link
+    rel="stylesheet"
+    href="https://fonts.googleapis.cn/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap"
+/>
+<script> const mixins = {}; </script>
+
+<!-- 主题CSS文件 -->
+<link rel="stylesheet" href="/css/main.css" id="light-theme">
+<link rel="stylesheet" href="/css/night.css" id="dark-theme" disabled>
+
+<script src="https://polyfill.alicdn.com/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<!-- 白天代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs.min.css"
+    id="light-highlight"
+/>
+<!-- 黑夜代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css"
+    id="dark-highlight"
+    disabled
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.css" />
+<script src="/js/lib/math.js"></script>
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>孤木落の博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+        <!-- 主题切换按钮 -->
+        <a href="javascript:void(0);" @click="toggleTheme" :title="themeTooltip" class="theme-toggle">
+            <i :class="themeIcon"></i>
+            <span>&ensp;{{ themeText }}</span>
+        </a>
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;孤木落の博客</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+                <!-- 移动端主题切换按钮 -->
+                <a href="javascript:void(0);" @click="toggleTheme">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i :class="themeIcon"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">
+                            主题 ({{ themeText }})
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>手撸一个ARM64 ELF静态修补工具</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2026/2/28
+        </span>
+        
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p>逆向分析时，我们经常需要修改 native 层的行为。比如给某个函数加个日志输出，或者 hook 掉某些检查。传统方法是用 IDA 改完再导出，或者用 Frida 动态 hook。但有些场景下动态 hook 不方便，静态修补反而更直接。而且静态修补可以永久修改文件，一劳永逸。</p>
+<p>但手动改 ELF 真的挺麻烦的：要处理段扩展、重定位、PC 相对指令修复……稍微不注意就改坏了。所以我想要一个工具，让我只需要写汇编代码，剩下的自动搞定。就像写个脚本一样简单。</p>
+<span id="more"></span>
+
+<h1 id="手撸一个-ARM64-ELF-静态补丁工具，顺便聊聊-LIEF-和-Keystone-的那些坑"><a href="#手撸一个-ARM64-ELF-静态补丁工具，顺便聊聊-LIEF-和-Keystone-的那些坑" class="headerlink" title="手撸一个 ARM64 ELF 静态补丁工具，顺便聊聊 LIEF 和 Keystone 的那些坑"></a>手撸一个 ARM64 ELF 静态补丁工具，顺便聊聊 LIEF 和 Keystone 的那些坑</h1><p>最近在研究 Android 逆向，发现在一些场景下，app的防护会依据静态的文件检验动态库是否被插桩，所以引发了如下思考：如果我静态patch修补一个so（比如修补libc.so，使用magisk挂载替换文件），是否可以绕过crc检测或脏页检测等检测方案？</p>
+<p>静态修补也有许多固有问题，由于是手动写汇编，一般只能实现比较简短的功能，比如打打log啥的；而且几乎是不可避免的会导致文件结构异常，导致被检测。</p>
+<p>一开始我都是手动用ida修改，后来发现这样太 low 了，而且容易改崩。于是决定自己写个工具，批量读取patch文件，自动化完成这些操作。折腾了一段时间，终于搞出一个能用的东西，跟大家分享下经验（顺便来论坛申请个会员</p>
+<p>成品库：<a target="_blank" rel="noopener" href="https://github.com/ggggmllll/elf-patcher">elf-patcher</a></p>
+<h2 id="依赖：LIEF-Keystone"><a href="#依赖：LIEF-Keystone" class="headerlink" title="依赖：LIEF + Keystone"></a>依赖：LIEF + Keystone</h2><p>我使用了几个库：</p>
+<ul>
+<li><strong>LIEF</strong>：用来解析和修改 ELF 结构。它提供了非常方便的 API，可以读取段、节、符号，还能直接扩展段、添加重定位，把很多复杂的功能以比较简单的api进行了封装。</li>
+<li><strong>Keystone</strong>：汇编引擎，能把 ARM64 汇编转成机器码。它支持符号解析回调，这样我就可以在汇编代码里直接写函数名，让它自动替换成地址。</li>
+</ul>
+<p>这俩搭配起来，完美满足需求。</p>
+<h2 id="核心设计思路"><a href="#核心设计思路" class="headerlink" title="核心设计思路"></a>核心设计思路</h2><h3 id="1-补丁文件格式"><a href="#1-补丁文件格式" class="headerlink" title="1. 补丁文件格式"></a>1. 补丁文件格式</h3><p>我希望补丁文件能像写汇编一样简单。于是设计了一套简单的 DSL：</p>
+<pre><code>.function my_hook
+.import_functions __android_log_print
+.libraries liblog.so
+.string tag &quot;mytag&quot;
+.string msg &quot;Hello from hook\n&quot;
+.asm
+    sub sp, sp, #0x20
+    stp x0, x1, [sp, #0x10]
+    stp x2, x30, [sp]
+    mov x0, #4
+    adr x1, tag
+    adr x2, msg
+    bl __android_log_print
+    ldp x2, x30, [sp]
+    ldp x0, x1, [sp, #0x10]
+    add sp, sp, #0x20
+    ret
+</code></pre>
+<p>用 <code>.function</code> 或 <code>.patch</code> 指定类型，后面可以跟 <code>.import_functions</code>、<code>.libraries</code>、<code>.string</code> 等指令，最后用 <code>.asm</code> 开始汇编代码。这样写起来很直观。（具体可以参考README.md）</p>
+<p>解析器也不复杂，逐行读文件，遇到 <code>.</code> 开头的就当作指令处理，<code>.asm</code> 之后的行都存起来。代码在 <code>parser.cpp</code> 里，比如解析 <code>.string</code> 的部分：</p>
+<pre><code class="language-cpp">else if (directive == &quot;.string&quot;) {
+    size_t first_quote = line.find(&#39;&quot;&#39;);
+    size_t last_quote = line.rfind(&#39;&quot;&#39;);
+    std::string content = line.substr(first_quote + 1, last_quote - first_quote - 1);
+    def.strings[name] = content;
+}
+</code></pre>
+<h3 id="2-段扩展与空间管理"><a href="#2-段扩展与空间管理" class="headerlink" title="2. 段扩展与空间管理"></a>2. 段扩展与空间管理</h3><p>要给二进制加新东西，首先得有地方放。LIEF 提供了 <code>extend</code> 方法，可以在文件末尾追加空间，并自动调整后续段和节的偏移。我封装了两个函数：<code>extend_executable_segment</code> 和 <code>extend_got_plt_segment</code>。</p>
+<p>前者是创建一个新的可执行段（<code>PT_LOAD</code>），用来放新代码和字符串。后者是找到包含 GOT 的段，扩展它来放新的 GOT 条目。</p>
+<pre><code class="language-cpp">bool Binary::extend_executable_segment(uint64_t additional_size) {
+    LIEF::ELF::Segment new_seg;
+    new_seg.type(LIEF::ELF::Segment::TYPE::LOAD);
+    new_seg.flags(LIEF::ELF::Segment::FLAGS::R | LIEF::ELF::Segment::FLAGS::X);
+    std::vector&lt;uint8_t&gt; content(additional_size, 0);
+    new_seg.content(content);
+    new_seg.alignment(0x1000);
+    auto result = binary.add(new_seg);
+    // ...
+    code_section.start = added_seg-&gt;virtual_address();
+    code_section.current = code_section.start;
+    return true;
+}
+</code></pre>
+<p>扩展后，我用两个 <code>Address</code> 结构体记录空闲区域的起始和当前指针，通过 <code>allocate_in_code_section</code> 和 <code>allocate_in_got_section</code> 来分配空间，确保不会重叠。</p>
+<p>但这里有一个小坑，LIEF为了修改段表，会把第一个LOAD段的大小增加0x1000，导致此后所以偏移增加0x1000。这样直接使用.patch后的地址进行修补会导致位置出错，所以框架在处理时会自动将.patch后的地址加上0x1000。</p>
+<h3 id="3-符号处理与导入"><a href="#3-符号处理与导入" class="headerlink" title="3. 符号处理与导入"></a>3. 符号处理与导入</h3><p>对于导入的函数和变量，需要在动态符号表里添加条目，并生成对应的 PLT 桩和 GOT 条目。以函数为例，我写了几个函数：</p>
+<ul>
+<li><code>add_imported_function</code>：添加动态符号（<code>UNDEF</code>，类型 <code>FUNC</code>）</li>
+<li><code>create_function_relocation</code>：分配 GOT 条目，生成 PLT 桩（<code>adrp</code> + <code>ldr</code> + <code>add</code> + <code>br</code>），并返回 GOT 和 PLT 地址</li>
+<li><code>add_function_relocation</code>：添加 <code>JUMP_SLOT</code> 重定位</li>
+</ul>
+<p>生成 PLT 桩时，需要计算页偏移和页内偏移，我直接用 Keystone 汇编：</p>
+<pre><code class="language-cpp">std::vector&lt;std::string&gt; asm_lines = {
+    &quot;adrp x16, #&quot; + utils::to_hex(page_gap &lt;&lt; 12),
+    &quot;ldr x17, [x16, #&quot; + utils::to_hex(offset) + &quot;]&quot;,
+    &quot;add x16, x16, #&quot; + utils::to_hex(offset),
+    &quot;br x17&quot;
+};
+auto res = assembler::assemble_code(asm_lines, plt_addr);
+</code></pre>
+<h3 id="4-符号解析与地址获取"><a href="#4-符号解析与地址获取" class="headerlink" title="4. 符号解析与地址获取"></a>4. 符号解析与地址获取</h3><p>为了让汇编代码里能直接写 <code>bl __android_log_print</code>，我需要一个符号解析机制。Keystone 支持注册回调函数，在汇编时遇到符号会调用回调，让用户返回地址。我在 <code>assembler.cpp</code> 里设置了一个全局符号表指针，并在回调中查找：</p>
+<pre><code class="language-cpp">static bool symbol_resolver_callback(const char* name, uint64_t* value) {
+    auto it = g_symbol_map-&gt;find(name);
+    if (it != g_symbol_map-&gt;end()) {
+        *value = it-&gt;second;
+        return true;
+    }
+    return false;
+}
+</code></pre>
+<p>然后在 <code>patchASM</code> 中设置符号表，调用带解析的汇编版本：</p>
+<pre><code class="language-cpp">assembler::set_global_symbol_map(&amp;symbol_table);
+auto res = assembler::assemble_code(def.asm_lines, patch_addr, true);
+</code></pre>
+<p>但是符号地址从哪来？对于本地函数，直接从二进制符号表拿；对于导入函数，需要拿到它的 PLT 桩地址。我在 <code>Binary::get_symbol</code> 里实现了这个逻辑：</p>
+<ul>
+<li>如果是导入函数（<code>shndx == UNDEF</code>），遍历 <code>.rela.plt</code> 找到对应 GOT 条目，然后扫描 <code>.plt</code> 节，通过解码 <code>adrp</code> 和 <code>ldr</code> 指令找到访问该 GOT 条目的 PLT 桩起始地址。</li>
+<li>如果是导入变量，则从 <code>.rela.dyn</code> 中找到 <code>GLOB_DAT</code> 重定位，返回 GOT 条目地址。</li>
+</ul>
+<p>这部分代码比较有意思，贴一段扫描 PLT 的：</p>
+<pre><code class="language-cpp">for (uint64_t pc = plt_base; pc + 8 &lt;= plt_base + plt_size; pc += 4) {
+    uint32_t adrp_insn = ...;
+    uint64_t target_page = decode_adrp(adrp_insn, pc);
+    uint32_t offset = decode_ldr_offset(ldr_insn);
+    if (target_page + offset == got_addr) {
+        return pc; // 这就是 PLT 桩的起始
+    }
+}
+</code></pre>
+<p>为了保证一定的通用性，只要是adrp + ldr序列，且偏移指向got，就会被判定为plt桩。</p>
+<h3 id="5-指令修复的坑"><a href="#5-指令修复的坑" class="headerlink" title="5. 指令修复的坑"></a>5. 指令修复的坑</h3><p>对于 <code>.patch</code> 类型，我会在目标地址写入一条 <code>b</code> 指令跳转到补丁代码，然后把原指令备份到 trampoline 里，并在 trampoline 末尾加一条 <code>b</code> 跳回原处。但原指令可能是 PC 相对寻址的（比如 <code>b</code>、<code>adr</code>、<code>ldr literal</code>），如果直接复制到 trampoline，它引用的地址就错了，必须修正偏移。</p>
+<p>这部分的代码参考了 And64InlineHook，但实现起来各种坑。比如 <code>adrp</code> 指令，它的立即数是由 <code>immlo</code> 和 <code>immhi</code> 拼起来的，要正确提取和重新编码。我写了 <code>__fix_branch_imm</code> 和几个修复函数，比如修复无条件分支：</p>
+<pre><code class="language-cpp">static size_t __fix_branch_imm(uint32_t orig_insn, uint64_t orig_pc, uint64_t new_pc, uint32_t* output) {
+    // ... 提取目标地址
+    int64_t new_offset = (absolute_addr - new_pc) &gt;&gt; 2;
+    if (llabs(new_offset) &gt;= 0x1ffffff) return 0; // 超出范围就放弃
+    *output = opc | (new_offset &amp; 0x3ffffff);
+    return 4;
+}
+</code></pre>
+<p>如果超出范围（21mb左右），我原本想生成绝对跳转序列（<code>adr</code> + <code>ldr</code> + <code>add</code> + <code>br</code>），但目前还没完全调通，就先返回 0 表示无法修复，上层会报错。这算是一个待完善的点，希望有大佬可以指点。</p>
+<h3 id="6-对齐问题"><a href="#6-对齐问题" class="headerlink" title="6. 对齐问题"></a>6. 对齐问题</h3><p>ARM64 里有些指令要求数据对齐，比如 <code>ldr</code> 字面量要求目标地址 8 字节对齐。在生成 trampoline 时，如果起始地址不对齐，我就插入 <code>NOP</code> 来调整。这部分在 <code>__fix_loadlit</code> 里处理：</p>
+<pre><code class="language-cpp">faligned &gt;&gt;= 2;
+uint64_t current_pc = new_pc;
+while ((new_pc_offset &amp; faligned) != 0) {
+    *output++ = A64_NOP;
+    current_pc += 4;
+    new_pc_offset = (absolute_addr - current_pc) &gt;&gt; 2;
+}
+</code></pre>
+<p>虽然代码有点绕，但确实能保证对齐。</p>
+<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><p>写个简单的测试，给 so 里某个函数加个日志：</p>
+<pre><code class="language-cpp">#include &quot;patcher.h&quot;
+#include &lt;iostream&gt;
+
+int main() {
+    std::string binary_path = &quot;./libmyapplication.so&quot;;  // 请确保此文件存在于构建目录
+    std::string patch_dir = &quot;./patches&quot;;
+
+    patcher::Patcher patcher;
+    if (!patcher.load(binary_path, patch_dir)) {
+        std::cerr &lt;&lt; &quot;Failed to load: &quot; &lt;&lt; patcher.getLastError() &lt;&lt; std::endl;
+        return 1;
+    }
+
+    if (!patcher.apply()) {
+        std::cerr &lt;&lt; &quot;Failed to apply patches: &quot; &lt;&lt; patcher.getLastError() &lt;&lt; std::endl;
+        return 1;
+    }
+
+    patcher.outputPatchedBinary(&quot;./libmyapplication_patched.so&quot;);
+    std::cout &lt;&lt; &quot;Patches applied successfully!&quot; &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>补丁文件：</p>
+<pre><code>.function my_new_function
+.import_functions 
+.import_variables
+.libraries
+.symbols _Z12do_some_logsv __android_log_print
+.string my_tag &quot;my_tag&quot;
+.string my_msg &quot;Hello from my_new_function\n&quot;
+.asm
+    mov     x0, #4
+    adr     x1, my_tag
+    adr     x2, my_msg
+    bl      __android_log_print
+    ret
+</code></pre>
+<pre><code>.patch 0x25018
+.import_functions write
+.libraries libc.so
+.symbols __android_log_print
+.string tag &quot;hook&quot;
+.string msg &quot;Hooked at entry!\n&quot;
+.asm
+    sub     sp, sp, #0x20
+    stp     x0, x1, [sp, #0x10]
+    stp     x2, x30, [sp]
+    mov x0, #0x4
+    adr x1, tag
+    adr x2, msg
+    bl __android_log_print
+    ldp     x2, x30, [sp]
+    ldp     x0, x1, [sp, #0x10]
+    add     sp, sp, #0x20
+</code></pre>
+<p>把所有的补丁文件放 <code>patches</code> 目录下，跑一下，就能生成打过补丁的 so。用 IDA 打开看，代码已经被替换成跳转，新代码段里也有我们的日志输出逻辑。实际跑起来也能看到日志，说明补丁生效了。</p>
+<h2 id="总结与展望"><a href="#总结与展望" class="headerlink" title="总结与展望"></a>总结与展望</h2><p>这个工具目前基本能用，但还有一些不足：</p>
+<ul>
+<li>指令修复还不够完善，有些情况会放弃修复导致失败。</li>
+<li>只支持 ARM64，要是能支持 x86 就更好了。</li>
+<li>补丁文件语法还可以优化，比如支持 label 和更复杂的表达式。</li>
+<li>希望可以用libtcc将c转为.o文件，通过手动重定向，实现使用c编写patch或函数。</li>
+</ul>
+<p>不过通过这个项目，我深入了解了 ELF 格式、重定位、ARM64 指令编码，也踩了不少 LIEF 和 Keystone 的坑，收获满满。希望能给同样有需求的兄弟们一点启发。</p>
+<p>最后，感谢 LIEF 和 Keystone 的开发团队，没有这些优秀的库，这个工具不可能实现。也感谢 52pojie 平台，让我有机会分享自己的折腾经历。申请个会员，以后继续跟大家一起交流学习！</p>
+<hr>
+<p>（注：文章里引用的代码都是项目里的实际代码，稍微调整了格式方便阅读。）</p>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2025 - 2026 孤木落の博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;Gumuluo
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+    <script src="/js/main.js"></script>
+    
+    
+
+
+
+
+    
+</body>
+</html>

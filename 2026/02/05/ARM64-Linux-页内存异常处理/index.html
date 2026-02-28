@@ -217,14 +217,14 @@
             
             <span class="tag">
                 
-                <a href="/tags/%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/" style="color: #ffa2c4">
+                <a href="/tags/%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/" style="color: #ff7d73">
                     异常处理
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81/" style="color: #ff7d73">
+                <a href="/tags/%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81/" style="color: #00a596">
                     内核源码
                 </a>
             </span>
@@ -238,7 +238,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/page-fault/" style="color: #00bcd4">
+                <a href="/tags/page-fault/" style="color: #03a9f4">
                     page fault
                 </a>
             </span>
@@ -248,7 +248,11 @@
     </div>
     
     <div class="content" v-pre>
-        <p>通过linux源码和deepseek学习arm64 linux设备对page fault的处理。</p>
+        <p>通过linux源码和deepseek学习arm64 linux设备对page fault的处理。本篇文章是使用脏页检测动态hook思路的基础。<br>先说一下检测方案（对于r-xp可执行段）：</p>
+<ol>
+<li>检测系统库时：利用smap判断是否有dirty和匿名内存；利用pagemap检测是否为file-backend，不为匿名且不为独占映射。</li>
+<li>检测自己的库时，利用smap判断是否有dirty和匿名内存；利用pagemap检测是否为file-backend且不为匿名。<br>为进一步提高效率，可以用lseek在记录偏移后加速定位。</li>
+</ol>
 <span id="more"></span>
 
 <p>将以“问题 - Deepseek回答”形式展开。</p>
