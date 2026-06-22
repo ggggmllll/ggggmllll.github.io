@@ -1,0 +1,417 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <title>ndk构建的通用内核模块设计 | 孤木落の博客</title>
+    <meta name="author" content="Gumuluo" />
+    <meta name="description" content="Gumuluo's Blog" />
+    <meta name="keywords" content="" />
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <link rel="icon" href="/images/avatar.jpg" />
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.cn" />
+<link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin />
+<link
+    rel="stylesheet"
+    href="https://fonts.googleapis.cn/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap"
+/>
+<script> const mixins = {}; </script>
+
+<!-- 主题CSS文件 -->
+<link rel="stylesheet" href="/css/main.css" id="light-theme">
+<link rel="stylesheet" href="/css/night.css" id="dark-theme" disabled>
+
+<script src="https://polyfill.alicdn.com/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<!-- 白天代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs.min.css"
+    id="light-highlight"
+/>
+<!-- 黑夜代码高亮主题 -->
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css"
+    id="dark-highlight"
+    disabled
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/KaTeX/0.16.9/katex.min.css" />
+<script src="/js/lib/math.js"></script>
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>孤木落の博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+        <!-- 主题切换按钮 -->
+        <a href="javascript:void(0);" @click="toggleTheme" :title="themeTooltip" class="theme-toggle">
+            <i :class="themeIcon"></i>
+            <span>&ensp;{{ themeText }}</span>
+        </a>
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;孤木落の博客</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+                <!-- 移动端主题切换按钮 -->
+                <a href="javascript:void(0);" @click="toggleTheme">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i :class="themeIcon"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">
+                            主题 ({{ themeText }})
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>ndk构建的通用内核模块设计</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2026/6/21
+        </span>
+        
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p>这一切都来源于初中时所接触到的只用c4droid和termux，但是想玩内核的少年梦想。。。</p>
+<span id="more"></span>
+
+<h1 id="使用NDK构建内核模块与通用内核模块思路"><a href="#使用NDK构建内核模块与通用内核模块思路" class="headerlink" title="使用NDK构建内核模块与通用内核模块思路"></a>使用NDK构建内核模块与通用内核模块思路</h1><p>拿来做root管理器，或者rootkit，这个技术总归是有用的吧，大概。</p>
+<h2 id="一、insmod-的三扇门"><a href="#一、insmod-的三扇门" class="headerlink" title="一、insmod 的三扇门"></a>一、insmod 的三扇门</h2><p>知己知彼，方能百战不殆 —— 当我们使用insmod安装内核模块时，linux内核到底校验了什么？</p>
+<p>这个问题只能从内核源码得到详细答案，由于分析过长，这里只给出摘要。</p>
+<h3 id="1-ELF格式-——-你的文件”看起来像”一个内核模块吗？"><a href="#1-ELF格式-——-你的文件”看起来像”一个内核模块吗？" class="headerlink" title="1. ELF格式 —— 你的文件”看起来像”一个内核模块吗？"></a>1. ELF格式 —— 你的文件”看起来像”一个内核模块吗？</h3><p>内核到底期望什么二进制？可执行、动态库 or 对象文件？</p>
+<p>这里让我们来看.ko加载时期待的section:</p>
+<pre><code>内核要求的 .ko
+──────────────
+.text 
+.data 
+.rodata 
+.symtab 
+.modinfo                    ← &quot;这个模块叫啥名、什么license&quot;
+__versions                  ← &quot;struct module 长什么样&quot;
+.gnu.linkonce.this_module   ← 模块结构体本体
+</code></pre>
+<p>毫无疑问，最接近这种格式要求的ELF文件格式就是.o对象文件，但是二者存在差异：</p>
+<pre><code>普通 .o              内核要求的 .ko
+───────              ──────────────
+.text ✓              .text ✓
+.data ✓              .data ✓
+.rodata ✓            .rodata ✓
+.symtab ✓            .symtab ✓
+❌ 没有 modinfo      .modinfo ✓        ← &quot;这个模块叫啥名、什么license&quot;
+❌ 没有 __versions   __versions ✓      ← &quot;struct module 长什么样&quot;
+❌ 没有 this_module  .gnu.linkonce.this_module ✓  ← 模块结构体本体
+</code></pre>
+<p>为了解决这个问题，我们引入一阶段修补工程 —— KPatcher，它负责（KPatcher.cpp:46-136）：</p>
+<pre><code>输入: loader_merged.o  (普通 ET_REL)
+  ↓ LIEF 库解析 ELF
+  ↓ ElfConverter 分析 section/符号/重定位
+  ↓ KoWriter 写入 .ko — 补上 modinfo、__versions、this_module
+输出: loader.ko  (内核认可的模块的模板)
+</code></pre>
+<ol>
+<li>去除.o文件中的无用段（即不在内核加载器需要的段类型范围内的段）。</li>
+<li>补充.gnu.linkonce.this_module段，分配2048字节空白空间，在偏移24字节处写入name。</li>
+<li>补充.modinfo段，填充模块元数据，其中vermagic仅作占位，import_ns命名空间默认设置为VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver。</li>
+<li>补充__versions，预留64字节空间。</li>
+<li>补充三个12字节 SHT_NOBITS section：.plt、.init.plt、.text.ftrace_trampoline：内核要求这三个section存在，如果这三个 section 用 SHT_PROGBITS（有实际内容），内核会在模块旁边分配独立内存页，跟相邻 section 权限冲突，触发 Gunyah（type-2 虚拟化）的 stage-2 缺页异常。</li>
+<li>追加 build-id：MTK 特有的坑，MTK 的 mrdump（内核崩溃转储工具）和 module_sysfs 假设所有模块都有 SHF_ALLOC 的 NOTE section。没有的话空指针解引用，崩，故追加一个 .note.gnu.build-id section</li>
+<li>重新映射section索引：经过刚才的处理，section索引全变了，需要重新映射。</li>
+<li>注入this_module的重定位：struct module 里有两个函数指针字段：init_module的地址、cleanup_module的地址，他们需要在加载后被内核的加载器重定位为绝对地址，需要增加两项Relocation。</li>
+<li>最后写出.ko模板文件，等待fixup上机完成下一步修补。</li>
+</ol>
+<p>注：namespace — Linux 把内核导出符号分了”房间”，普通驱动不能随便访问内部符号。-N VFS_internal_… 就是告诉内核”我获得了这个房间的访问授权”。</p>
+<h3 id="2-vermagic-——-“你是我这个内核版本编译的吗？”"><a href="#2-vermagic-——-“你是我这个内核版本编译的吗？”" class="headerlink" title="2. vermagic —— “你是我这个内核版本编译的吗？”"></a>2. vermagic —— “你是我这个内核版本编译的吗？”</h3><p>这是fixup需要填充的第一个地方，fixup根据真机上已经存在的.ko文件，提取vermagic，回填到KPatcher留下的位置（vermagic占位符）。</p>
+<p>注：其实android内核不是很在意内核版本，比如<code>5.10.198-android12-9-g12345678 SMP preempt mod_unload aarch64</code>，android内核实际关注的是<code>SMP preempt mod_unload aarch64</code>，内核版本<code>5.10.198-android12-9-g12345678</code>则无所谓。猜测这与android的内核映像和设备高度绑定不能更新，但是系统可以更新有关。</p>
+<h3 id="3-module-layout-CRC-—-“struct-module-的结构体布局跟我一样吗？”"><a href="#3-module-layout-CRC-—-“struct-module-的结构体布局跟我一样吗？”" class="headerlink" title="3. module_layout CRC — “struct module 的结构体布局跟我一样吗？”"></a>3. module_layout CRC — “struct module 的结构体布局跟我一样吗？”</h3><p>即使内核版本相同，编译选项不同也会导致 struct module 内部的字段偏移不同。内核用 __versions 里的 CRC 校验这个。fixup将从真机上的.ko提取其CRC值并填入__versions。</p>
+<p>为了解决2、3，我们引入了fixup负责通过真机上的.ko文件修补KPatcher生成的模块.ko:</p>
+<ol>
+<li>修补vermagic：见上。</li>
+<li>修补CRC：见上。</li>
+<li>替换struct module：先保存模板.ko文件中.gnu.linkonce.this_module中的name。把真机.ko文件.gnu.linkonce.this_module的内容直接拷贝到模板预留的2048字节空位中，更新 section header 的 sh_size &#x3D; 参考大小。动态定位 name 字段偏移，搜不到就用默认值（64-bit: 24, 32-bit: 16），重新把name改回模板中的name。</li>
+<li>修正重定位偏移：扫描真机.ko文件的.rela.gnu.linkonce.this_module里的所有重定位，只收集 STT_FUNC 类型的（函数指针），按 offset 排序，第一个 &#x3D; init_module，第二个 &#x3D; cleanup_module。如果参考 .ko 没有 exit 重定位，保留目标原有的 exit 偏移不动，不要清零，否则模块变为 [permanent] ， rmmod 返回 EBUSY。按照获得的偏移修正重定位偏移。</li>
+<li>注入 kallsyms 地址：程序里埋了一个 32 字节的魔术字符串，fixup_ko 在 .ko 文件里扫描这个 marker，把 kallsyms_lookup_name 的真实地址写进去。运行时向&#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;kptr_restrict写入0，读取&#x2F;proc&#x2F;kallsyms，获取kallsyms_lookup_name地址。</li>
+</ol>
+<h2 id="二、运行时的安全特性CFI"><a href="#二、运行时的安全特性CFI" class="headerlink" title="二、运行时的安全特性CFI"></a>二、运行时的安全特性CFI</h2><h3 id="1-控制流完整性校验"><a href="#1-控制流完整性校验" class="headerlink" title="1. 控制流完整性校验"></a>1. 控制流完整性校验</h3><p>Android 内核开启了 CFI（Control Flow Integrity，控制流完整性），在真的执行你的代码之前，验证你的函数指针没有被篡改。它的逻辑很简单：</p>
+<pre><code>正常调用：                          攻击者篡改后：
+  func_ptr = &amp;合法的函数            func_ptr = &amp;恶意代码
+  内核检查：这个地址是我认识的吗？   内核检查：不认识！→ 崩
+</code></pre>
+<p>但是5.x内核和6.x内核的具体检验策略是不同的，想象机场安检：</p>
+<ul>
+<li>5.x（Shadow CFI）：安检员拿你的护照，去后台数据库查”这个人合法吗”</li>
+<li>6.x（kCFI）：护照里嵌了芯片，读卡器一扫就知道真伪</li>
+</ul>
+<p>技术上：</p>
+<pre><code>5.x Shadow CFI（clang 12-17）：                 6.x kCFI（clang 18+）：
+                                             
+  调用 func_ptr(x)                              调用 func_ptr(x)
+    ↓                                            ↓
+  __cfi_slowpath(id, ptr)  ← 拦截               ldr w16, [x16, #-4]  ← 读函数前4字节
+    ↓                                            ↓
+  查跳转表: {hash → stub → func}                cmp w16, #期望的hash  ← 芯片比对
+    ↓                                            ↓
+  匹配 → 执行  不匹配 → 崩                       匹配 → 执行  不匹配 → __kcfi_trap → 崩
+</code></pre>
+<p>关键区别：</p>
+<ul>
+<li>5.x：检查靠外部跳转表，hash 存在另一个 section</li>
+<li>6.x：检查靠嵌入在函数前面的 4 字节 hash，读取 func_addr - 4</li>
+</ul>
+<h3 id="2-伪造的-cfi-check-函数（cfi-entry-stubs-S-29-73）："><a href="#2-伪造的-cfi-check-函数（cfi-entry-stubs-S-29-73）：" class="headerlink" title="2. 伪造的 __cfi_check 函数（cfi_entry_stubs.S:29-73）："></a>2. 伪造的 __cfi_check 函数（cfi_entry_stubs.S:29-73）：</h3><p>内核调用 init_module() 时会被拦下，然后调用模块注册的 __cfi_check 问”这个函数安全吗？”。这里我们手工构造函数：</p>
+<pre><code>__cfi_check:
+    # 检查传入的 hash 是不是 init_module 或 cleanup_module 的
+    cmp x0, #init_module的hash      # 调用者期望的类型对吗？
+    b.eq check_which_target         # 对 → 继续检查目标地址
+    cmp x0, #cleanup_module的hash
+    b.eq check_which_target
+    b   fail                        # 都不对 → 失败
+
+check_which_target:
+    # 目标地址是我们的 init_module / cleanup_module 吗？
+    cmp x1, init_module_addr
+    b.eq accept                     # 是 → 放行
+    cmp x1, cleanup_module_addr  
+    b.eq accept
+    b   fail                        # 不是 → 失败
+
+accept: ret                         # ✅ 放行
+fail:   b   __cfi_check_fail        # ❌ 拒绝
+</code></pre>
+<p>翻译成人话：”不管来什么 hash，只要目标地址是我认识的，就通过。”</p>
+<h3 id="3-跳转表（cfi-entry-stubs-S-88-114）："><a href="#3-跳转表（cfi-entry-stubs-S-88-114）：" class="headerlink" title="3. 跳转表（cfi_entry_stubs.S:88-114）："></a>3. 跳转表（cfi_entry_stubs.S:88-114）：</h3><p>跳转表结构：</p>
+<pre><code>┌──────────────────────────┐
+│ .word hash (4字节)       │ ← 跟调用者传来的 hash 比对
+│ cleanup_module:          │ ← 内核可见的符号，真正的入口
+│   b cleanup_module_impl  │ ← 跳到 loader.c 里真正干活的函数
+└──────────────────────────┘
+</code></pre>
+<p>但跳转表结构不只是给 5.x 用的。那 4 字节 hash 同时服务了 6.x。</p>
+<h3 id="4-为-6-x-注入-kCFI-Hash："><a href="#4-为-6-x-注入-kCFI-Hash：" class="headerlink" title="4. 为 6.x 注入 kCFI Hash："></a>4. 为 6.x 注入 kCFI Hash：</h3><p>6.x 不用跳转表了，它直接读函数地址前 4 字节。问题是：这 4 字节必须是 clang 亲自生成的，不能自己编。于是有了偷 hash 的流水线。</p>
+<h4 id="第一步：让-clang-生成-hash"><a href="#第一步：让-clang-生成-hash" class="headerlink" title="第一步：让 clang 生成 hash"></a>第一步：让 clang 生成 hash</h4><pre><code>// kcfi_hash_probe.c — 用 -fsanitize=kcfi 编译
+int init_module(void) { return 0; }
+void cleanup_module(void) { }
+</code></pre>
+<h4 id="第二步：从编译产物里偷出来"><a href="#第二步：从编译产物里偷出来" class="headerlink" title="第二步：从编译产物里偷出来"></a>第二步：从编译产物里偷出来</h4><pre><code># extract_kcfi_prefix.py
+# 解析 kcfi_hash_probe.o 的 ELF 符号表
+# 找到 init_module 的地址（比如 section 内偏移 0x10）
+# kCFI hash 在函数代码前 4 字节（0x10 - 4 = 0x0C）
+prefix = struct.unpack(&quot;&lt;I&quot;, section_data[addr - 4 : addr])[0]
+# cleanup_module: 0xa540670c
+# init_module:    0x36b1c5a6
+</code></pre>
+<p>生成汇编文件：</p>
+<pre><code>// kcfi_prefix_gen.S（自动生成）
+.section .kcfi_prefix.cleanup,&quot;ax&quot;,@progbits
+.word 0xa540670c
+
+.section .kcfi_prefix.init,&quot;ax&quot;,@progbits
+.word 0x36b1c5a6
+</code></pre>
+<h4 id="第三步：链接脚本精确排列"><a href="#第三步：链接脚本精确排列" class="headerlink" title="第三步：链接脚本精确排列"></a>第三步：链接脚本精确排列</h4><p>linker_dual.lds 把前两步产物按精确顺序排进 .text section。内存布局最终变成：</p>
+<pre><code>0x2048: [4字节] 0xA540670C     ← .text..L.cfi.jumptable (跳转表里的 .word)
+0x204C: cleanup_module:        ← 内核可见的符号
+            b cleanup_module.cfi
+0x2058: [4字节] 0x36B1C5A6     ← .text..L.cfi.jumptable.1
+0x205C: init_module:           ← 内核可见的符号
+            b init_module.cfi
+
+0x2050: [4字节] 0xA540670C     ← .kcfi_prefix.cleanup (独立前缀)
+0x2054: cleanup_module.cfi:    ← 中间 stub，只被 b 指令直接跳转
+            b cleanup_module_impl
+</code></pre>
+<p>6.x 内核的 kCFI 检查读 cleanup_module - 4 &#x3D; 跳转表 hash（0xA540670C），匹配，通过。</p>
+<p>注：细看会发现 kcfi_prefix.cleanup 里的 hash 和跳转表里的 hash 完全一样。但内核只读跳转表 hash。原因是 kcfi_prefix.cleanup 紧贴在 cleanup_module.cfi 这个符号前面——而内核从不间接调用 cleanup_module.cfi，它只被 cleanup_module: 以 b 指令直接跳转。直接跳转不触发 kCFI。所以这个 hash 实际上从未被读取——它是第一版开发时留下的冗余保险，属于不影响功能的历史残留。</p>
+<h3 id="5-运行时放行-KPM-函数指针"><a href="#5-运行时放行-KPM-函数指针" class="headerlink" title="5. 运行时放行 KPM 函数指针"></a>5. 运行时放行 KPM 函数指针</h3><p>前面解决的只是 loader.ko 自身通过 insmod 时的 CFI 检查。但 loader 加载的 KPM（内核补丁模块）是用普通 clang 编译的，没有任何 CFI 保护。loader 通过函数指针调用 KPM 代码时，还是会撞 CFI。</p>
+<p>于是 loader 在内核内部做了一次”安检豁免权申请”——hook 内核的 CFI 基础设施：</p>
+<pre><code>// loader.c
+static void replace__cfi_slowpath(u64 id, void *ptr, void *diag)
+{
+    if (ptr 在 KPM 内存区域内)
+        return;                              // 放行，不检查
+    backup__cfi_slowpath(id, ptr, diag);     // 否则交给原始检查
+}
+</code></pre>
+<p>同时把 CFI 失败的处理从 crash 降级为 warn：</p>
+<pre><code>do_hook(__cfi_slowpath, replace__cfi_slowpath, &amp;backup);
+do_hook(report_cfi_failure, replace_report_cfi_failure, &amp;backup);
+</code></pre>
+<p>这样一来 loader.ko 自身的 insmod 走编译时伪造的跳转表 &#x2F; kCFI hash，而它加载的 KPM 走运行时的 check 豁免，两套机制各司其职。</p>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2025 - 2026 孤木落の博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;Gumuluo
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+    <script src="/js/main.js"></script>
+    
+    
+
+
+
+
+    
+</body>
+</html>
